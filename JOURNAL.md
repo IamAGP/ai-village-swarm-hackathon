@@ -49,3 +49,43 @@ Plus the 4 h hard cap. From the laptop: I poll the S3 log and instance state, an
   Pass 3 moved 194 files (~139 GB) in ~27 min at 60–138 MB/s via hf_xet. Compute across all 3 passes ~53 min ≈ $0.20 (estimate, billing not read).
   Verification is by file count + exact byte size, not content hashes.
   TODO for user: rotate HF token `ai-village` (exposed in SSM Run Command output by my `set -x` mistake).
+
+## 2026-09-23 — Explorer box: profile the data + host a local-only dashboard (billed: EC2)
+
+**Goal.** Profile all 13 tables (structure, stats, joins, JSON shapes) → `docs/DATA_PROFILE.md`; build a
+Parquet copy; serve a Streamlit + DuckDB explorer. All data stays on the instance; user reaches the UI only
+through an SSM port-forward (no inbound ports, no public IP needed for access).
+
+**Machine.** `ai-village-explorer`, r7i.xlarge (4 vCPU / 32 GiB), ap-south-1, $0.2730/hr on-demand
+(Pricing API, 2026-09-23). 100 GB gp3 → $9.12/month while it exists, including when stopped.
+Shutdown behaviour = **stop** (not terminate) so work survives; user approved stop/restart.
+Opening state: 0 EC2 instances in ap-south-1. Reuses role `ai-village-hfcopy-role` (S3 on this bucket + SSM core).
+
+**Preflight (answered before launch, from reading `infra/explorer_bootstrap.sh`):**
+1. *Timestamped progress per unit of work?* Bootstrap logs one UTC line per step (packages, venv, each table
+   synced) to `/var/log/explorer-bootstrap.log`, shipped to `s3://…/_explorer/bootstrap.log`. Profiling runs
+   per table and prints a line per table with row count and seconds.
+2. *Results written incrementally?* Yes — one JSON profile per table written as it finishes (`/data/profile/*.json`,
+   mirrored to S3); Parquet written per table.
+3. *Memory growth / peak?* DuckDB with `memory_limit=20GB` and a spill dir on disk; tables processed one at a
+   time. Peak bounded at ~20 GiB of 32 GiB. Disk: 6 GB raw gz + Parquet (est. 10–25 GB) on 100 GB.
+4. *If killed at 80%?* Every finished table's profile JSON + Parquet file on disk and in S3; profiler skips
+   tables whose output already exists.
+
+**Watchdog.** On-box systemd timer every 5 min: if no connection on :8501, load < 0.5, and no profiler
+running for 60 min → `shutdown -h now` (→ stopped). Hard cap: stop after 12 h uptime. Laptop side:
+I check state at the end of each work block and confirm the instance is stopped or report that it isn't.
+
+### Log
+- 18:41:18Z launched `i-0ed2e0636c29e833d` (r7i.xlarge, ap-south-1c), bootstrap `s3://…/_explorer/explorer_bootstrap.sh`.
+  Local Mac lacks `session-manager-plugin` — needed for the dashboard port-forward.
+- 18:42:27Z bootstrap READY in ~1 min: Python 3.11.16, duckdb 1.5.5, pyarrow 25.0.1, streamlit 1.64.0; tables synced; 92 GB free.
+- 18:44Z started `explorer/build.py` → `explorer/profile.py` (detached, setsid). Log → `s3://…/_explorer/job.log`,
+  profile JSONs → `s3://…/_explorer/profile/` every 60 s.
+- 18:46Z build: 13 tables → Parquet in 1m53s (turns 2.51M rows / 2.53 GB); profile in ~40 s. Doc counts are stale
+  (46 agents, 381,610 events, 183,485 chat, 78,362 sessions, 2,510,487 turns, 246,151 memories).
+- Fixed my own derivations after reading the profile: 981,509 bash turns had no `action` key (were "None");
+  provider-shape rule mislabelled OpenAI-style chat messages as Anthropic; USER_TALK speakerId is a user id.
+  Screenshot tars end 2026-08-21 (20 later days, ≈348k turns, have none). → `docs/DATA_PROFILE.md`.
+- 18:55Z `explorer/app.py` (Streamlit, 6 views) passed headless AppTest on all pages (0 exceptions); screenshot
+  path verified on a real turn (valid 144,694-byte PNG). Service `explorer.service` on 127.0.0.1:8501 only.
