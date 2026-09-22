@@ -159,9 +159,13 @@ def page_overview():
     stats = q("""SELECT (SELECT count(*) FROM agents) a, (SELECT count(*) FROM chat_messages) c,
                         (SELECT count(*) FROM computer_use_sessions) s, (SELECT count(*) FROM turns_slim) t,
                         (SELECT count(*) FROM agent_memories) m, (SELECT count(*) FROM village_goals) g""").iloc[0]
+    def short(n):
+        n = int(n)
+        return f"{n / 1e6:.2f}M" if n >= 1e6 else f"{n / 1e3:.1f}K" if n >= 1e4 else f"{n:,}"
+
     for col, (label, v) in zip(c, [("Agents", stats.a), ("Chat messages", stats.c), ("Sessions", stats.s),
                                    ("Turns", stats.t), ("Memories", stats.m), ("Village goals", stats.g)]):
-        col.metric(label, f"{int(v):,}")
+        col.metric(label, short(v), help=f"{int(v):,}")
 
     st.subheader("Village goals over time")
     g = q("""SELECT goal, start_time::TIMESTAMP AS start, coalesce(end_time::TIMESTAMP, now()::TIMESTAMP) AS "end"

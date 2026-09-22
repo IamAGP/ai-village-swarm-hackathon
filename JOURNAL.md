@@ -89,3 +89,9 @@ I check state at the end of each work block and confirm the instance is stopped 
   Screenshot tars end 2026-08-21 (20 later days, ≈348k turns, have none). → `docs/DATA_PROFILE.md`.
 - 18:55Z `explorer/app.py` (Streamlit, 6 views) passed headless AppTest on all pages (0 exceptions); screenshot
   path verified on a real turn (valid 144,694-byte PNG). Service `explorer.service` on 127.0.0.1:8501 only.
+- 19:10Z user connected via SSM port-forward. Charts failed: "Failed to fetch dynamically imported module
+  ArrowVegaLiteChart.CnqICc92.js". Evidence: file present + HTTP 200 on box; 306 reachable chunks fetched through
+  the tunnel with 0 errors/0 size mismatches; content-type application/javascript; a direct import() in the page
+  succeeded, after which reloads rendered the charts with 0 console errors. Most likely a bad browser-cached chunk
+  from the first load (Streamlit serves chunks `immutable, max-age=1y`) — not proven. Remedy: Cmd+Shift+R /
+  "Empty Cache and Hard Reload". Also shortened metric labels (183.5K / 2.51M).
