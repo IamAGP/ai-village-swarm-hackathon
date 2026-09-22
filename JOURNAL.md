@@ -95,3 +95,5 @@ I check state at the end of each work block and confirm the instance is stopped 
   succeeded, after which reloads rendered the charts with 0 console errors. Most likely a bad browser-cached chunk
   from the first load (Streamlit serves chunks `immutable, max-age=1y`) — not proven. Remedy: Cmd+Shift+R /
   "Empty Cache and Hard Reload". Also shortened metric labels (183.5K / 2.51M).
+- 19:2xZ stopped `i-0ed2e0636c29e833d` on user request (state: stopped; 0 running instances in ap-south-1).
+  While stopped: only the 100 GB gp3 volume bills (~$9.12/month). Restart with `explorer/connect.sh`.
