@@ -1,0 +1,24 @@
+# Secrets
+.env
+.env.*
+
+# AI Village dataset content (gated; research terms — never commit data)
+samples/
+data/
+*.jsonl
+*.jsonl.gz
+*.tar
+*.png
+
+# Local agent tooling
+.agents/
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store

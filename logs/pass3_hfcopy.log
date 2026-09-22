@@ -1,0 +1,616 @@
+Shutdown scheduled for Tue 2026-09-22 20:50:35 UTC, use 'shutdown -c' to cancel.
+2026-09-22T16:50:35Z BOOT instance=i-06f7a1fa13e1cd3e7 rev=838b4150303ca8228e8edb432d8b8ccae353d258 workers=4
+2026-09-22T16:50:58Z HFHUB 1.8.0 hf_xet ok
+2026-09-22T16:50:58Z FILELIST files=390 bytes=176865369812
+2026-09-22T16:50:59Z SKIP .gitattributes 2564
+2026-09-22T16:50:59Z SKIP CHANGELOG.md 21965
+2026-09-22T16:50:59Z SKIP README.md 15101
+2026-09-22T16:50:59Z SKIP SCHEMA.md 18647
+2026-09-22T16:50:59Z SKIP agent_goals.jsonl.gz 3973
+2026-09-22T16:50:59Z SKIP agent_memories.jsonl.gz 2438234633
+2026-09-22T16:50:59Z SKIP chat_messages.jsonl.gz 52543996
+2026-09-22T16:50:59Z SKIP agents.jsonl.gz 5280
+2026-09-22T16:50:59Z SKIP chat_rooms.jsonl.gz 1711
+2026-09-22T16:50:59Z SKIP claude_code_messages.jsonl.gz 104002877
+2026-09-22T16:50:59Z SKIP claude_code_sessions.jsonl.gz 12662
+2026-09-22T16:50:59Z SKIP computer_use_sessions.jsonl.gz 40080397
+2026-09-22T16:50:59Z SKIP computer_use_turns.jsonl.gz 2475319119
+2026-09-22T16:50:59Z SKIP events.jsonl.gz 328621853
+2026-09-22T16:50:59Z SKIP example.py 1691
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-02.tar 251688960
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-03.tar 215951360
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-04.tar 195246080
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-05.tar 135557120
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-06.tar 145612800
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-07.tar 155985920
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-08.tar 162560000
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-09.tar 221184000
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-10.tar 135782400
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-11.tar 42967040
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-14.tar 149422080
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-15.tar 79063040
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-16.tar 163952640
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-17.tar 112680960
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-18.tar 107694080
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-21.tar 88576000
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-22.tar 83025920
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-23.tar 126720000
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-24.tar 115312640
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-25.tar 76666880
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-28.tar 58152960
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-29.tar 123514880
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-04-30.tar 53125120
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-02.tar 37109760
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-01.tar 60241920
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-05.tar 148776960
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-06.tar 104396800
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-07.tar 64778240
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-08.tar 105451520
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-09.tar 84899840
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-10.tar 65382400
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-11.tar 65771520
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-12.tar 13199360
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-13.tar 68659200
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-14.tar 80046080
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-15.tar 156047360
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-16.tar 55265280
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-19.tar 88309760
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-20.tar 109363200
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-21.tar 65955840
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-22.tar 119572480
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-23.tar 109465600
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-26.tar 128460800
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-27.tar 154255360
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-28.tar 116776960
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-29.tar 127191040
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-05-30.tar 123043840
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-02.tar 178800640
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-03.tar 134778880
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-04.tar 165591040
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-05.tar 157061120
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-06.tar 96133120
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-09.tar 102502400
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-10.tar 94781440
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-11.tar 135290880
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-12.tar 54292480
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-13.tar 135229440
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-16.tar 152453120
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-17.tar 131921920
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-18.tar 274135040
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-19.tar 131553280
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-20.tar 139571200
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-23.tar 112568320
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-24.tar 124887040
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-25.tar 145930240
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-26.tar 161853440
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-27.tar 208199680
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-29.tar 282204160
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-06-30.tar 155125760
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-01.tar 167219200
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-02.tar 127754240
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-03.tar 134123520
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-04.tar 130590720
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-07.tar 173977600
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-08.tar 138403840
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-09.tar 94812160
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-10.tar 150988800
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-11.tar 139130880
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-14.tar 168622080
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-15.tar 120647680
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-16.tar 145858560
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-17.tar 167096320
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-18.tar 201000960
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-21.tar 184279040
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-22.tar 195348480
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-23.tar 236451840
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-24.tar 225228800
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-25.tar 178657280
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-28.tar 161280000
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-29.tar 256245760
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-30.tar 258529280
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-07-31.tar 313354240
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-01.tar 218214400
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-04.tar 253224960
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-05.tar 230963200
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-06.tar 263567360
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-07.tar 268339200
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-08.tar 178821120
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-11.tar 225812480
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-12.tar 120576000
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-13.tar 154173440
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-14.tar 144220160
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-15.tar 97239040
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-18.tar 334602240
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-19.tar 144025600
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-20.tar 233144320
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-21.tar 221880320
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-22.tar 242442240
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-25.tar 288419840
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-26.tar 240271360
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-27.tar 224645120
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-28.tar 187781120
+2026-09-22T16:50:59Z SKIP images/computer-use-turns/2025-08-29.tar 196290560
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-01.tar 161320960
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-02.tar 225863680
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-03.tar 178862080
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-04.tar 164444160
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-05.tar 241029120
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-08.tar 220446720
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-09.tar 199946240
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-10.tar 255866880
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-11.tar 192399360
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-12.tar 230031360
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-15.tar 207943680
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-16.tar 197058560
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-17.tar 226211840
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-18.tar 195174400
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-19.tar 199557120
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-22.tar 226375680
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-23.tar 253358080
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-24.tar 243056640
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-25.tar 249180160
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-26.tar 245186560
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-29.tar 158443520
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-09-30.tar 213729280
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-01.tar 182456320
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-02.tar 122490880
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-03.tar 93624320
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-06.tar 219002880
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-07.tar 290795520
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-08.tar 237527040
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-09.tar 260311040
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-10.tar 302561280
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-13.tar 213821440
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-14.tar 177725440
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-15.tar 151838720
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-16.tar 75008000
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-17.tar 91750400
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-20.tar 205096960
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-21.tar 154152960
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-22.tar 274821120
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-24.tar 209326080
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-23.tar 142008320
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-27.tar 219668480
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-28.tar 398090240
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-29.tar 366080000
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-30.tar 442572800
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-10-31.tar 260392960
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-03.tar 326819840
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-04.tar 225228800
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-05.tar 312637440
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-06.tar 306995200
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-07.tar 244101120
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-10.tar 404869120
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-11.tar 468398080
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-12.tar 333373440
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-13.tar 425605120
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-17.tar 446638080
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-14.tar 279173120
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-18.tar 347596800
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-19.tar 464302080
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-20.tar 509931520
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-21.tar 541081600
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-24.tar 494243840
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-25.tar 408965120
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-26.tar 314818560
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-27.tar 463708160
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-11-28.tar 406118400
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-12-01.tar 567060480
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-12-02.tar 436858880
+2026-09-22T16:51:00Z SKIP images/computer-use-turns/2025-12-03.tar 307189760
+2026-09-22T16:51:00Z START images/computer-use-turns/2025-12-04.tar 314439680 try=1
+2026-09-22T16:51:00Z START images/computer-use-turns/2025-12-05.tar 283586560 try=1
+2026-09-22T16:51:00Z START images/computer-use-turns/2025-12-08.tar 566097920 try=1
+2026-09-22T16:51:00Z START images/computer-use-turns/2025-12-09.tar 493025280 try=1
+2026-09-22T16:51:11Z DONE images/computer-use-turns/2025-12-04.tar 314439680 secs=11
+2026-09-22T16:51:11Z START images/computer-use-turns/2025-12-10.tar 471511040 try=1
+2026-09-22T16:51:28Z DONE images/computer-use-turns/2025-12-05.tar 283586560 secs=28
+2026-09-22T16:51:28Z START images/computer-use-turns/2025-12-11.tar 424908800 try=1
+2026-09-22T16:51:28Z DONE images/computer-use-turns/2025-12-09.tar 493025280 secs=28
+2026-09-22T16:51:28Z START images/computer-use-turns/2025-12-12.tar 370606080 try=1
+2026-09-22T16:51:34Z DONE images/computer-use-turns/2025-12-08.tar 566097920 secs=34
+2026-09-22T16:51:34Z START images/computer-use-turns/2025-12-15.tar 567029760 try=1
+2026-09-22T16:51:40Z DONE images/computer-use-turns/2025-12-10.tar 471511040 secs=29
+2026-09-22T16:51:40Z START images/computer-use-turns/2025-12-16.tar 598097920 try=1
+2026-09-22T16:51:53Z DONE images/computer-use-turns/2025-12-12.tar 370606080 secs=25
+2026-09-22T16:51:53Z START images/computer-use-turns/2025-12-17.tar 590561280 try=1
+2026-09-22T16:51:56Z DONE images/computer-use-turns/2025-12-11.tar 424908800 secs=28
+2026-09-22T16:51:56Z START images/computer-use-turns/2025-12-18.tar 633128960 try=1
+2026-09-22T16:51:59Z HEARTBEAT files=203/390 bytes=44241369669/176865369812 disk_free=97G
+2026-09-22T16:52:09Z DONE images/computer-use-turns/2025-12-15.tar 567029760 secs=35
+2026-09-22T16:52:09Z START images/computer-use-turns/2025-12-19.tar 482078720 try=1
+2026-09-22T16:52:10Z DONE images/computer-use-turns/2025-12-16.tar 598097920 secs=30
+2026-09-22T16:52:10Z START images/computer-use-turns/2025-12-22.tar 535859200 try=1
+2026-09-22T16:52:26Z DONE images/computer-use-turns/2025-12-17.tar 590561280 secs=33
+2026-09-22T16:52:26Z START images/computer-use-turns/2025-12-23.tar 722145280 try=1
+2026-09-22T16:52:28Z DONE images/computer-use-turns/2025-12-18.tar 633128960 secs=32
+2026-09-22T16:52:28Z START images/computer-use-turns/2025-12-24.tar 700200960 try=1
+2026-09-22T16:52:38Z DONE images/computer-use-turns/2025-12-19.tar 482078720 secs=29
+2026-09-22T16:52:38Z START images/computer-use-turns/2025-12-25.tar 744089600 try=1
+2026-09-22T16:52:46Z DONE images/computer-use-turns/2025-12-22.tar 535859200 secs=36
+2026-09-22T16:52:46Z START images/computer-use-turns/2025-12-26.tar 508497920 try=1
+2026-09-22T16:52:58Z DONE images/computer-use-turns/2025-12-23.tar 722145280 secs=32
+2026-09-22T16:52:58Z START images/computer-use-turns/2025-12-29.tar 493475840 try=1
+2026-09-22T16:53:00Z HEARTBEAT files=210/390 bytes=48370270789/176865369812 disk_free=97G
+2026-09-22T16:53:01Z DONE images/computer-use-turns/2025-12-24.tar 700200960 secs=33
+2026-09-22T16:53:01Z START images/computer-use-turns/2025-12-30.tar 364892160 try=1
+2026-09-22T16:53:16Z DONE images/computer-use-turns/2025-12-26.tar 508497920 secs=30
+2026-09-22T16:53:16Z START images/computer-use-turns/2025-12-31.tar 593827840 try=1
+2026-09-22T16:53:16Z DONE images/computer-use-turns/2025-12-25.tar 744089600 secs=38
+2026-09-22T16:53:16Z START images/computer-use-turns/2026-01-01.tar 565012480 try=1
+2026-09-22T16:53:27Z DONE images/computer-use-turns/2025-12-30.tar 364892160 secs=26
+2026-09-22T16:53:27Z START images/computer-use-turns/2026-01-02.tar 401162240 try=1
+2026-09-22T16:53:29Z DONE images/computer-use-turns/2025-12-29.tar 493475840 secs=31
+2026-09-22T16:53:29Z START images/computer-use-turns/2026-01-05.tar 440832000 try=1
+2026-09-22T16:53:49Z DONE images/computer-use-turns/2025-12-31.tar 593827840 secs=33
+2026-09-22T16:53:49Z START images/computer-use-turns/2026-01-06.tar 134881280 try=1
+2026-09-22T16:53:53Z DONE images/computer-use-turns/2026-01-01.tar 565012480 secs=37
+2026-09-22T16:53:53Z START images/computer-use-turns/2026-01-07.tar 246650880 try=1
+2026-09-22T16:53:59Z DONE images/computer-use-turns/2026-01-02.tar 401162240 secs=32
+2026-09-22T16:53:59Z START images/computer-use-turns/2026-01-08.tar 263505920 try=1
+2026-09-22T16:54:00Z DONE images/computer-use-turns/2026-01-05.tar 440832000 secs=31
+2026-09-22T16:54:00Z START images/computer-use-turns/2026-01-09.tar 302714880 try=1
+2026-09-22T16:54:01Z HEARTBEAT files=219/390 bytes=53182261829/176865369812 disk_free=98G
+2026-09-22T16:54:06Z DONE images/computer-use-turns/2026-01-06.tar 134881280 secs=17
+2026-09-22T16:54:06Z START images/computer-use-turns/2026-01-12.tar 600084480 try=1
+2026-09-22T16:54:17Z DONE images/computer-use-turns/2026-01-07.tar 246650880 secs=24
+2026-09-22T16:54:17Z START images/computer-use-turns/2026-01-13.tar 352440320 try=1
+2026-09-22T16:54:24Z DONE images/computer-use-turns/2026-01-08.tar 263505920 secs=25
+2026-09-22T16:54:24Z START images/computer-use-turns/2026-01-14.tar 303667200 try=1
+2026-09-22T16:54:27Z DONE images/computer-use-turns/2026-01-09.tar 302714880 secs=27
+2026-09-22T16:54:27Z START images/computer-use-turns/2026-01-15.tar 383866880 try=1
+2026-09-22T16:54:45Z DONE images/computer-use-turns/2026-01-12.tar 600084480 secs=39
+2026-09-22T16:54:45Z START images/computer-use-turns/2026-01-16.tar 343470080 try=1
+2026-09-22T16:54:45Z DONE images/computer-use-turns/2026-01-13.tar 352440320 secs=28
+2026-09-22T16:54:45Z START images/computer-use-turns/2026-01-19.tar 442818560 try=1
+2026-09-22T16:54:53Z DONE images/computer-use-turns/2026-01-14.tar 303667200 secs=29
+2026-09-22T16:54:53Z START images/computer-use-turns/2026-01-20.tar 290242560 try=1
+2026-09-22T16:54:57Z DONE images/computer-use-turns/2026-01-15.tar 383866880 secs=30
+2026-09-22T16:54:57Z START images/computer-use-turns/2026-01-21.tar 252016640 try=1
+2026-09-22T16:55:01Z HEARTBEAT files=227/390 bytes=55770073669/176865369812 disk_free=98G
+2026-09-22T16:55:13Z DONE images/computer-use-turns/2026-01-16.tar 343470080 secs=28
+2026-09-22T16:55:13Z START images/computer-use-turns/2026-01-22.tar 124426240 try=1
+2026-09-22T16:55:16Z DONE images/computer-use-turns/2026-01-20.tar 290242560 secs=23
+2026-09-22T16:55:16Z START images/computer-use-turns/2026-01-23.tar 247531520 try=1
+2026-09-22T16:55:16Z DONE images/computer-use-turns/2026-01-19.tar 442818560 secs=31
+2026-09-22T16:55:16Z START images/computer-use-turns/2026-01-26.tar 475187200 try=1
+2026-09-22T16:55:19Z DONE images/computer-use-turns/2026-01-21.tar 252016640 secs=22
+2026-09-22T16:55:19Z START images/computer-use-turns/2026-01-27.tar 398622720 try=1
+2026-09-22T16:55:29Z DONE images/computer-use-turns/2026-01-22.tar 124426240 secs=16
+2026-09-22T16:55:29Z START images/computer-use-turns/2026-01-28.tar 303656960 try=1
+2026-09-22T16:55:39Z DONE images/computer-use-turns/2026-01-23.tar 247531520 secs=23
+2026-09-22T16:55:39Z START images/computer-use-turns/2026-01-29.tar 398755840 try=1
+2026-09-22T16:55:44Z DONE images/computer-use-turns/2026-01-26.tar 475187200 secs=28
+2026-09-22T16:55:44Z START images/computer-use-turns/2026-01-30.tar 291870720 try=1
+2026-09-22T16:55:48Z DONE images/computer-use-turns/2026-01-27.tar 398622720 secs=29
+2026-09-22T16:55:48Z START images/computer-use-turns/2026-02-02.tar 694108160 try=1
+2026-09-22T16:55:52Z DONE images/computer-use-turns/2026-01-28.tar 303656960 secs=23
+2026-09-22T16:55:52Z START images/computer-use-turns/2026-02-03.tar 758169600 try=1
+2026-09-22T16:56:02Z HEARTBEAT files=236/390 bytes=58648046149/176865369812 disk_free=97G
+2026-09-22T16:56:05Z DONE images/computer-use-turns/2026-01-29.tar 398755840 secs=26
+2026-09-22T16:56:05Z START images/computer-use-turns/2026-02-04.tar 577013760 try=1
+2026-09-22T16:56:06Z DONE images/computer-use-turns/2026-01-30.tar 291870720 secs=22
+2026-09-22T16:56:06Z START images/computer-use-turns/2026-02-05.tar 600350720 try=1
+2026-09-22T16:56:20Z DONE images/computer-use-turns/2026-02-02.tar 694108160 secs=32
+2026-09-22T16:56:20Z START images/computer-use-turns/2026-02-06.tar 604549120 try=1
+2026-09-22T16:56:30Z DONE images/computer-use-turns/2026-02-03.tar 758169600 secs=38
+2026-09-22T16:56:30Z START images/computer-use-turns/2026-02-09.tar 657684480 try=1
+2026-09-22T16:56:38Z DONE images/computer-use-turns/2026-02-04.tar 577013760 secs=33
+2026-09-22T16:56:38Z START images/computer-use-turns/2026-02-10.tar 518174720 try=1
+2026-09-22T16:56:39Z DONE images/computer-use-turns/2026-02-05.tar 600350720 secs=33
+2026-09-22T16:56:39Z START images/computer-use-turns/2026-02-11.tar 584212480 try=1
+2026-09-22T16:56:57Z DONE images/computer-use-turns/2026-02-06.tar 604549120 secs=37
+2026-09-22T16:56:57Z START images/computer-use-turns/2026-02-12.tar 509102080 try=1
+2026-09-22T16:57:02Z HEARTBEAT files=243/390 bytes=62572864069/176865369812 disk_free=97G
+2026-09-22T16:57:07Z DONE images/computer-use-turns/2026-02-09.tar 657684480 secs=37
+2026-09-22T16:57:07Z START images/computer-use-turns/2026-02-13.tar 496025600 try=1
+2026-09-22T16:57:12Z DONE images/computer-use-turns/2026-02-10.tar 518174720 secs=34
+2026-09-22T16:57:12Z START images/computer-use-turns/2026-02-16.tar 482560000 try=1
+2026-09-22T16:57:13Z DONE images/computer-use-turns/2026-02-11.tar 584212480 secs=34
+2026-09-22T16:57:13Z START images/computer-use-turns/2026-02-17.tar 594350080 try=1
+2026-09-22T16:57:37Z DONE images/computer-use-turns/2026-02-12.tar 509102080 secs=40
+2026-09-22T16:57:37Z START images/computer-use-turns/2026-02-18.tar 441630720 try=1
+2026-09-22T16:57:46Z DONE images/computer-use-turns/2026-02-13.tar 496025600 secs=39
+2026-09-22T16:57:46Z START images/computer-use-turns/2026-02-19.tar 353699840 try=1
+2026-09-22T16:57:48Z DONE images/computer-use-turns/2026-02-16.tar 482560000 secs=36
+2026-09-22T16:57:48Z START images/computer-use-turns/2026-02-20.tar 422287360 try=1
+2026-09-22T16:57:49Z DONE images/computer-use-turns/2026-02-17.tar 594350080 secs=36
+2026-09-22T16:57:49Z START images/computer-use-turns/2026-02-23.tar 288327680 try=1
+2026-09-22T16:58:03Z HEARTBEAT files=250/390 bytes=66414973509/176865369812 disk_free=97G
+2026-09-22T16:58:09Z DONE images/computer-use-turns/2026-02-18.tar 441630720 secs=32
+2026-09-22T16:58:09Z START images/computer-use-turns/2026-02-24.tar 321628160 try=1
+2026-09-22T16:58:11Z DONE images/computer-use-turns/2026-02-23.tar 288327680 secs=22
+2026-09-22T16:58:11Z START images/computer-use-turns/2026-02-25.tar 233185280 try=1
+2026-09-22T16:58:16Z DONE images/computer-use-turns/2026-02-19.tar 353699840 secs=30
+2026-09-22T16:58:16Z START images/computer-use-turns/2026-02-26.tar 324526080 try=1
+2026-09-22T16:58:21Z DONE images/computer-use-turns/2026-02-20.tar 422287360 secs=33
+2026-09-22T16:58:21Z START images/computer-use-turns/2026-02-27.tar 360222720 try=1
+2026-09-22T16:58:33Z DONE images/computer-use-turns/2026-02-25.tar 233185280 secs=22
+2026-09-22T16:58:33Z START images/computer-use-turns/2026-03-02.tar 321525760 try=1
+2026-09-22T16:58:40Z DONE images/computer-use-turns/2026-02-26.tar 324526080 secs=24
+2026-09-22T16:58:40Z START images/computer-use-turns/2026-03-03.tar 376975360 try=1
+2026-09-22T16:58:41Z DONE images/computer-use-turns/2026-02-24.tar 321628160 secs=32
+2026-09-22T16:58:41Z START images/computer-use-turns/2026-03-04.tar 357488640 try=1
+2026-09-22T16:58:47Z DONE images/computer-use-turns/2026-02-27.tar 360222720 secs=26
+2026-09-22T16:58:47Z START images/computer-use-turns/2026-03-05.tar 338227200 try=1
+2026-09-22T16:58:59Z DONE images/computer-use-turns/2026-03-02.tar 321525760 secs=26
+2026-09-22T16:58:59Z START images/computer-use-turns/2026-03-06.tar 393359360 try=1
+2026-09-22T16:59:04Z HEARTBEAT files=259/390 bytes=69482007109/176865369812 disk_free=97G
+2026-09-22T16:59:06Z DONE images/computer-use-turns/2026-03-03.tar 376975360 secs=26
+2026-09-22T16:59:06Z START images/computer-use-turns/2026-03-09.tar 270131200 try=1
+2026-09-22T16:59:10Z DONE images/computer-use-turns/2026-03-04.tar 357488640 secs=29
+2026-09-22T16:59:10Z START images/computer-use-turns/2026-03-10.tar 229847040 try=1
+2026-09-22T16:59:14Z DONE images/computer-use-turns/2026-03-05.tar 338227200 secs=27
+2026-09-22T16:59:14Z START images/computer-use-turns/2026-03-11.tar 242749440 try=1
+2026-09-22T16:59:28Z DONE images/computer-use-turns/2026-03-06.tar 393359360 secs=29
+2026-09-22T16:59:28Z START images/computer-use-turns/2026-03-12.tar 381829120 try=1
+2026-09-22T16:59:33Z DONE images/computer-use-turns/2026-03-09.tar 270131200 secs=27
+2026-09-22T16:59:33Z START images/computer-use-turns/2026-03-13.tar 221143040 try=1
+2026-09-22T16:59:35Z DONE images/computer-use-turns/2026-03-10.tar 229847040 secs=25
+2026-09-22T16:59:35Z START images/computer-use-turns/2026-03-16.tar 539402240 try=1
+2026-09-22T16:59:39Z DONE images/computer-use-turns/2026-03-11.tar 242749440 secs=25
+2026-09-22T16:59:39Z START images/computer-use-turns/2026-03-17.tar 514058240 try=1
+2026-09-22T16:59:55Z DONE images/computer-use-turns/2026-03-13.tar 221143040 secs=22
+2026-09-22T16:59:55Z START images/computer-use-turns/2026-03-18.tar 665569280 try=1
+2026-09-22T16:59:57Z DONE images/computer-use-turns/2026-03-12.tar 381829120 secs=29
+2026-09-22T16:59:57Z START images/computer-use-turns/2026-03-19.tar 637880320 try=1
+2026-09-22T17:00:04Z HEARTBEAT files=268/390 bytes=72293757509/176865369812 disk_free=97G
+2026-09-22T17:00:07Z DONE images/computer-use-turns/2026-03-16.tar 539402240 secs=32
+2026-09-22T17:00:07Z START images/computer-use-turns/2026-03-20.tar 806451200 try=1
+2026-09-22T17:00:11Z DONE images/computer-use-turns/2026-03-17.tar 514058240 secs=32
+2026-09-22T17:00:11Z START images/computer-use-turns/2026-03-23.tar 527124480 try=1
+2026-09-22T17:00:34Z DONE images/computer-use-turns/2026-03-18.tar 665569280 secs=39
+2026-09-22T17:00:34Z START images/computer-use-turns/2026-03-24.tar 420628480 try=1
+2026-09-22T17:00:39Z DONE images/computer-use-turns/2026-03-19.tar 637880320 secs=42
+2026-09-22T17:00:39Z START images/computer-use-turns/2026-03-25.tar 499701760 try=1
+2026-09-22T17:00:47Z DONE images/computer-use-turns/2026-03-23.tar 527124480 secs=36
+2026-09-22T17:00:47Z START images/computer-use-turns/2026-03-26.tar 561715200 try=1
+2026-09-22T17:00:48Z DONE images/computer-use-turns/2026-03-20.tar 806451200 secs=41
+2026-09-22T17:00:48Z START images/computer-use-turns/2026-03-27.tar 479313920 try=1
+2026-09-22T17:01:05Z HEARTBEAT files=274/390 bytes=75984243269/176865369812 disk_free=97G
+2026-09-22T17:01:07Z DONE images/computer-use-turns/2026-03-24.tar 420628480 secs=33
+2026-09-22T17:01:07Z START images/computer-use-turns/2026-03-30.tar 499066880 try=1
+2026-09-22T17:01:13Z DONE images/computer-use-turns/2026-03-25.tar 499701760 secs=34
+2026-09-22T17:01:13Z START images/computer-use-turns/2026-03-31.tar 487741440 try=1
+2026-09-22T17:01:16Z DONE images/computer-use-turns/2026-03-27.tar 479313920 secs=28
+2026-09-22T17:01:16Z START images/computer-use-turns/2026-04-01.tar 510904320 try=1
+2026-09-22T17:01:18Z DONE images/computer-use-turns/2026-03-26.tar 561715200 secs=31
+2026-09-22T17:01:18Z START images/computer-use-turns/2026-04-02.tar 527155200 try=1
+2026-09-22T17:01:48Z DONE images/computer-use-turns/2026-04-02.tar 527155200 secs=30
+2026-09-22T17:01:48Z START images/computer-use-turns/2026-04-03.tar 462858240 try=1
+2026-09-22T17:01:50Z DONE images/computer-use-turns/2026-03-30.tar 499066880 secs=43
+2026-09-22T17:01:50Z START images/computer-use-turns/2026-04-06.tar 624793600 try=1
+2026-09-22T17:01:50Z DONE images/computer-use-turns/2026-03-31.tar 487741440 secs=37
+2026-09-22T17:01:50Z START images/computer-use-turns/2026-04-07.tar 652369920 try=1
+2026-09-22T17:01:50Z DONE images/computer-use-turns/2026-04-01.tar 510904320 secs=34
+2026-09-22T17:01:50Z START images/computer-use-turns/2026-04-08.tar 723691520 try=1
+2026-09-22T17:02:05Z HEARTBEAT files=282/390 bytes=79970470469/176865369812 disk_free=98G
+2026-09-22T17:02:21Z DONE images/computer-use-turns/2026-04-03.tar 462858240 secs=33
+2026-09-22T17:02:21Z START images/computer-use-turns/2026-04-09.tar 629575680 try=1
+2026-09-22T17:02:25Z DONE images/computer-use-turns/2026-04-06.tar 624793600 secs=35
+2026-09-22T17:02:25Z START images/computer-use-turns/2026-04-10.tar 575436800 try=1
+2026-09-22T17:02:30Z DONE images/computer-use-turns/2026-04-07.tar 652369920 secs=40
+2026-09-22T17:02:30Z START images/computer-use-turns/2026-04-13.tar 506163200 try=1
+2026-09-22T17:02:31Z DONE images/computer-use-turns/2026-04-08.tar 723691520 secs=41
+2026-09-22T17:02:31Z START images/computer-use-turns/2026-04-14.tar 600596480 try=1
+2026-09-22T17:02:53Z DONE images/computer-use-turns/2026-04-09.tar 629575680 secs=32
+2026-09-22T17:02:53Z START images/computer-use-turns/2026-04-15.tar 485509120 try=1
+2026-09-22T17:02:57Z DONE images/computer-use-turns/2026-04-10.tar 575436800 secs=32
+2026-09-22T17:02:57Z START images/computer-use-turns/2026-04-16.tar 611778560 try=1
+2026-09-22T17:03:00Z DONE images/computer-use-turns/2026-04-13.tar 506163200 secs=30
+2026-09-22T17:03:00Z START images/computer-use-turns/2026-04-17.tar 531650560 try=1
+2026-09-22T17:03:06Z HEARTBEAT files=289/390 bytes=84145359429/176865369812 disk_free=97G
+2026-09-22T17:03:06Z DONE images/computer-use-turns/2026-04-14.tar 600596480 secs=35
+2026-09-22T17:03:06Z START images/computer-use-turns/2026-04-20.tar 530309120 try=1
+2026-09-22T17:03:25Z DONE images/computer-use-turns/2026-04-15.tar 485509120 secs=32
+2026-09-22T17:03:25Z START images/computer-use-turns/2026-04-21.tar 508917760 try=1
+2026-09-22T17:03:32Z DONE images/computer-use-turns/2026-04-16.tar 611778560 secs=35
+2026-09-22T17:03:32Z START images/computer-use-turns/2026-04-22.tar 565104640 try=1
+2026-09-22T17:03:35Z DONE images/computer-use-turns/2026-04-17.tar 531650560 secs=35
+2026-09-22T17:03:35Z START images/computer-use-turns/2026-04-23.tar 470374400 try=1
+2026-09-22T17:03:39Z DONE images/computer-use-turns/2026-04-20.tar 530309120 secs=33
+2026-09-22T17:03:39Z START images/computer-use-turns/2026-04-24.tar 416839680 try=1
+2026-09-22T17:03:55Z DONE images/computer-use-turns/2026-04-21.tar 508917760 secs=30
+2026-09-22T17:03:55Z START images/computer-use-turns/2026-04-27.tar 425707520 try=1
+2026-09-22T17:04:03Z DONE images/computer-use-turns/2026-04-23.tar 470374400 secs=28
+2026-09-22T17:04:03Z START images/computer-use-turns/2026-04-28.tar 644935680 try=1
+2026-09-22T17:04:06Z HEARTBEAT files=296/390 bytes=87884495429/176865369812 disk_free=97G
+2026-09-22T17:04:07Z DONE images/computer-use-turns/2026-04-22.tar 565104640 secs=35
+2026-09-22T17:04:07Z START images/computer-use-turns/2026-04-29.tar 569190400 try=1
+2026-09-22T17:04:10Z DONE images/computer-use-turns/2026-04-24.tar 416839680 secs=31
+2026-09-22T17:04:10Z START images/computer-use-turns/2026-04-30.tar 640768000 try=1
+2026-09-22T17:04:28Z DONE images/computer-use-turns/2026-04-27.tar 425707520 secs=33
+2026-09-22T17:04:28Z START images/computer-use-turns/2026-05-01.tar 543774720 try=1
+2026-09-22T17:04:40Z DONE images/computer-use-turns/2026-04-28.tar 644935680 secs=37
+2026-09-22T17:04:40Z START images/computer-use-turns/2026-05-04.tar 526970880 try=1
+2026-09-22T17:04:41Z DONE images/computer-use-turns/2026-04-29.tar 569190400 secs=34
+2026-09-22T17:04:41Z START images/computer-use-turns/2026-05-05.tar 1062799360 try=1
+2026-09-22T17:04:43Z DONE images/computer-use-turns/2026-04-30.tar 640768000 secs=33
+2026-09-22T17:04:43Z START images/computer-use-turns/2026-05-06.tar 953303040 try=1
+2026-09-22T17:04:58Z DONE images/computer-use-turns/2026-05-01.tar 543774720 secs=30
+2026-09-22T17:04:58Z START images/computer-use-turns/2026-05-07.tar 349122560 try=1
+2026-09-22T17:05:07Z HEARTBEAT files=303/390 bytes=91690816069/176865369812 disk_free=97G
+2026-09-22T17:05:15Z DONE images/computer-use-turns/2026-05-04.tar 526970880 secs=35
+2026-09-22T17:05:15Z START images/computer-use-turns/2026-05-08.tar 390973440 try=1
+2026-09-22T17:05:24Z DONE images/computer-use-turns/2026-05-06.tar 953303040 secs=41
+2026-09-22T17:05:24Z START images/computer-use-turns/2026-05-11.tar 327976960 try=1
+2026-09-22T17:05:25Z DONE images/computer-use-turns/2026-05-05.tar 1062799360 secs=44
+2026-09-22T17:05:25Z START images/computer-use-turns/2026-05-12.tar 320788480 try=1
+2026-09-22T17:05:27Z DONE images/computer-use-turns/2026-05-07.tar 349122560 secs=29
+2026-09-22T17:05:27Z START images/computer-use-turns/2026-05-13.tar 363008000 try=1
+2026-09-22T17:05:43Z DONE images/computer-use-turns/2026-05-08.tar 390973440 secs=28
+2026-09-22T17:05:43Z START images/computer-use-turns/2026-05-14.tar 385925120 try=1
+2026-09-22T17:05:51Z DONE images/computer-use-turns/2026-05-12.tar 320788480 secs=26
+2026-09-22T17:05:51Z START images/computer-use-turns/2026-05-15.tar 156999680 try=1
+2026-09-22T17:05:53Z DONE images/computer-use-turns/2026-05-11.tar 327976960 secs=29
+2026-09-22T17:05:53Z START images/computer-use-turns/2026-05-18.tar 771338240 try=1
+2026-09-22T17:05:53Z DONE images/computer-use-turns/2026-05-13.tar 363008000 secs=26
+2026-09-22T17:05:53Z START images/computer-use-turns/2026-05-19.tar 699525120 try=1
+2026-09-22T17:06:08Z HEARTBEAT files=311/390 bytes=95985758789/176865369812 disk_free=97G
+2026-09-22T17:06:09Z DONE images/computer-use-turns/2026-05-15.tar 156999680 secs=18
+2026-09-22T17:06:09Z START images/computer-use-turns/2026-05-20.tar 618618880 try=1
+2026-09-22T17:06:10Z DONE images/computer-use-turns/2026-05-14.tar 385925120 secs=27
+2026-09-22T17:06:10Z START images/computer-use-turns/2026-05-21.tar 765747200 try=1
+2026-09-22T17:06:27Z DONE images/computer-use-turns/2026-05-19.tar 699525120 secs=34
+2026-09-22T17:06:27Z START images/computer-use-turns/2026-05-22.tar 752209920 try=1
+2026-09-22T17:06:30Z DONE images/computer-use-turns/2026-05-18.tar 771338240 secs=37
+2026-09-22T17:06:30Z START images/computer-use-turns/2026-05-25.tar 364482560 try=1
+2026-09-22T17:06:44Z DONE images/computer-use-turns/2026-05-20.tar 618618880 secs=35
+2026-09-22T17:06:44Z START images/computer-use-turns/2026-05-26.tar 272680960 try=1
+2026-09-22T17:06:49Z DONE images/computer-use-turns/2026-05-21.tar 765747200 secs=39
+2026-09-22T17:06:49Z START images/computer-use-turns/2026-05-27.tar 302796800 try=1
+2026-09-22T17:06:54Z DONE images/computer-use-turns/2026-05-25.tar 364482560 secs=24
+2026-09-22T17:06:54Z START images/computer-use-turns/2026-05-28.tar 423321600 try=1
+2026-09-22T17:07:05Z DONE images/computer-use-turns/2026-05-26.tar 272680960 secs=21
+2026-09-22T17:07:05Z START images/computer-use-turns/2026-05-29.tar 436224000 try=1
+2026-09-22T17:07:06Z DONE images/computer-use-turns/2026-05-22.tar 752209920 secs=39
+2026-09-22T17:07:06Z START images/computer-use-turns/2026-06-01.tar 440330240 try=1
+2026-09-22T17:07:08Z HEARTBEAT files=320/390 bytes=100773286469/176865369812 disk_free=97G
+2026-09-22T17:07:16Z DONE images/computer-use-turns/2026-05-27.tar 302796800 secs=27
+2026-09-22T17:07:16Z START images/computer-use-turns/2026-06-02.tar 405186560 try=1
+2026-09-22T17:07:25Z DONE images/computer-use-turns/2026-05-28.tar 423321600 secs=31
+2026-09-22T17:07:25Z START images/computer-use-turns/2026-06-03.tar 477409280 try=1
+2026-09-22T17:07:36Z DONE images/computer-use-turns/2026-05-29.tar 436224000 secs=31
+2026-09-22T17:07:36Z START images/computer-use-turns/2026-06-04.tar 319549440 try=1
+2026-09-22T17:07:38Z DONE images/computer-use-turns/2026-06-01.tar 440330240 secs=32
+2026-09-22T17:07:38Z START images/computer-use-turns/2026-06-05.tar 329666560 try=1
+2026-09-22T17:07:48Z DONE images/computer-use-turns/2026-06-02.tar 405186560 secs=32
+2026-09-22T17:07:48Z START images/computer-use-turns/2026-06-08.tar 1065175040 try=1
+2026-09-22T17:07:55Z DONE images/computer-use-turns/2026-06-05.tar 329666560 secs=17
+2026-09-22T17:07:55Z START images/computer-use-turns/2026-06-09.tar 926873600 try=1
+2026-09-22T17:08:00Z DONE images/computer-use-turns/2026-06-03.tar 477409280 secs=35
+2026-09-22T17:08:00Z START images/computer-use-turns/2026-06-10.tar 837969920 try=1
+2026-09-22T17:08:04Z DONE images/computer-use-turns/2026-06-04.tar 319549440 secs=28
+2026-09-22T17:08:04Z START images/computer-use-turns/2026-06-11.tar 996474880 try=1
+2026-09-22T17:08:09Z HEARTBEAT files=328/390 bytes=103907770949/176865369812 disk_free=97G
+2026-09-22T17:08:23Z DONE images/computer-use-turns/2026-06-08.tar 1065175040 secs=35
+2026-09-22T17:08:23Z START images/computer-use-turns/2026-06-12.tar 902246400 try=1
+2026-09-22T17:08:23Z DONE images/computer-use-turns/2026-06-09.tar 926873600 secs=28
+2026-09-22T17:08:23Z START images/computer-use-turns/2026-06-13.tar 564623360 try=1
+2026-09-22T17:08:32Z DONE images/computer-use-turns/2026-06-10.tar 837969920 secs=32
+2026-09-22T17:08:32Z START images/computer-use-turns/2026-06-15.tar 823767040 try=1
+2026-09-22T17:08:42Z DONE images/computer-use-turns/2026-06-11.tar 996474880 secs=38
+2026-09-22T17:08:42Z START images/computer-use-turns/2026-06-16.tar 390430720 try=1
+2026-09-22T17:08:47Z DONE images/computer-use-turns/2026-06-13.tar 564623360 secs=24
+2026-09-22T17:08:47Z START images/computer-use-turns/2026-06-17.tar 354467840 try=1
+2026-09-22T17:08:53Z DONE images/computer-use-turns/2026-06-12.tar 902246400 secs=30
+2026-09-22T17:08:53Z START images/computer-use-turns/2026-06-18.tar 649236480 try=1
+2026-09-22T17:08:59Z DONE images/computer-use-turns/2026-06-16.tar 390430720 secs=17
+2026-09-22T17:08:59Z START images/computer-use-turns/2026-06-19.tar 596019200 try=1
+2026-09-22T17:09:03Z DONE images/computer-use-turns/2026-06-15.tar 823767040 secs=31
+2026-09-22T17:09:03Z START images/computer-use-turns/2026-06-22.tar 600002560 try=1
+2026-09-22T17:09:09Z HEARTBEAT files=336/390 bytes=110415331909/176865369812 disk_free=97G
+2026-09-22T17:09:15Z DONE images/computer-use-turns/2026-06-18.tar 649236480 secs=22
+2026-09-22T17:09:15Z START images/computer-use-turns/2026-06-23.tar 1497866240 try=1
+2026-09-22T17:09:19Z DONE images/computer-use-turns/2026-06-19.tar 596019200 secs=20
+2026-09-22T17:09:19Z START images/computer-use-turns/2026-06-24.tar 1576980480 try=1
+2026-09-22T17:09:26Z DONE images/computer-use-turns/2026-06-22.tar 600002560 secs=23
+2026-09-22T17:09:26Z START images/computer-use-turns/2026-06-25.tar 1790115840 try=1
+2026-09-22T17:09:52Z DONE images/computer-use-turns/2026-06-23.tar 1497866240 secs=37
+2026-09-22T17:09:52Z START images/computer-use-turns/2026-06-26.tar 1662453760 try=1
+2026-09-22T17:09:58Z DONE images/computer-use-turns/2026-06-24.tar 1576980480 secs=39
+2026-09-22T17:09:58Z START images/computer-use-turns/2026-06-29.tar 2968442880 try=1
+2026-09-22T17:09:59Z DONE images/computer-use-turns/2026-06-17.tar 354467840 secs=72
+2026-09-22T17:09:59Z START images/computer-use-turns/2026-06-30.tar 2499133440 try=1
+2026-09-22T17:10:07Z DONE images/computer-use-turns/2026-06-25.tar 1790115840 secs=41
+2026-09-22T17:10:07Z START images/computer-use-turns/2026-07-01.tar 2248110080 try=1
+2026-09-22T17:10:10Z HEARTBEAT files=343/390 bytes=117480020549/176865369812 disk_free=96G
+2026-09-22T17:10:19Z DONE images/computer-use-turns/2026-06-29.tar 2968442880 secs=21
+2026-09-22T17:10:19Z START images/computer-use-turns/2026-07-02.tar 2343485440 try=1
+2026-09-22T17:10:29Z DONE images/computer-use-turns/2026-06-26.tar 1662453760 secs=37
+2026-09-22T17:10:29Z START images/computer-use-turns/2026-07-03.tar 1929093120 try=1
+2026-09-22T17:11:00Z DONE images/computer-use-turns/2026-07-01.tar 2248110080 secs=53
+2026-09-22T17:11:00Z START images/computer-use-turns/2026-07-06.tar 1875783680 try=1
+2026-09-22T17:11:03Z DONE images/computer-use-turns/2026-06-30.tar 2499133440 secs=64
+2026-09-22T17:11:03Z START images/computer-use-turns/2026-07-07.tar 1636229120 try=1
+2026-09-22T17:11:07Z DONE images/computer-use-turns/2026-07-02.tar 2343485440 secs=48
+2026-09-22T17:11:07Z START images/computer-use-turns/2026-07-08.tar 1893980160 try=1
+2026-09-22T17:11:09Z DONE images/computer-use-turns/2026-07-03.tar 1929093120 secs=40
+2026-09-22T17:11:09Z START images/computer-use-turns/2026-07-09.tar 1318635520 try=1
+2026-09-22T17:11:11Z HEARTBEAT files=349/390 bytes=131130739269/176865369812 disk_free=98G
+2026-09-22T17:11:45Z DONE images/computer-use-turns/2026-07-07.tar 1636229120 secs=42
+2026-09-22T17:11:45Z START images/computer-use-turns/2026-07-10.tar 1700915200 try=1
+2026-09-22T17:11:52Z DONE images/computer-use-turns/2026-07-06.tar 1875783680 secs=52
+2026-09-22T17:11:52Z START images/computer-use-turns/2026-07-13.tar 1614499840 try=1
+2026-09-22T17:11:55Z DONE images/computer-use-turns/2026-07-08.tar 1893980160 secs=48
+2026-09-22T17:11:55Z START images/computer-use-turns/2026-07-14.tar 1301862400 try=1
+2026-09-22T17:11:57Z DONE images/computer-use-turns/2026-07-09.tar 1318635520 secs=48
+2026-09-22T17:11:57Z START images/computer-use-turns/2026-07-15.tar 1139302400 try=1
+2026-09-22T17:12:11Z HEARTBEAT files=353/390 bytes=137855367749/176865369812 disk_free=97G
+2026-09-22T17:12:30Z DONE images/computer-use-turns/2026-07-15.tar 1139302400 secs=33
+2026-09-22T17:12:30Z START images/computer-use-turns/2026-07-16.tar 1162557440 try=1
+2026-09-22T17:12:33Z DONE images/computer-use-turns/2026-07-14.tar 1301862400 secs=38
+2026-09-22T17:12:33Z START images/computer-use-turns/2026-07-17.tar 1018951680 try=1
+2026-09-22T17:12:40Z DONE images/computer-use-turns/2026-07-10.tar 1700915200 secs=55
+2026-09-22T17:12:40Z START images/computer-use-turns/2026-07-20.tar 1320990720 try=1
+2026-09-22T17:12:42Z DONE images/computer-use-turns/2026-07-13.tar 1614499840 secs=50
+2026-09-22T17:12:42Z START images/computer-use-turns/2026-07-21.tar 1407907840 try=1
+2026-09-22T17:13:02Z DONE images/computer-use-turns/2026-07-17.tar 1018951680 secs=29
+2026-09-22T17:13:02Z START images/computer-use-turns/2026-07-22.tar 1107865600 try=1
+2026-09-22T17:13:03Z DONE images/computer-use-turns/2026-07-16.tar 1162557440 secs=33
+2026-09-22T17:13:03Z START images/computer-use-turns/2026-07-23.tar 1337344000 try=1
+2026-09-22T17:13:12Z HEARTBEAT files=359/390 bytes=145793456709/176865369812 disk_free=94G
+2026-09-22T17:13:18Z DONE images/computer-use-turns/2026-07-20.tar 1320990720 secs=38
+2026-09-22T17:13:18Z START images/computer-use-turns/2026-07-24.tar 1324646400 try=1
+2026-09-22T17:13:23Z DONE images/computer-use-turns/2026-07-21.tar 1407907840 secs=41
+2026-09-22T17:13:23Z START images/computer-use-turns/2026-07-27.tar 1267046400 try=1
+2026-09-22T17:13:28Z DONE images/computer-use-turns/2026-07-22.tar 1107865600 secs=26
+2026-09-22T17:13:28Z START images/computer-use-turns/2026-07-28.tar 868321280 try=1
+2026-09-22T17:13:40Z DONE images/computer-use-turns/2026-07-23.tar 1337344000 secs=37
+2026-09-22T17:13:40Z START images/computer-use-turns/2026-07-29.tar 1067847680 try=1
+2026-09-22T17:13:52Z DONE images/computer-use-turns/2026-07-24.tar 1324646400 secs=34
+2026-09-22T17:13:52Z START images/computer-use-turns/2026-07-30.tar 1066004480 try=1
+2026-09-22T17:14:07Z DONE images/computer-use-turns/2026-07-28.tar 868321280 secs=39
+2026-09-22T17:14:07Z START images/computer-use-turns/2026-07-31.tar 921692160 try=1
+2026-09-22T17:14:07Z DONE images/computer-use-turns/2026-07-27.tar 1267046400 secs=44
+2026-09-22T17:14:07Z START images/computer-use-turns/2026-08-03.tar 935014400 try=1
+2026-09-22T17:14:12Z HEARTBEAT files=366/390 bytes=154427578949/176865369812 disk_free=97G
+2026-09-22T17:14:23Z DONE images/computer-use-turns/2026-07-29.tar 1067847680 secs=43
+2026-09-22T17:14:23Z START images/computer-use-turns/2026-08-04.tar 875540480 try=1
+2026-09-22T17:14:34Z DONE images/computer-use-turns/2026-07-30.tar 1066004480 secs=42
+2026-09-22T17:14:34Z START images/computer-use-turns/2026-08-05.tar 806246400 try=1
+2026-09-22T17:14:44Z DONE images/computer-use-turns/2026-07-31.tar 921692160 secs=37
+2026-09-22T17:14:44Z START images/computer-use-turns/2026-08-06.tar 865105920 try=1
+2026-09-22T17:14:46Z DONE images/computer-use-turns/2026-08-03.tar 935014400 secs=39
+2026-09-22T17:14:46Z START images/computer-use-turns/2026-08-07.tar 936151040 try=1
+2026-09-22T17:15:00Z DONE images/computer-use-turns/2026-08-04.tar 875540480 secs=37
+2026-09-22T17:15:00Z START images/computer-use-turns/2026-08-10.tar 1011384320 try=1
+2026-09-22T17:15:13Z DONE images/computer-use-turns/2026-08-05.tar 806246400 secs=39
+2026-09-22T17:15:13Z START images/computer-use-turns/2026-08-11.tar 1291407360 try=1
+2026-09-22T17:15:13Z HEARTBEAT files=372/390 bytes=160099924549/176865369812 disk_free=97G
+2026-09-22T17:15:22Z DONE images/computer-use-turns/2026-08-06.tar 865105920 secs=38
+2026-09-22T17:15:22Z START images/computer-use-turns/2026-08-12.tar 1685637120 try=1
+2026-09-22T17:15:29Z DONE images/computer-use-turns/2026-08-07.tar 936151040 secs=43
+2026-09-22T17:15:29Z START images/computer-use-turns/2026-08-13.tar 1208043520 try=1
+2026-09-22T17:15:48Z DONE images/computer-use-turns/2026-08-10.tar 1011384320 secs=48
+2026-09-22T17:15:48Z START images/computer-use-turns/2026-08-14.tar 1569648640 try=1
+2026-09-22T17:16:01Z DONE images/computer-use-turns/2026-08-11.tar 1291407360 secs=48
+2026-09-22T17:16:01Z START images/computer-use-turns/2026-08-17.tar 1390141440 try=1
+2026-09-22T17:16:11Z DONE images/computer-use-turns/2026-08-13.tar 1208043520 secs=42
+2026-09-22T17:16:11Z START images/computer-use-turns/2026-08-18.tar 1390653440 try=1
+2026-09-22T17:16:11Z DONE images/computer-use-turns/2026-08-12.tar 1685637120 secs=49
+2026-09-22T17:16:11Z START images/computer-use-turns/2026-08-19.tar 1687695360 try=1
+2026-09-22T17:16:14Z HEARTBEAT files=378/390 bytes=167097653829/176865369812 disk_free=98G
+2026-09-22T17:16:46Z DONE images/computer-use-turns/2026-08-14.tar 1569648640 secs=58
+2026-09-22T17:16:46Z START images/computer-use-turns/2026-08-20.tar 1693941760 try=1
+2026-09-22T17:16:54Z DONE images/computer-use-turns/2026-08-17.tar 1390141440 secs=53
+2026-09-22T17:16:54Z START images/computer-use-turns/2026-08-21.tar 1670522880 try=1
+2026-09-22T17:16:59Z DONE images/computer-use-turns/2026-08-18.tar 1390653440 secs=48
+2026-09-22T17:16:59Z START images/computer-use-turns/index.json 20245 try=1
+2026-09-22T17:17:01Z DONE images/computer-use-turns/index.json 20245 secs=2
+2026-09-22T17:17:01Z START manifest.json 706 try=1
+2026-09-22T17:17:03Z DONE manifest.json 706 secs=2
+2026-09-22T17:17:03Z START summaries.jsonl.gz 2851293 try=1
+2026-09-22T17:17:03Z DONE images/computer-use-turns/2026-08-19.tar 1687695360 secs=52
+2026-09-22T17:17:03Z START village-transcript.json 362235443 try=1
+2026-09-22T17:17:07Z DONE summaries.jsonl.gz 2851293 secs=4
+2026-09-22T17:17:07Z START village_goals.jsonl.gz 4449 try=1
+2026-09-22T17:17:10Z DONE village_goals.jsonl.gz 4449 secs=3
+2026-09-22T17:17:10Z START villages.jsonl.gz 327 try=1
+2026-09-22T17:17:13Z DONE villages.jsonl.gz 327 secs=3
+2026-09-22T17:17:14Z HEARTBEAT files=387/390 bytes=173138669729/176865369812 disk_free=97G
+2026-09-22T17:17:31Z DONE village-transcript.json 362235443 secs=28
+2026-09-22T17:17:35Z DONE images/computer-use-turns/2026-08-20.tar 1693941760 secs=49
+2026-09-22T17:17:54Z DONE images/computer-use-turns/2026-08-21.tar 1670522880 secs=60
+2026-09-22T17:17:54Z VERIFY OK s3_files=390 s3_bytes=176865369812 hf_files=390 hf_bytes=176865369812
+2026-09-22T17:17:54Z EXIT powering off
