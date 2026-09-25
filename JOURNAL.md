@@ -104,3 +104,10 @@ Same box `i-0ed2e0636c29e833d` (r7i.xlarge, $0.2730/hr; opening state: stopped, 
 Preflight for `explorer/feasibility.py`: (1) one UTC line per query step; (2) each step's result written to
 `/data/analysis/*.json` and synced to S3 as it finishes; (3) DuckDB memory_limit 20 GB of 32 GiB, spill to disk;
 (4) killed at 80% → completed steps' JSON survive, script skips finished steps. Watchdog: on-box 60-min idle stop.
+- 19:24:58Z started explorer box. First feasibility run died at once: my URL regex's `'` broke the SQL literal (fixed: escape as `''`).
+- 19:30:42Z BUG (mine): idle watchdog stopped the box 5 min after boot — `idle_min=4330`, because the activity stamp
+  file survived from 2026-09-22. Would have hit every `connect.sh` restart. Fix: reset the stamp if older than boot;
+  also count feasibility/trace jobs as busy. Installed on the box at 19:33:53Z (reports idle_min=0 after boot).
+- GitHub: gh CLI's active account changed to ADITHYAG73; repo is owned by IamAGP (private) → push 404/auth fail.
+  Tried a repo-local credential override; it hung on a prompt; reverted (no local credential config left).
+  Commits wait locally until the user picks the account.

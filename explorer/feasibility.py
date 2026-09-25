@@ -27,7 +27,8 @@ def log(msg):
 
 
 def urls_from(col):
-    return f"list_transform(regexp_extract_all({col}, '{URL_RE}'), u -> rtrim(u, '.:;!?*'))"
+    pattern = URL_RE.replace("'", "''")  # the character class contains a quote; escape for the SQL literal
+    return f"list_transform(regexp_extract_all({col}, '{pattern}'), u -> rtrim(u, '.:;!?*'))"
 
 
 def rows(con, sql):

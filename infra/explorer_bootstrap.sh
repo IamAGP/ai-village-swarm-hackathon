@@ -24,10 +24,14 @@ cat > /usr/local/bin/explorer-idle.sh <<'EOF'
 # or after HARD_CAP_H hours of uptime. Instance shutdown behaviour is "stop".
 IDLE_MIN=60; HARD_CAP_H=12; STAMP=/var/lib/explorer/active.stamp
 mkdir -p /var/lib/explorer; [ -f "$STAMP" ] || touch "$STAMP"
+# Idle time never counts from before this boot: a stamp from a previous run would stop the box
+# minutes after every restart (seen 2026-09-25: idle_min=4330 at uptime 0).
+boot_epoch=$(( $(date +%s) - $(cut -d. -f1 /proc/uptime) ))
+[ "$(stat -c %Y "$STAMP")" -lt "$boot_epoch" ] && touch "$STAMP"
 busy=""
 [ -n "$(ss -Htn state established '( sport = :8501 )' 2>/dev/null)" ] && busy="dashboard"
 awk '{exit !($1 > 0.5)}' /proc/loadavg && busy="${busy} load"
-pgrep -f 'explorer/(profile|build)' >/dev/null && busy="${busy} job"
+pgrep -f 'explorer/(profile|build|feasibility|trace)' >/dev/null && busy="${busy} job"
 [ -n "$busy" ] && touch "$STAMP"
 idle=$(( ( $(date +%s) - $(stat -c %Y "$STAMP") ) / 60 ))
 up_h=$(( $(cut -d. -f1 /proc/uptime) / 3600 ))
