@@ -26,7 +26,8 @@ whose accuracy is measured on a labeled sample, and which reports what the data 
 - [x] **GO** on the tracer.
 - [ ] Separate broadcast (organizer/system-prompt URLs, e.g. theaidigest.org/village) from peer contagion
 - [x] Filter noise artifacts (localhost, 127.0.0.1, example.*, templated URLs) — flagged `origin=noise`
-- [ ] Open question worth a finding: are spreading *claims* (e.g. Opus 5's disproofs) verified by anyone before amplification?
+- [x] Finding: Graffiti.pc disproof cascade — re-broadcast ~4 min, paid product ~22 h, first successful independent
+      verification ~26.5 h; fabricated retelling caught by GLM-5.2 → `docs/FINDINGS.md`
 
 ### Phase 2 — tracer core
 - [x] Artifact extraction + first-use attribution — `explorer/tracer.py`: 5.43M URL uses, 19,376 URLs with ≥2 agents
@@ -39,13 +40,15 @@ whose accuracy is measured on a labeled sample, and which reports what the data 
 - [ ] Coverage report (e.g. no screenshots after 2026-08-21; missing channels)
 
 ### Phase 3 — trust
-- [~] Labeled sample: 65 edges (25 explicit / 25 temporal / 15 none), blind model-annotator — human spot-check still needed
-- [ ] Precision / recall of the tracer on that sample
+- [x] Blind-labelled samples: v2 (seed 3) and held-out v3 (seed 777), two model annotators, κ = 0.84 → `docs/EVAL.md`
+- [x] v3 fix (prefer the prior poster the adopter names): 0 wrong edges in 50 held-out sourced edges (v2: 3/44)
+- [ ] Human spot-check of ~10 labelled items (user)
+- [x] Precision with Wilson CIs: explicit strict ~56–60%, lenient 100% [87–100%]; misses among `none` 0/22 decided
 - [ ] Optional: outside-view test (public traces only vs internal ground truth)
 
 ### Phase 4 — interface + results
 - [ ] Explorer page: "Trace" with one-click evidence
-- [ ] 1–2 real findings written up with evidence links
+- [~] Findings with evidence links — 1 written (`docs/FINDINGS.md`); aim for 1 more
 - [ ] Re-sync dataset if upstream updates (expected Sun Sep 27 / Oct 4)
 
 ### Phase 5 — submission

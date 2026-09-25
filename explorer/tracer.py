@@ -117,28 +117,25 @@ def main():
                     SELECT *, host IN ({noise}) OR host LIKE '%.local' OR url LIKE '%{{%' OR url LIKE '%$%' AS is_noise
                     FROM trace_artifacts_base""")
 
-    # 4. Exposure edges. Adoption = an agent's earliest use of the URL in any channel.
-    #    Source = the most recent earlier chat post of that URL by a different actor (agent or human).
-    build(con, "trace_edges", f"""
+    # 4. Adoptions: an agent's earliest use of the URL in any channel, with its normalised text
+    #    (chat / action / model output; memory snapshots name many agents, so they are not used for attribution).
+    build(con, "trace_adopt", """
         WITH adopt AS (
           SELECT f.url, f.actor AS target, min(f.first_at) AS t_at,
                  arg_min(f.row_id, f.first_at) AS target_row, arg_min(f.channel, f.first_at) AS target_channel
           FROM trace_first_use f JOIN trace_art a USING (url)
-          WHERE NOT f.is_human AND NOT a.is_noise GROUP BY ALL),
-        posts AS (
-          SELECT url, coalesce(agent_id, human) AS actor, created_at, row_id, room_id
-          FROM trace_uses WHERE channel = 'chat'),
-        cand AS (
-          SELECT d.*, p.actor AS source, p.created_at AS s_at, p.row_id AS source_row, p.room_id AS source_room,
-                 row_number() OVER (PARTITION BY d.url, d.target ORDER BY p.created_at DESC) AS rk,
-                 count(*) OVER (PARTITION BY d.url, d.target) AS prior_posts
-          FROM adopt d JOIN posts p ON p.url = d.url AND p.created_at < d.t_at AND p.actor <> d.target)
-        SELECT d.url, d.target, d.t_at, d.target_row, d.target_channel,
-               c.source, c.s_at, c.source_row, c.source_room, coalesce(c.prior_posts, 0) AS prior_posts,
-               epoch(d.t_at - c.s_at) AS lag_s
-        FROM adopt d LEFT JOIN cand c ON c.url = d.url AND c.target = d.target AND c.rk = 1""")
+          WHERE NOT f.is_human AND NOT a.is_noise GROUP BY ALL)
+        SELECT d.*, CASE WHEN d.target_channel <> 'memory' THEN
+                 ' ' || regexp_replace(lower(coalesce(cm.content, t.agent_action::VARCHAR || ' ' || t.agent_messages::VARCHAR, '')),
+                                       '[^a-z0-9.-]+', ' ', 'g') || ' ' END AS target_text
+        FROM adopt d
+        LEFT JOIN chat_messages cm ON d.target_channel = 'chat' AND cm.id = d.target_row
+        LEFT JOIN computer_use_turns t ON d.target_channel IN ('action', 'model_output') AND t.id = d.target_row""")
 
-    # 5. Evidence level: does the adopter's first-use text name the source agent? (chat / action / model output)
+    # 5. Exposure edge per adoption. Candidates = every other actor who posted the URL in chat before the
+    #    adoption (their latest such post). If the adopter's text names candidates, the most recent NAMED one is
+    #    the source (explicit); otherwise the most recent poster (temporal / stale). v2 picked only the most recent
+    #    poster, and blind labels showed 3/22 temporal edges credited to the wrong agent that way (2026-09-26).
     build(con, "trace_edges_scored", f"""
         WITH names AS (
           -- Token-normalised aliases: "Claude Opus 5" -> ["claude opus 5", "opus 5"]; matched on word
@@ -147,20 +144,32 @@ def main():
                  list_distinct(list_transform([name, replace(name, 'Claude ', '')],
                      x -> trim(regexp_replace(lower(x), '[^a-z0-9.-]+', ' ', 'g')))) AS aliases
           FROM agents),
-        txt AS (
-          SELECT e.*, ' ' || regexp_replace(lower(coalesce(cm.content,
-                        t.agent_action::VARCHAR || ' ' || t.agent_messages::VARCHAR, '')), '[^a-z0-9.-]+', ' ', 'g') || ' ' AS target_text
-          FROM trace_edges e
-          LEFT JOIN chat_messages cm ON e.target_channel = 'chat' AND cm.id = e.target_row
-          LEFT JOIN computer_use_turns t ON e.target_channel IN ('action', 'model_output') AND t.id = e.target_row)
-        SELECT txt.* EXCLUDE (target_text),
-               CASE WHEN txt.source IS NULL THEN 'none'
-                    WHEN txt.target_channel <> 'memory' AND len(list_filter(n.aliases, x -> length(x) >= 4 AND
-                         (contains(txt.target_text, ' ' || x || ' ') OR contains(txt.target_text, ' ' || x || '. ')))) > 0
-                         THEN 'explicit'
-                    WHEN txt.lag_s <= {WINDOW_HOURS} * 3600 THEN 'temporal'
+        posts AS (
+          SELECT url, coalesce(agent_id, human) AS actor, created_at, row_id, room_id
+          FROM trace_uses WHERE channel = 'chat'),
+        cand AS (
+          SELECT d.url, d.target, p.actor AS source, max(p.created_at) AS s_at,
+                 arg_max(p.row_id, p.created_at) AS source_row, arg_max(p.room_id, p.created_at) AS source_room
+          FROM trace_adopt d JOIN posts p ON p.url = d.url AND p.created_at < d.t_at AND p.actor <> d.target
+          GROUP BY ALL),
+        scored AS (
+          SELECT c.*, d.target_text IS NOT NULL AND len(list_filter(coalesce(n.aliases, []), x -> length(x) >= 4 AND
+                   (contains(d.target_text, ' ' || x || ' ') OR contains(d.target_text, ' ' || x || '. ')))) > 0 AS named
+          FROM cand c JOIN trace_adopt d USING (url, target) LEFT JOIN names n ON n.agent_id = c.source),
+        ranked AS (
+          SELECT *, row_number() OVER (PARTITION BY url, target ORDER BY named DESC, s_at DESC) AS rk,
+                 count(*) OVER (PARTITION BY url, target) AS prior_posters,
+                 count(*) FILTER (WHERE named) OVER (PARTITION BY url, target) AS named_posters
+          FROM scored)
+        SELECT d.url, d.target, d.t_at, d.target_row, d.target_channel,
+               r.source, r.s_at, r.source_row, r.source_room,
+               coalesce(r.prior_posters, 0) AS prior_posts, coalesce(r.named_posters, 0) AS named_posters,
+               epoch(d.t_at - r.s_at) AS lag_s,
+               CASE WHEN r.source IS NULL THEN 'none'
+                    WHEN r.named THEN 'explicit'
+                    WHEN epoch(d.t_at - r.s_at) <= {WINDOW_HOURS} * 3600 THEN 'temporal'
                     ELSE 'stale' END AS evidence
-        FROM txt LEFT JOIN names n ON n.agent_id = txt.source""")
+        FROM trace_adopt d LEFT JOIN ranked r ON r.url = d.url AND r.target = d.target AND r.rk = 1""")
 
     # 6. Artifact summary with origin label.
     build(con, "trace_artifacts", f"""

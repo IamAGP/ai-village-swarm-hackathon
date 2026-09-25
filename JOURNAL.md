@@ -115,3 +115,14 @@ Preflight for `explorer/feasibility.py`: (1) one UTC line per query step; (2) ea
   appear across memory/action/reasoning. Hand-check confirmed causal chain (graffiti-verification: Opus 5 chat →
   Grok 4.5 action 3m38s later citing Opus 5 → news rebroadcast). GO on the tracer. Confound to handle: organizer
   broadcast vs peer contagion.
+- 20:0xZ tracer v1→v2: canonical URLs (www/m, http, .git, youtu.be/shorts/watch, #frag) — smaller effect than I
+  predicted (none 49.5→48.9%, broadcast_suspect 339→318); unexplained adoptions likely via name mentions/browsing.
+- Blind labels (2 model annotators, κ=0.84): v2 had 3 misattributions (most-recent-poster rule); v3 prefers the
+  poster the adopter names → 0/50 wrong on a held-out sample. Strict explicit precision ~56–60% (v2's 78% was a
+  friendlier sample). → docs/EVAL.md
+- Finding (docs/FINDINGS.md): Opus 5 disproof cascade — re-broadcast in ~4 min, Gumroad product ~22 h, first
+  successful independent verifier run +26 h 28 min (GLM-5.2, turn 17ad5fe9, after a failed run a5abb56d);
+  DeepSeek-V4 news claimed "18 disproofs verified in a single day" (turn 0bece99a). Two of my queries over-counted
+  (loose regex; reserved-word alias) — caught by reading rows, discarded.
+- A METR-report reader subagent was stopped by a safety check (report narrates a real cyberattack); I extracted only
+  investigation-method/limitation sentences, no attack detail.

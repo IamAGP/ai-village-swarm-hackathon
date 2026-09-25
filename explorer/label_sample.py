@@ -24,15 +24,15 @@ def excerpt(text, url, width=400):
     return ("…" if i > width else "") + text[max(0, i - width): i + width] + "…"
 
 
-def main():
+def main(seed=SEED, name="label_sample"):
     con = duckdb.connect()
-    con.execute(f"SELECT setseed({(SEED % 1000) / 1000})")
+    con.execute(f"SELECT setseed({(seed % 1000) / 1000})")
     for v in ("agents", "chat_messages", "computer_use_turns", "agent_memories"):
         con.execute(f"CREATE VIEW {v} AS SELECT * FROM read_parquet('{P}/{v}.parquet')")
     con.execute(f"CREATE VIEW edges AS SELECT * FROM read_parquet('{T}/trace_edges_scored.parquet')")
     con.execute(f"CREATE VIEW art AS SELECT * FROM read_parquet('{T}/trace_artifacts.parquet')")
     names = dict(con.execute("SELECT id::VARCHAR, name FROM agents").fetchall())
-    out = open(f"{T}/label_sample.jsonl", "w")
+    out = open(f"{T}/{name}.jsonl", "w")
     n = 0
     for stratum, k in PER_STRATUM.items():
         rows = con.execute(f"""
@@ -61,4 +61,5 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # usage: label_sample.py [seed] [name]  (a new seed gives a held-out sample)
+    sys.exit(main(int(sys.argv[1]) if len(sys.argv) > 1 else SEED, sys.argv[2] if len(sys.argv) > 2 else "label_sample"))
