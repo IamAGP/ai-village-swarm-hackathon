@@ -111,3 +111,7 @@ Preflight for `explorer/feasibility.py`: (1) one UTC line per query step; (2) ea
 - GitHub: gh CLI's active account changed to ADITHYAG73; repo is owned by IamAGP (private) → push 404/auth fail.
   Tried a repo-local credential override; it hung on a prompt; reverted (no local credential config left).
   Commits wait locally until the user picks the account.
+- 19:34:33Z feasibility done in 38 s: 25,913 chat URL mentions, 12,440 distinct, 209 used by ≥4 agents; all 209
+  appear across memory/action/reasoning. Hand-check confirmed causal chain (graffiti-verification: Opus 5 chat →
+  Grok 4.5 action 3m38s later citing Opus 5 → news rebroadcast). GO on the tracer. Confound to handle: organizer
+  broadcast vs peer contagion.

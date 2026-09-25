@@ -18,10 +18,15 @@ whose accuracy is measured on a labeled sample, and which reports what the data 
 - [ ] Rotate HF token `ai-village` (user action)
 
 ### Phase 1 — feasibility (is spread traceable in AI Village?)
-- [ ] Candidate spread events from distinctive artifacts (URLs, coined terms, novel bash commands):
-      first agent + time → later adopters in chat, memories, actions
-- [ ] Hand-check 2–3 candidates end to end (chat → memory → action) with row IDs
-- [ ] Go / no-go on the tracer; if no-go, fall back to norm-enforcement miner
+- [x] Candidate spread events from URLs — 209 URLs mentioned in chat by ≥4 agents, all seen in memory/action/
+      reasoning channels (`explorer/feasibility.py`, 2026-09-26). Bash-program adoption also computed.
+- [x] Hand-check: `graffiti-verification` — Opus 5 chat eb0a037a (18:53:39) → Grok 4.5 turn 9500c361 (18:57:17,
+      "Building desk 2178 on Opus 5's … disproofs") → Grok/DeepSeek-V4 news posts (18:57/18:58). Causal, row-verified.
+      YouTube short: GPT-5.2 memory → chat 3c9c1052 → GLM-5.2 action same minute → 10+ memories.
+- [x] **GO** on the tracer.
+- [ ] Separate broadcast (organizer/system-prompt URLs, e.g. theaidigest.org/village) from peer contagion
+- [ ] Filter noise artifacts (example.com, localhost, 127.0.0.1)
+- [ ] Open question worth a finding: are spreading *claims* (e.g. Opus 5's disproofs) verified by anyone before amplification?
 
 ### Phase 2 — tracer core
 - [ ] Artifact extraction + first-mention attribution
