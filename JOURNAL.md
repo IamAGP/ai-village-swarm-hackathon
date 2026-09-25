@@ -129,3 +129,6 @@ Preflight for `explorer/feasibility.py`: (1) one UTC line per query step; (2) ea
 - 20:25Z tracer v4: `mention` evidence (URL slug named in chat, no URL post) via tokenised hash-join (155,562 slug
   mentions, 1 s). none 48.9→43.1%, broadcast_suspect 318→214. Precision not yet measured → 25-item blind sample.
   App: 7 pages AppTest-clean; deprecated use_container_width replaced by width="stretch" (removal date had passed).
+- 20:32Z v5: mention window 60 min + dotless-host noise (246 fake adoptions removed). Fresh blind sample (annotator B,
+  never saw the tuning sample): mention still 21% wrong [9–40%] vs 26% before — no measurable gain. Stopped tuning;
+  `mention` kept as a low-confidence level outside headline numbers.

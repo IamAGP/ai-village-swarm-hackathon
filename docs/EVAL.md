@@ -56,3 +56,28 @@ Fresh sample (0 overlap with seed 3), labelled blind by **two** annotators (A = 
   `temporal` on held-out data. v2's 78% came from a friendlier sample (same annotator A: 78% → 60%).
 - `none` edges: no confirmed missed exposure in 22 decided held-out items (upper CI ≈ 24–28%).
 - Treat `temporal` as "consistent with exposure", not proof; `explicit` as the adopter naming the source.
+
+### `mention` evidence (v4, 72 h window) — sample seed 4242, annotator A
+
+| n | yes | plausible | no | unclear | strict | lenient | wrong |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 25 | 5 | 12 | 6 | 2 | 22% [10–42%] | 74% [54–87%] | 26% [13–46%] |
+
+Much weaker than URL-post edges (0/50 wrong). Failure patterns: long lags (3 of 6 wrong edges at 177–1,753 min,
+all 5 `yes` under 2 min); URL fragments that are not URLs (`https://daily-signal-garden` inside a regex); the
+adopter's own repo coinciding with a name someone else mentioned. → v5: mention window 60 min, dotless hosts
+flagged as noise. Because these changes were chosen on this sample, v5 is re-measured on a **fresh** sample below.
+
+### `mention` evidence (v5, 60 min window, dotless hosts = noise) — fresh sample seed 9090, annotator B
+
+| n | yes | plausible | no | unclear | strict | lenient | wrong |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 25 | 6 | 13 | 5 | 1 | 25% [12–45%] | 79% [60–91%] | 21% [9–40%] |
+
+The tightening did not measurably help (26% → 21% wrong; CIs overlap; different annotator). Remaining errors
+are structural to name matching: generic filenames shared across sites (`agent-card.json`,
+`quarter-life-crisis.html`), a domain treated as a name (`o3-ux.github.io`), and adopters who got the URL
+elsewhere (own machine, a GitHub issue). **Decision:** keep `mention` as a separate low-confidence level
+(~1 in 5 wrong), excluded from headline numbers. Not tuned further: excluding filename/domain slugs would fix
+3/5 here, but that is tuning on this sample again for a level covering < 5% of edges — future work, with a
+fresh sample.

@@ -37,7 +37,7 @@ whose accuracy is measured on a labeled sample, and which reports what the data 
 - [x] Spread timeline + edge inspector — explorer **Trace** page, linkable via `?url=` (AppTest: 0 exceptions,
       graffiti trace renders Grok 4.5 ← Opus 5 explicit 4 min with both rows)
 - [x] "Mentioned by name" evidence (v4): 4,295 edges (5.8%) move from `none` (48.9→43.1%); broadcast_suspect 318→214;
-      median lag 7.3 min. Precision being measured (25-item blind sample).
+      median lag 7.3 min. Measured twice (v4, v5 fresh): ~21–26% wrong → kept as low-confidence level, not headline.
 - [ ] Coverage report (e.g. no screenshots after 2026-08-21; missing channels)
 
 ### Phase 3 — trust
@@ -46,6 +46,8 @@ whose accuracy is measured on a labeled sample, and which reports what the data 
 - [ ] Human spot-check of ~10 labelled items (user)
 - [x] Precision with Wilson CIs: explicit strict ~56–60%, lenient 100% [87–100%]; misses among `none` 0/22 decided
 - [ ] Optional: outside-view test (public traces only vs internal ground truth)
+
+- [ ] Future: exclude filename/domain slugs from `mention`, re-measure on a fresh sample
 
 ### Phase 4 — interface + results
 - [ ] Explorer page: "Trace" with one-click evidence

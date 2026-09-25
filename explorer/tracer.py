@@ -25,6 +25,9 @@ TABLES = ["agents", "chat_messages", "agent_memories", "computer_use_turns", "co
           "events_slim", "village_goals", "agent_goals"]
 URL_RE = r"""https?://[^\s<>"'`)\]}|,\\]+"""
 WINDOW_HOURS = 72
+# Bare-name mentions are weaker than URL posts; a blind sample (2026-09-26) had every correct mention edge
+# under 2 min and half the wrong ones over 3 h, so they get a much shorter window.
+MENTION_WINDOW_MIN = 60
 BROADCAST_AGENTS, BROADCAST_MINUTES = 5, 60
 NOISE_HOSTS = ("localhost", "127.0.0.1", "0.0.0.0", "example.com", "example.org", "example.net")
 
@@ -114,7 +117,7 @@ def main():
         SELECT *, lower(regexp_extract(url, '^https?://([^/:?#]+)', 1)) AS host
         FROM per WHERE n_agents >= 2""")
     con.execute(f"""CREATE OR REPLACE TEMP VIEW trace_art AS
-                    SELECT *, host IN ({noise}) OR host LIKE '%.local' OR url LIKE '%{{%' OR url LIKE '%$%' AS is_noise
+                    SELECT *, host IN ({noise}) OR host LIKE '%.local' OR NOT contains(host, '.') OR url LIKE '%{{%' OR url LIKE '%$%' AS is_noise
                     FROM trace_artifacts_base""")
 
     # 4. Adoptions: an agent's earliest use of the URL in any channel, with its normalised text
@@ -189,7 +192,7 @@ def main():
                coalesce(r.prior_posters, 0) AS prior_posts, coalesce(r.named_posters, 0) AS named_posters,
                epoch(d.t_at - coalesce(r.s_at, m.s_at)) AS lag_s,
                CASE WHEN r.source IS NULL AND m.source IS NOT NULL
-                         AND epoch(d.t_at - m.s_at) <= {WINDOW_HOURS} * 3600 THEN 'mention'
+                         AND epoch(d.t_at - m.s_at) <= {MENTION_WINDOW_MIN} * 60 THEN 'mention'
                     WHEN r.source IS NULL THEN 'none'
                     WHEN r.named THEN 'explicit'
                     WHEN epoch(d.t_at - r.s_at) <= {WINDOW_HOURS} * 3600 THEN 'temporal'

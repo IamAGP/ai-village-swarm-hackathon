@@ -17,7 +17,7 @@ evidence levels have **measured precision** on blind-labelled samples.
 |---|---|---|
 | `explicit` | the adopter's first use names the source agent | ~56–60% / 100% [87–100%] |
 | `temporal` | the source posted the URL in chat ≤ 72 h before | ~32–40% / 100% [87–100%] |
-| `mention` | no URL post, but the source named it (URL slug) in chat ≤ 72 h before | not yet measured |
+| `mention` | no URL post, but the source named it (URL slug) in chat ≤ 60 min before | low confidence: ~21–26% wrong |
 | `stale` / `none` | older post / no visible source | misses among `none`: 0/22 decided |
 
 Details: [`docs/EVAL.md`](docs/EVAL.md). A worked investigation: [`docs/FINDINGS.md`](docs/FINDINGS.md) —
