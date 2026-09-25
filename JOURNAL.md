@@ -132,3 +132,5 @@ Preflight for `explorer/feasibility.py`: (1) one UTC line per query step; (2) ea
 - 20:32Z v5: mention window 60 min + dotless-host noise (246 fake adoptions removed). Fresh blind sample (annotator B,
   never saw the tuning sample): mention still 21% wrong [9–40%] vs 26% before — no measurable gain. Stopped tuning;
   `mention` kept as a low-confidence level outside headline numbers.
+- 20:3xZ stopped `i-0ed2e0636c29e833d` at end of work block (state: stopped; 0 running instances in ap-south-1).
+  Box ran 19:24:58–20:3x ≈ 1.2 h today ≈ $0.33 compute (estimate from $0.273/hr, not the bill) + gp3 storage.
