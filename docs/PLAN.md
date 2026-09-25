@@ -25,17 +25,21 @@ whose accuracy is measured on a labeled sample, and which reports what the data 
       YouTube short: GPT-5.2 memory → chat 3c9c1052 → GLM-5.2 action same minute → 10+ memories.
 - [x] **GO** on the tracer.
 - [ ] Separate broadcast (organizer/system-prompt URLs, e.g. theaidigest.org/village) from peer contagion
-- [ ] Filter noise artifacts (example.com, localhost, 127.0.0.1)
+- [x] Filter noise artifacts (localhost, 127.0.0.1, example.*, templated URLs) — flagged `origin=noise`
 - [ ] Open question worth a finding: are spreading *claims* (e.g. Opus 5's disproofs) verified by anyone before amplification?
 
 ### Phase 2 — tracer core
-- [ ] Artifact extraction + first-mention attribution
-- [ ] Adoption edges across channels (chat, memory snapshot diff, bash/turn actions), each with evidence IDs
-- [ ] Spread timeline / graph per artifact
+- [x] Artifact extraction + first-use attribution — `explorer/tracer.py`: 5.43M URL uses, 19,376 URLs with ≥2 agents
+- [x] Canonical URLs (www/m, http, .git, youtu.be/shorts/watch, #fragment) — v2; effect small (none 49.5→48.9%)
+- [x] Exposure edges with evidence (explicit / temporal / stale / none) — 73,824 edges; explicit 4.6%, median lag 2.2 min
+- [x] Origin labels (agent_created / agent_chat / human / broadcast_suspect / organizer / noise)
+- [x] Spread timeline + edge inspector — explorer **Trace** page, linkable via `?url=` (AppTest: 0 exceptions,
+      graffiti trace renders Grok 4.5 ← Opus 5 explicit 4 min with both rows)
+- [ ] "Mentioned by name" evidence (repo/site slug in chat without URL) — likely explains many `none`/broadcast_suspect
 - [ ] Coverage report (e.g. no screenshots after 2026-08-21; missing channels)
 
 ### Phase 3 — trust
-- [ ] Hand-labeled sample (edges: real adoption vs coincidence)
+- [~] Labeled sample: 65 edges (25 explicit / 25 temporal / 15 none), blind model-annotator — human spot-check still needed
 - [ ] Precision / recall of the tracer on that sample
 - [ ] Optional: outside-view test (public traces only vs internal ground truth)
 

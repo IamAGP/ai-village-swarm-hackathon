@@ -172,7 +172,7 @@ def page_overview():
              FROM village_goals ORDER BY start_time""")
     st.altair_chart(alt.Chart(g).mark_bar().encode(
         x="start:T", x2="end:T", y=alt.Y("goal:N", sort=None, title=None, axis=alt.Axis(labelLimit=420)),
-        tooltip=["goal", "start:T", "end:T"]).properties(height=900), use_container_width=True)
+        tooltip=["goal", "start:T", "end:T"]).properties(height=900), width="stretch")
 
     st.subheader("When each agent was active")
     life = q("""SELECT a.name, min(t.created_at) AS first, max(t.created_at) AS last, count(*) AS turns
@@ -180,7 +180,7 @@ def page_overview():
     st.altair_chart(alt.Chart(life).mark_bar().encode(
         x="first:T", x2="last:T", y=alt.Y("name:N", sort=None, title=None),
         color=alt.Color("turns:Q", scale=alt.Scale(scheme="blues")),
-        tooltip=["name", "first:T", "last:T", "turns"]).properties(height=820), use_container_width=True)
+        tooltip=["name", "first:T", "last:T", "turns"]).properties(height=820), width="stretch")
 
     st.subheader("Weekly activity")
     wk = q("""SELECT date_trunc('week', created_at) AS week, 'turns' AS kind, count(*) AS n FROM turns_slim GROUP BY 1
@@ -188,7 +188,7 @@ def page_overview():
               UNION ALL SELECT date_trunc('week', created_at), 'memories', count(*) FROM memories_slim GROUP BY 1""")
     st.altair_chart(alt.Chart(wk).mark_line().encode(
         x="week:T", y="n:Q", color="kind:N", tooltip=["week:T", "kind", "n"]).properties(height=300),
-        use_container_width=True)
+        width="stretch")
 
 
 def page_agent():
@@ -208,12 +208,12 @@ def page_agent():
         acts = q("SELECT coalesce(action, 'talk-only') AS action, count(*) AS n FROM turns_slim WHERE agent_id = ? "
                  "GROUP BY 1 ORDER BY 2 DESC LIMIT 15", [aid])
         st.altair_chart(alt.Chart(acts).mark_bar().encode(x="n:Q", y=alt.Y("action:N", sort="-x")),
-                        use_container_width=True)
+                        width="stretch")
     with c2:
         st.subheader("Turns per week")
         wk = q("SELECT date_trunc('week', created_at) AS week, count(*) AS n FROM turns_slim WHERE agent_id = ? "
                "GROUP BY 1 ORDER BY 1", [aid])
-        st.altair_chart(alt.Chart(wk).mark_area().encode(x="week:T", y="n:Q"), use_container_width=True)
+        st.altair_chart(alt.Chart(wk).mark_area().encode(x="week:T", y="n:Q"), width="stretch")
 
     tab_chat, tab_sess, tab_mem = st.tabs(["Chat", "Sessions", "Memories"])
     with tab_chat:
@@ -222,12 +222,12 @@ def page_agent():
         df = q(f"""SELECT m.created_at, r.name AS room, m.content FROM chat_messages m
                    LEFT JOIN chat_rooms r ON r.id::VARCHAR = m.room_id WHERE m.agent_speaker_id = ?
                    ORDER BY m.created_at {'DESC' if order.startswith('newest') else 'ASC'} LIMIT {lim}""", [aid])
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
     with tab_sess:
         df = q("""SELECT s.id, s.created_at, s.short_displayed_session_goal AS goal, count(t.id) AS turns
                   FROM computer_use_sessions s LEFT JOIN turns_slim t ON t.session_id = s.id
                   WHERE s.agent_id = ? GROUP BY ALL ORDER BY s.created_at DESC LIMIT 500""", [aid])
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
         st.caption("Copy a session id into **Session replay** to step through it.")
     with tab_mem:
         mem = q("SELECT id, created_at, content_len FROM memories_slim WHERE agent_id = ? ORDER BY created_at DESC", [aid])
@@ -293,7 +293,7 @@ def page_session():
         with st.spinner(f"Loading screenshots for {t.pt_day} (first view of a day downloads its tar)…"):
             png = screenshot(t.pt_day, t.id)
         if png:
-            st.image(png, use_container_width=True)
+            st.image(png, width="stretch")
         else:
             st.caption("No screenshot for this turn (bash/talk turn, or day not in the export — tars end 2026-08-21).")
 
@@ -334,7 +334,134 @@ def page_day():
               FROM events_slim e LEFT JOIN agents a ON a.id::VARCHAR = e.agent_id
               WHERE e.pt_day = ? AND list_contains(?, e.action_type) ORDER BY e.event_index""", [day, keep])
     st.caption(f"{len(df):,} events")
-    st.dataframe(df, use_container_width=True, hide_index=True, height=700)
+    st.dataframe(df, width="stretch", hide_index=True, height=700)
+
+
+TRACE = "/data/trace"
+EVIDENCE_HELP = {
+    "explicit": "adopter's first use names the source agent",
+    "temporal": "source posted it in chat within 72 h before",
+    "stale": "a prior chat post exists, but older than 72 h",
+    "none": "no earlier public post — independent discovery or an unseen channel",
+}
+
+
+def fmt_lag(s):
+    if s is None or pd.isna(s):
+        return "—"
+    s = float(s)
+    return f"{s / 60:.0f} min" if s < 3600 else f"{s / 3600:.1f} h" if s < 172800 else f"{s / 86400:.1f} d"
+
+
+def row_evidence(channel, row_id, url):
+    """The text that proves one side of an edge: chat message, turn (decoded), or memory snippet around the URL."""
+    if channel == "chat":
+        r = q("SELECT created_at, content FROM chat_messages WHERE id = ?", [row_id])
+        return None if r.empty else (r.created_at.iloc[0], [("text", r.content.iloc[0])])
+    if channel in ("action", "model_output"):
+        r = q("SELECT created_at, agent_action, agent_messages FROM computer_use_turns WHERE id = ?", [row_id])
+        if r.empty:
+            return None
+        parts = decode_messages(r.agent_messages.iloc[0])
+        if r.agent_action.iloc[0]:
+            parts.append(("action", json.dumps(json.loads(r.agent_action.iloc[0]), indent=1)[:3000]))
+        return r.created_at.iloc[0], parts
+    if channel == "memory":
+        r = q("SELECT created_at, content FROM agent_memories WHERE id = ?", [row_id])
+        if r.empty:
+            return None
+        text = r.content.iloc[0]
+        # The tracer stores canonical URLs; the memory may hold a variant (www./m., .git, youtu.be, http).
+        keys = [url, url.split("://", 1)[-1], url.split("v=")[-1] if "youtube.com/watch" in url else url.rsplit("/", 1)[-1]]
+        i = next((text.find(k) for k in keys if k and text.find(k) >= 0), -1)
+        return r.created_at.iloc[0], [("memory", ("…" if i > 600 else "") + text[max(0, i - 600): i + 600] + "…")]
+    return None
+
+
+def show_evidence(title, actor, channel, row_id, url):
+    st.markdown(f"**{title}** — {actor} · `{channel}` · row `{row_id}`")
+    ev = row_evidence(channel, row_id, url)
+    if ev is None:
+        st.caption("Row not found.")
+        return
+    st.caption(f"{ev[0]:%Y-%m-%d %H:%M:%S} UTC")
+    for kind, text in ev[1]:
+        if kind == "reasoning":
+            with st.expander("💭 reasoning"):
+                st.write(text)
+        elif kind in ("action", "tool"):
+            st.code(text[:3000])
+        else:
+            st.write(text[:4000])
+
+
+def page_trace():
+    st.header("Trace: how a URL spread through the village")
+    if not os.path.exists(f"{TRACE}/trace_artifacts.parquet"):
+        st.warning("Tracer output not found — run explorer/tracer.py on this box.")
+        return
+    names = agent_names()
+    art = q(f"SELECT * FROM read_parquet('{TRACE}/trace_artifacts.parquet') WHERE adopters IS NOT NULL")
+    c1, c2, c3 = st.columns([3, 3, 2])
+    search = c1.text_input("URL contains")
+    origins = sorted(art.origin.dropna().unique().tolist())
+    keep = c2.multiselect("Origin", origins, default=[o for o in origins if o != "noise"])
+    min_adopt = c3.number_input("Min adopters", 1, 100, 5)
+    view = art[art.origin.isin(keep) & (art.adopters >= min_adopt)]
+    if search:
+        view = view[view.url.str.contains(search, case=False, regex=False)]
+    view = view.sort_values(["ev_explicit", "adopters"], ascending=False)
+    st.caption(f"{len(view):,} of {len(art):,} traced URLs · evidence: " +
+               " · ".join(f"**{k}** = {v}" for k, v in EVIDENCE_HELP.items()))
+    table = view[["url", "origin", "adopters", "ev_explicit", "ev_temporal", "ev_stale", "ev_none",
+                  "median_lag_s", "first_at", "first_actor"]].copy()
+    table["first_actor"] = table.first_actor.map(lambda a: names.get(a, a))
+    table["median_lag"] = table.pop("median_lag_s").map(fmt_lag)
+    pick = st.dataframe(table, width="stretch", hide_index=True, height=300,
+                        on_select="rerun", selection_mode="single-row")
+    rows_sel = pick.selection.rows if pick and pick.selection else []
+    # A trace can also be opened directly with ?url=<canonical url> (linkable from the write-up).
+    url = table.iloc[rows_sel[0]].url if rows_sel else st.query_params.get("url")
+    if not url or url not in set(art.url):
+        st.info("Select a URL above to see its spread.")
+        return
+    st.query_params["url"] = url
+    view = art[art.url == url]
+    a = view[view.url == url].iloc[0]
+    st.subheader(url)
+    st.markdown(f"Origin **{a.origin}** · first used by **{names.get(a.first_actor, a.first_actor)}** in "
+                f"`{a.first_channel}` at {a.first_at:%Y-%m-%d %H:%M} UTC · {int(a.adopters)} adopters")
+
+    uses = q(f"SELECT actor, is_human, channel, first_at, row_id, n FROM read_parquet('{TRACE}/trace_first_use.parquet') "
+             "WHERE url = ? ORDER BY first_at", [url])
+    uses["who"] = uses.actor.map(lambda x: names.get(x, x))
+    st.altair_chart(alt.Chart(uses).mark_circle(size=90).encode(
+        x=alt.X("first_at:T", title="first use"), y=alt.Y("who:N", sort=None, title=None),
+        color=alt.Color("channel:N"), tooltip=["who", "channel", "first_at:T", "n", "row_id"]
+    ).properties(height=max(200, 22 * uses.who.nunique())), width="stretch")
+
+    edges = q(f"SELECT * FROM read_parquet('{TRACE}/trace_edges_scored.parquet') WHERE url = ? ORDER BY t_at", [url])
+    edges["adopter"] = edges.target.map(lambda x: names.get(x, x))
+    edges["from"] = edges.source.map(lambda x: names.get(x, x) if isinstance(x, str) else "—")
+    edges["lag"] = edges.lag_s.map(fmt_lag)
+    et = edges[["t_at", "adopter", "target_channel", "from", "lag", "evidence", "prior_posts"]]
+    st.markdown("**Exposure edges**")
+    st.dataframe(et, width="stretch", hide_index=True)
+    if edges.empty:
+        return
+    order = edges.evidence.map({"explicit": 0, "temporal": 1, "stale": 2, "none": 3}).sort_values(kind="stable").index
+    i = st.selectbox("Inspect edge", list(order), format_func=lambda k:
+                     f"{edges.adopter[k]} ← {edges['from'][k]} · {edges.evidence[k]} · {fmt_lag(edges.lag_s[k])}")
+    e = edges.loc[i]
+    st.caption(f"Evidence: **{e.evidence}** — {EVIDENCE_HELP[e.evidence]}")
+    l, r = st.columns(2)
+    with l:
+        if isinstance(e.source_row, str):
+            show_evidence("Source post", e["from"], "chat", e.source_row, url)
+        else:
+            st.caption("No earlier public post of this URL.")
+    with r:
+        show_evidence("Adopter's first use", e.adopter, e.target_channel, e.target_row, url)
 
 
 def page_sql():
@@ -347,12 +474,12 @@ def page_sql():
         "WHERE t.action = 'bash'\nGROUP BY 1 ORDER BY 2 DESC LIMIT 20")
     if st.button("Run"):
         try:
-            st.dataframe(q(sql), use_container_width=True, hide_index=True)
+            st.dataframe(q(sql), width="stretch", hide_index=True)
         except Exception as e:
             st.error(str(e))
 
 
-PAGES = {"Overview": page_overview, "Agent": page_agent, "Session replay": page_session,
+PAGES = {"Overview": page_overview, "Trace": page_trace, "Agent": page_agent, "Session replay": page_session,
          "Chat": page_chat, "Day timeline": page_day, "SQL": page_sql}
 st.sidebar.title("AI Village explorer")
 st.sidebar.caption("Private · data stays on this box · rev 838b415")

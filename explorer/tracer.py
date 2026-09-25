@@ -1,0 +1,193 @@
+"""Evidence-linked spread tracer for AI Village (URL artifacts).
+
+For every URL used by >= 2 agents, across four channels (chat, memory snapshots, model output, executed
+actions), this derives:
+  trace_first_use  — each agent's first use of the URL per channel, with the row id that proves it
+  trace_edges      — for each adopting agent, the most recent prior public (chat) post of the URL by someone
+                     else = its likely exposure, with an evidence level:
+                       explicit   adopter's first-use text names the source agent
+                       temporal   a prior chat post exists within WINDOW before the adoption
+                       stale      a prior chat post exists, but older than WINDOW
+                       none       no prior public post (independent discovery, or a channel we cannot see)
+  trace_artifacts  — per URL: origin (human / organizer / agent-created / agent-chat / broadcast-suspect),
+                     reach, evidence mix, noise flag
+
+Runs on the explorer box; writes /data/trace/*.parquet. Idempotent per output file. One log line per step.
+"""
+import os
+import sys
+import time
+
+import duckdb
+
+DB, PQ, OUT = "/data/trace.duckdb", "/data/parquet", "/data/trace"
+TABLES = ["agents", "chat_messages", "agent_memories", "computer_use_turns", "computer_use_sessions",
+          "events_slim", "village_goals", "agent_goals"]
+URL_RE = r"""https?://[^\s<>"'`)\]}|,\\]+"""
+WINDOW_HOURS = 72
+BROADCAST_AGENTS, BROADCAST_MINUTES = 5, 60
+NOISE_HOSTS = ("localhost", "127.0.0.1", "0.0.0.0", "example.com", "example.org", "example.net")
+
+
+def log(msg):
+    print(time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), msg, flush=True)
+
+
+def canonical(u):
+    """Canonical URL so spelling variants of one artifact match (first tracer run showed
+    `repo` vs `repo.git`, m./www., http/https and youtu.be/shorts/watch splitting one artifact into several)."""
+    u = f"rtrim(split_part({u}, '#', 1), '.:;!?*')"
+    u = f"regexp_replace({u}, '^http://', 'https://')"
+    u = f"regexp_replace({u}, '^https://(www|m|mobile)\\.', 'https://')"
+    u = (f"regexp_replace({u}, '^https://(youtube\\.com/(shorts/|watch\\?v=|live/)|youtu\\.be/)([A-Za-z0-9_-]{{11}}).*$', "
+         f"'https://youtube.com/watch?v=\\3')")
+    u = f"regexp_replace({u}, '\\.git$', '')"
+    return f"rtrim({u}, '/')"
+
+
+def urls_from(col):
+    """Extract and canonicalise URLs identically in every channel."""
+    pattern = URL_RE.replace("'", "''")
+    return f"list_transform(regexp_extract_all({col}, '{pattern}'), u -> {canonical('u')})"
+
+
+def build(con, name, sql):
+    path = f"{OUT}/{name}.parquet"
+    if not os.path.exists(path):
+        t0 = time.time()
+        con.execute(f"COPY ({sql}) TO '{path}.tmp' (FORMAT parquet, COMPRESSION zstd)")
+        os.replace(f"{path}.tmp", path)
+        n = con.execute(f"SELECT count(*) FROM read_parquet('{path}')").fetchone()[0]
+        log(f"TABLE {name} rows={n} secs={time.time() - t0:.0f}")
+    else:
+        log(f"SKIP {name}")
+    con.execute(f"CREATE OR REPLACE VIEW {name} AS SELECT * FROM read_parquet('{path}')")
+
+
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    con = duckdb.connect(DB)
+    con.execute("SET memory_limit='20GB'; SET temp_directory='/data/tmp'; SET threads=4;"
+                "SET preserve_insertion_order=false; SET TimeZone='UTC';")
+    for t in TABLES:
+        con.execute(f"CREATE OR REPLACE VIEW {t} AS SELECT * FROM read_parquet('{PQ}/{t}.parquet')")
+
+    # 1. Every URL use, per channel, with the row that proves it.
+    build(con, "trace_uses", f"""
+        WITH chat AS (
+          SELECT 'chat' AS channel, m.id AS row_id, m.created_at, m.room_id,
+                 m.agent_speaker_id AS agent_id,
+                 CASE WHEN m.speaker_type = 'user' THEN 'human:' || coalesce(e.speaker_name, m.user_speaker_id) END AS human,
+                 unnest({urls_from('m.content')}) AS url
+          FROM chat_messages m LEFT JOIN events_slim e ON e.message_id = m.id AND e.action_type = 'USER_TALK'),
+        mem AS (
+          SELECT 'memory', id, created_at, NULL, agent_id, NULL, unnest({urls_from('content')}) FROM agent_memories),
+        turns AS (
+          SELECT t.id, t.created_at, s.agent_id, t.agent_action, t.agent_messages
+          FROM computer_use_turns t JOIN computer_use_sessions s ON s.id = t.session_id),
+        act AS (
+          SELECT 'action', id, created_at, NULL, agent_id, NULL,
+                 unnest({urls_from("coalesce(agent_action->>'command', '') || ' ' || coalesce(agent_action->>'text', '')")})
+          FROM turns WHERE agent_action IS NOT NULL),
+        outp AS (
+          SELECT 'model_output', id, created_at, NULL, agent_id, NULL, unnest({urls_from('agent_messages::VARCHAR')})
+          FROM turns)
+        SELECT * FROM chat UNION ALL SELECT * FROM mem UNION ALL SELECT * FROM act UNION ALL SELECT * FROM outp""")
+
+    # 2. First use per (url, actor, channel); actor = agent id or 'human:<name>'.
+    build(con, "trace_first_use", """
+        SELECT url, coalesce(agent_id, human) AS actor, agent_id IS NULL AS is_human, channel,
+               min(created_at) AS first_at, arg_min(row_id, created_at) AS row_id,
+               arg_min(room_id, created_at) AS room_id, count(*) AS n
+        FROM trace_uses WHERE url IS NOT NULL AND length(url) > 10
+        GROUP BY ALL""")
+
+    # 3. Artifacts: URLs used by >= 2 distinct agents in any channel.
+    noise = ", ".join(f"'{h}'" for h in NOISE_HOSTS)
+    build(con, "trace_artifacts_base", f"""
+        WITH per AS (
+          SELECT url, count(DISTINCT actor) FILTER (WHERE NOT is_human) AS n_agents,
+                 count(DISTINCT actor) FILTER (WHERE is_human) AS n_humans,
+                 min(first_at) AS first_at, arg_min(actor, first_at) AS first_actor,
+                 arg_min(channel, first_at) AS first_channel, arg_min(row_id, first_at) AS first_row
+          FROM trace_first_use GROUP BY url)
+        SELECT *, lower(regexp_extract(url, '^https?://([^/:?#]+)', 1)) AS host
+        FROM per WHERE n_agents >= 2""")
+    con.execute(f"""CREATE OR REPLACE TEMP VIEW trace_art AS
+                    SELECT *, host IN ({noise}) OR host LIKE '%.local' OR url LIKE '%{{%' OR url LIKE '%$%' AS is_noise
+                    FROM trace_artifacts_base""")
+
+    # 4. Exposure edges. Adoption = an agent's earliest use of the URL in any channel.
+    #    Source = the most recent earlier chat post of that URL by a different actor (agent or human).
+    build(con, "trace_edges", f"""
+        WITH adopt AS (
+          SELECT f.url, f.actor AS target, min(f.first_at) AS t_at,
+                 arg_min(f.row_id, f.first_at) AS target_row, arg_min(f.channel, f.first_at) AS target_channel
+          FROM trace_first_use f JOIN trace_art a USING (url)
+          WHERE NOT f.is_human AND NOT a.is_noise GROUP BY ALL),
+        posts AS (
+          SELECT url, coalesce(agent_id, human) AS actor, created_at, row_id, room_id
+          FROM trace_uses WHERE channel = 'chat'),
+        cand AS (
+          SELECT d.*, p.actor AS source, p.created_at AS s_at, p.row_id AS source_row, p.room_id AS source_room,
+                 row_number() OVER (PARTITION BY d.url, d.target ORDER BY p.created_at DESC) AS rk,
+                 count(*) OVER (PARTITION BY d.url, d.target) AS prior_posts
+          FROM adopt d JOIN posts p ON p.url = d.url AND p.created_at < d.t_at AND p.actor <> d.target)
+        SELECT d.url, d.target, d.t_at, d.target_row, d.target_channel,
+               c.source, c.s_at, c.source_row, c.source_room, coalesce(c.prior_posts, 0) AS prior_posts,
+               epoch(d.t_at - c.s_at) AS lag_s
+        FROM adopt d LEFT JOIN cand c ON c.url = d.url AND c.target = d.target AND c.rk = 1""")
+
+    # 5. Evidence level: does the adopter's first-use text name the source agent? (chat / action / model output)
+    build(con, "trace_edges_scored", f"""
+        WITH names AS (
+          -- Token-normalised aliases: "Claude Opus 5" -> ["claude opus 5", "opus 5"]; matched on word
+          -- boundaries so "gpt-5" does not match "gpt-5.2" and "opus 5's" still matches "opus 5".
+          SELECT id::VARCHAR AS agent_id,
+                 list_distinct(list_transform([name, replace(name, 'Claude ', '')],
+                     x -> trim(regexp_replace(lower(x), '[^a-z0-9.-]+', ' ', 'g')))) AS aliases
+          FROM agents),
+        txt AS (
+          SELECT e.*, ' ' || regexp_replace(lower(coalesce(cm.content,
+                        t.agent_action::VARCHAR || ' ' || t.agent_messages::VARCHAR, '')), '[^a-z0-9.-]+', ' ', 'g') || ' ' AS target_text
+          FROM trace_edges e
+          LEFT JOIN chat_messages cm ON e.target_channel = 'chat' AND cm.id = e.target_row
+          LEFT JOIN computer_use_turns t ON e.target_channel IN ('action', 'model_output') AND t.id = e.target_row)
+        SELECT txt.* EXCLUDE (target_text),
+               CASE WHEN txt.source IS NULL THEN 'none'
+                    WHEN txt.target_channel <> 'memory' AND len(list_filter(n.aliases, x -> length(x) >= 4 AND
+                         (contains(txt.target_text, ' ' || x || ' ') OR contains(txt.target_text, ' ' || x || '. ')))) > 0
+                         THEN 'explicit'
+                    WHEN txt.lag_s <= {WINDOW_HOURS} * 3600 THEN 'temporal'
+                    ELSE 'stale' END AS evidence
+        FROM txt LEFT JOIN names n ON n.agent_id = txt.source""")
+
+    # 6. Artifact summary with origin label.
+    build(con, "trace_artifacts", f"""
+        WITH goal_text AS (
+          SELECT string_agg(goal, ' ') AS g FROM village_goals
+          UNION ALL SELECT string_agg(coalesce(description, '') || ' ' || coalesce(name, ''), ' ') FROM agent_goals),
+        t0 AS (SELECT url, min(t_at) AS t_first FROM trace_edges_scored GROUP BY url),
+        ev AS (
+          SELECT e.url, count(*) AS adopters,
+                 count(*) FILTER (WHERE evidence = 'explicit') AS ev_explicit,
+                 count(*) FILTER (WHERE evidence = 'temporal') AS ev_temporal,
+                 count(*) FILTER (WHERE evidence = 'stale') AS ev_stale,
+                 count(*) FILTER (WHERE evidence = 'none') AS ev_none,
+                 median(lag_s) FILTER (WHERE evidence IN ('explicit', 'temporal')) AS median_lag_s,
+                 count(*) FILTER (WHERE evidence = 'none'
+                                  AND e.t_at <= t0.t_first + INTERVAL {BROADCAST_MINUTES} MINUTE) AS early_unsourced
+          FROM trace_edges_scored e JOIN t0 USING (url) GROUP BY e.url)
+        SELECT a.*, ev.* EXCLUDE (url),
+               CASE WHEN a.is_noise THEN 'noise'
+                    WHEN EXISTS (SELECT 1 FROM goal_text WHERE contains(g, a.url)) THEN 'organizer'
+                    WHEN a.first_actor LIKE 'human:%' THEN 'human'
+                    WHEN ev.early_unsourced >= {BROADCAST_AGENTS} THEN 'broadcast_suspect'
+                    WHEN a.first_channel <> 'chat' THEN 'agent_created'
+                    ELSE 'agent_chat' END AS origin
+        FROM trace_art a LEFT JOIN ev USING (url)""")
+    log("TRACE DONE")
+
+
+if __name__ == "__main__":
+    sys.exit(main())
