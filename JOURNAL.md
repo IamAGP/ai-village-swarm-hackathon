@@ -97,3 +97,10 @@ I check state at the end of each work block and confirm the instance is stopped 
   "Empty Cache and Hard Reload". Also shortened metric labels (183.5K / 2.51M).
 - 19:2xZ stopped `i-0ed2e0636c29e833d` on user request (state: stopped; 0 running instances in ap-south-1).
   While stopped: only the 100 GB gp3 volume bills (~$9.12/month). Restart with `explorer/connect.sh`.
+
+## 2026-09-26 — Feasibility: is behaviour spread traceable in AI Village? (billed: EC2 restart)
+
+Same box `i-0ed2e0636c29e833d` (r7i.xlarge, $0.2730/hr; opening state: stopped, 0 running instances).
+Preflight for `explorer/feasibility.py`: (1) one UTC line per query step; (2) each step's result written to
+`/data/analysis/*.json` and synced to S3 as it finishes; (3) DuckDB memory_limit 20 GB of 32 GiB, spill to disk;
+(4) killed at 80% → completed steps' JSON survive, script skips finished steps. Watchdog: on-box 60-min idle stop.
