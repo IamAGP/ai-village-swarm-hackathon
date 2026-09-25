@@ -36,7 +36,8 @@ whose accuracy is measured on a labeled sample, and which reports what the data 
 - [x] Origin labels (agent_created / agent_chat / human / broadcast_suspect / organizer / noise)
 - [x] Spread timeline + edge inspector — explorer **Trace** page, linkable via `?url=` (AppTest: 0 exceptions,
       graffiti trace renders Grok 4.5 ← Opus 5 explicit 4 min with both rows)
-- [ ] "Mentioned by name" evidence (repo/site slug in chat without URL) — likely explains many `none`/broadcast_suspect
+- [x] "Mentioned by name" evidence (v4): 4,295 edges (5.8%) move from `none` (48.9→43.1%); broadcast_suspect 318→214;
+      median lag 7.3 min. Precision being measured (25-item blind sample).
 - [ ] Coverage report (e.g. no screenshots after 2026-08-21; missing channels)
 
 ### Phase 3 — trust

@@ -126,3 +126,6 @@ Preflight for `explorer/feasibility.py`: (1) one UTC line per query step; (2) ea
   (loose regex; reserved-word alias) — caught by reading rows, discarded.
 - A METR-report reader subagent was stopped by a safety check (report narrates a real cyberattack); I extracted only
   investigation-method/limitation sentences, no attack detail.
+- 20:25Z tracer v4: `mention` evidence (URL slug named in chat, no URL post) via tokenised hash-join (155,562 slug
+  mentions, 1 s). none 48.9→43.1%, broadcast_suspect 318→214. Precision not yet measured → 25-item blind sample.
+  App: 7 pages AppTest-clean; deprecated use_container_width replaced by width="stretch" (removal date had passed).

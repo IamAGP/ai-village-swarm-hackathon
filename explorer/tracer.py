@@ -132,6 +132,20 @@ def main():
         LEFT JOIN chat_messages cm ON d.target_channel = 'chat' AND cm.id = d.target_row
         LEFT JOIN computer_use_turns t ON d.target_channel IN ('action', 'model_output') AND t.id = d.target_row""")
 
+    # 4b. Name mentions: agents often refer to a repo/site by name without posting its URL. Slug = the URL's last
+    #     path segment when it looks like a coined identifier (>= 8 chars, contains '-' or '_').
+    #     Chat is tokenised once and hash-joined (a per-adoption substring scan would be ~10^10 comparisons).
+    build(con, "trace_slug_mentions", """
+        WITH slugs AS (
+          SELECT DISTINCT url, lower(regexp_extract(url, '/([A-Za-z0-9_.-]+)$', 1)) AS slug FROM trace_adopt),
+        good AS (SELECT * FROM slugs WHERE length(slug) >= 8 AND (contains(slug, '-') OR contains(slug, '_'))),
+        tok AS (
+          SELECT m.id AS row_id, m.created_at, m.room_id, coalesce(m.agent_speaker_id, 'human:' || m.user_speaker_id) AS actor,
+                 unnest(list_distinct(regexp_extract_all(lower(m.content), '[a-z0-9][a-z0-9_.-]{6,}[a-z0-9]'))) AS token
+          FROM chat_messages m)
+        SELECT g.url, t.actor, t.created_at, t.row_id, t.room_id
+        FROM good g JOIN tok t ON t.token = g.slug""")
+
     # 5. Exposure edge per adoption. Candidates = every other actor who posted the URL in chat before the
     #    adoption (their latest such post). If the adopter's text names candidates, the most recent NAMED one is
     #    the source (explicit); otherwise the most recent poster (temporal / stale). v2 picked only the most recent
@@ -161,15 +175,28 @@ def main():
                  count(*) OVER (PARTITION BY url, target) AS prior_posters,
                  count(*) FILTER (WHERE named) OVER (PARTITION BY url, target) AS named_posters
           FROM scored)
+        , mention AS (
+          SELECT d.url, d.target, mm.actor AS source, max(mm.created_at) AS s_at,
+                 arg_max(mm.row_id, mm.created_at) AS source_row, arg_max(mm.room_id, mm.created_at) AS source_room
+          FROM trace_adopt d JOIN trace_slug_mentions mm
+            ON mm.url = d.url AND mm.created_at < d.t_at AND mm.actor <> d.target
+          GROUP BY d.url, d.target, mm.actor),
+        mention_best AS (
+          SELECT *, row_number() OVER (PARTITION BY url, target ORDER BY s_at DESC) AS rk FROM mention)
         SELECT d.url, d.target, d.t_at, d.target_row, d.target_channel,
-               r.source, r.s_at, r.source_row, r.source_room,
+               coalesce(r.source, m.source) AS source, coalesce(r.s_at, m.s_at) AS s_at,
+               coalesce(r.source_row, m.source_row) AS source_row, coalesce(r.source_room, m.source_room) AS source_room,
                coalesce(r.prior_posters, 0) AS prior_posts, coalesce(r.named_posters, 0) AS named_posters,
-               epoch(d.t_at - r.s_at) AS lag_s,
-               CASE WHEN r.source IS NULL THEN 'none'
+               epoch(d.t_at - coalesce(r.s_at, m.s_at)) AS lag_s,
+               CASE WHEN r.source IS NULL AND m.source IS NOT NULL
+                         AND epoch(d.t_at - m.s_at) <= {WINDOW_HOURS} * 3600 THEN 'mention'
+                    WHEN r.source IS NULL THEN 'none'
                     WHEN r.named THEN 'explicit'
                     WHEN epoch(d.t_at - r.s_at) <= {WINDOW_HOURS} * 3600 THEN 'temporal'
                     ELSE 'stale' END AS evidence
-        FROM trace_adopt d LEFT JOIN ranked r ON r.url = d.url AND r.target = d.target AND r.rk = 1""")
+        FROM trace_adopt d
+        LEFT JOIN ranked r ON r.url = d.url AND r.target = d.target AND r.rk = 1
+        LEFT JOIN mention_best m ON m.url = d.url AND m.target = d.target AND m.rk = 1""")
 
     # 6. Artifact summary with origin label.
     build(con, "trace_artifacts", f"""
@@ -182,6 +209,7 @@ def main():
                  count(*) FILTER (WHERE evidence = 'explicit') AS ev_explicit,
                  count(*) FILTER (WHERE evidence = 'temporal') AS ev_temporal,
                  count(*) FILTER (WHERE evidence = 'stale') AS ev_stale,
+                 count(*) FILTER (WHERE evidence = 'mention') AS ev_mention,
                  count(*) FILTER (WHERE evidence = 'none') AS ev_none,
                  median(lag_s) FILTER (WHERE evidence IN ('explicit', 'temporal')) AS median_lag_s,
                  count(*) FILTER (WHERE evidence = 'none'
