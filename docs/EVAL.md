@@ -89,7 +89,7 @@ fresh sample.
 
 ## Known issues (tracer review, 2026-09-26 — `docs/TRACER_REVIEW.md`)
 
-Measured on v5 outputs before fixing:
+Measured on v5 outputs before fixing; **#11 and #12 were fixed in v6 (PRs #15, #14)** — see *v6 measured effect* below.
 - **Room visibility (#11).** Since rooms v1 (2026-02-25) agents only see their current room. Of 34,030 sourced
   edges with a post-rooms source, the adopter's last known room differs from the source post's room for explicit
   77/2,943 (2.6%), temporal 700/27,878 (2.5%), mention 137/3,209 (4.3%). Those edges are likely not direct
@@ -98,3 +98,19 @@ Measured on v5 outputs before fixing:
   ≤ 109 had a candidate source and could flip to `explicit`.
 - **Adoption time is an observation bound** (first *recorded* use), and a source row is a *representative*
   prior post, not proven transmission (review #3, #4).
+
+### v6 measured effect (PRs #14 + #15, rebuilt 2026-09-26)
+
+| evidence | v5 | v6 |
+|---|---:|---:|
+| temporal | 33,149 | 32,461 |
+| explicit | 3,547 | 3,519 |
+| mention | 3,581 | 3,520 |
+| stale | 1,027 | 897 |
+| cross_room | – | 907 (1.2%) |
+| none | 32,274 | 32,274 |
+
+Transitions: temporal→cross_room 633, stale→cross_room 125, mention→cross_room 85, explicit→cross_room 64
+(adopter names the source, but the source's post was in a room the adopter wasn't in — likely learned via another
+channel); temporal→explicit 41 (#12). 48 edges `room_unknown`. The held-out precision above was measured on v3–v5 and
+includes edges that v6 now labels `cross_room`; a fresh blind sample stratified by room visibility is still to do.

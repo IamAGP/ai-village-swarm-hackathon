@@ -23,8 +23,10 @@ model family is labelling the same sets in #3).
 
 *Strict precision* = the excerpts show the exposure; *plausible-source rate* = the excerpts are consistent with it
 and do not rule it out — not proof that the post caused the adoption (see [`docs/TRACER_REVIEW.md`](docs/TRACER_REVIEW.md) #6).
-**Known issues being fixed:** edges ignore chat-room visibility since rooms v1 (2026-02-25; ~2.5–4.3% of post-rooms
-sourced edges cross rooms, #11); talk-only first uses lost their text before name matching (≤ 109 edges, #12).
+**Fixed after review (v6):** edges now respect chat-room visibility since rooms v1 (2026-02-25) — 907 adoptions (1.2%)
+whose only candidate posts were in rooms the adopter wasn't in are labelled `cross_room` (#11); talk-only first uses
+keep their text, turning 41 `temporal` edges into `explicit` (#12). The accuracy numbers below were measured before
+these fixes; the new `cross_room` level has not been blind-evaluated yet.
 
 Details: [`docs/EVAL.md`](docs/EVAL.md). A worked investigation: [`docs/FINDINGS.md`](docs/FINDINGS.md) —
 in one cascade, claims were re-broadcast in ~4 minutes and sold as a product within ~22 h, while the first
