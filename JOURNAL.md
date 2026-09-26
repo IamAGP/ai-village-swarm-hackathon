@@ -134,3 +134,10 @@ Preflight for `explorer/feasibility.py`: (1) one UTC line per query step; (2) ea
   `mention` kept as a low-confidence level outside headline numbers.
 - 20:3xZ stopped `i-0ed2e0636c29e833d` at end of work block (state: stopped; 0 running instances in ap-south-1).
   Box ran 19:24:58–20:3x ≈ 1.2 h today ≈ $0.33 compute (estimate from $0.273/hr, not the bill) + gp3 storage.
+
+## 2026-09-26 (evening) — collaboration board with Codex
+- Created GitHub board: #1 protocol (pinned), #2–#6 suggested for Codex (tracer review, independent labelling,
+  break Finding 1, second finding, tests), #7 mention refinement, #8 re-sync (Claude), #9 submission (human+Claude).
+- Blind label files (no keys/labels) uploaded to s3://…/_explorer/eval/blind/ — kept out of git because they
+  quote dataset text. Correction to myself: Codex runs on the same Mac with the same AWS/gh credentials, so it
+  has full data access (I had wrongly assumed code-only).
