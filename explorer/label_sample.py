@@ -46,7 +46,7 @@ def main(seed=SEED, name="label_sample"):
             if e["target_channel"] == "chat":
                 tgt = con.execute("SELECT content FROM chat_messages WHERE id = ?", [e["target_row"]]).fetchone()
             else:
-                tgt = con.execute("SELECT agent_action::VARCHAR || ' ' || agent_messages::VARCHAR FROM computer_use_turns WHERE id = ?",
+                tgt = con.execute("SELECT concat_ws(' ', agent_action::VARCHAR, agent_messages::VARCHAR) FROM computer_use_turns WHERE id = ?",
                                   [e["target_row"]]).fetchone()
             rec = {"stratum": stratum, "url": e["url"], "origin": e["origin"],
                    "source": names.get(e["source"], e["source"]), "target": names.get(e["target"], e["target"]),

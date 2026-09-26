@@ -32,6 +32,69 @@ BROADCAST_AGENTS, BROADCAST_MINUTES = 5, 60
 NOISE_HOSTS = ("localhost", "127.0.0.1", "0.0.0.0", "example.com", "example.org", "example.net")
 
 
+TRACE_ADOPT_SQL = """
+        WITH adopt AS (
+          SELECT f.url, f.actor AS target, min(f.first_at) AS t_at,
+                 arg_min(f.row_id, f.first_at) AS target_row, arg_min(f.channel, f.first_at) AS target_channel
+          FROM trace_first_use f JOIN trace_art a USING (url)
+          WHERE NOT f.is_human AND NOT a.is_noise GROUP BY ALL)
+        SELECT d.*, CASE WHEN d.target_channel <> 'memory' THEN
+                 ' ' || regexp_replace(lower(coalesce(cm.content, concat_ws(' ', t.agent_action::VARCHAR, t.agent_messages::VARCHAR), '')),
+                                       '[^a-z0-9.-]+', ' ', 'g') || ' ' END AS target_text
+        FROM adopt d
+        LEFT JOIN chat_messages cm ON d.target_channel = 'chat' AND cm.id = d.target_row
+        LEFT JOIN computer_use_turns t ON d.target_channel IN ('action', 'model_output') AND t.id = d.target_row"""
+
+
+TRACE_EDGES_SCORED_SQL = f"""
+        WITH names AS (
+          -- Token-normalised aliases: "Claude Opus 5" -> ["claude opus 5", "opus 5"]; matched on word
+          -- boundaries so "gpt-5" does not match "gpt-5.2" and "opus 5's" still matches "opus 5".
+          SELECT id::VARCHAR AS agent_id,
+                 list_distinct(list_transform([name, replace(name, 'Claude ', '')],
+                     x -> trim(regexp_replace(lower(x), '[^a-z0-9.-]+', ' ', 'g')))) AS aliases
+          FROM agents),
+        posts AS (
+          SELECT url, coalesce(agent_id, human) AS actor, created_at, row_id, room_id
+          FROM trace_uses WHERE channel = 'chat'),
+        cand AS (
+          SELECT d.url, d.target, p.actor AS source, max(p.created_at) AS s_at,
+                 arg_max(p.row_id, p.created_at) AS source_row, arg_max(p.room_id, p.created_at) AS source_room
+          FROM trace_adopt d JOIN posts p ON p.url = d.url AND p.created_at < d.t_at AND p.actor <> d.target
+          GROUP BY ALL),
+        scored AS (
+          SELECT c.*, d.target_text IS NOT NULL AND len(list_filter(coalesce(n.aliases, []), x -> length(x) >= 4 AND
+                   (contains(d.target_text, ' ' || x || ' ') OR contains(d.target_text, ' ' || x || '. ')))) > 0 AS named
+          FROM cand c JOIN trace_adopt d USING (url, target) LEFT JOIN names n ON n.agent_id = c.source),
+        ranked AS (
+          SELECT *, row_number() OVER (PARTITION BY url, target ORDER BY named DESC, s_at DESC) AS rk,
+                 count(*) OVER (PARTITION BY url, target) AS prior_posters,
+                 count(*) FILTER (WHERE named) OVER (PARTITION BY url, target) AS named_posters
+          FROM scored)
+        , mention AS (
+          SELECT d.url, d.target, mm.actor AS source, max(mm.created_at) AS s_at,
+                 arg_max(mm.row_id, mm.created_at) AS source_row, arg_max(mm.room_id, mm.created_at) AS source_room
+          FROM trace_adopt d JOIN trace_slug_mentions mm
+            ON mm.url = d.url AND mm.created_at < d.t_at AND mm.actor <> d.target
+          GROUP BY d.url, d.target, mm.actor),
+        mention_best AS (
+          SELECT *, row_number() OVER (PARTITION BY url, target ORDER BY s_at DESC) AS rk FROM mention)
+        SELECT d.url, d.target, d.t_at, d.target_row, d.target_channel,
+               coalesce(r.source, m.source) AS source, coalesce(r.s_at, m.s_at) AS s_at,
+               coalesce(r.source_row, m.source_row) AS source_row, coalesce(r.source_room, m.source_room) AS source_room,
+               coalesce(r.prior_posters, 0) AS prior_posts, coalesce(r.named_posters, 0) AS named_posters,
+               epoch(d.t_at - coalesce(r.s_at, m.s_at)) AS lag_s,
+               CASE WHEN r.source IS NULL AND m.source IS NOT NULL
+                         AND epoch(d.t_at - m.s_at) <= {MENTION_WINDOW_MIN} * 60 THEN 'mention'
+                    WHEN r.source IS NULL THEN 'none'
+                    WHEN r.named THEN 'explicit'
+                    WHEN epoch(d.t_at - r.s_at) <= {WINDOW_HOURS} * 3600 THEN 'temporal'
+                    ELSE 'stale' END AS evidence
+        FROM trace_adopt d
+        LEFT JOIN ranked r ON r.url = d.url AND r.target = d.target AND r.rk = 1
+        LEFT JOIN mention_best m ON m.url = d.url AND m.target = d.target AND m.rk = 1"""
+
+
 def log(msg):
     print(time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), msg, flush=True)
 
@@ -122,18 +185,7 @@ def main():
 
     # 4. Adoptions: an agent's earliest use of the URL in any channel, with its normalised text
     #    (chat / action / model output; memory snapshots name many agents, so they are not used for attribution).
-    build(con, "trace_adopt", """
-        WITH adopt AS (
-          SELECT f.url, f.actor AS target, min(f.first_at) AS t_at,
-                 arg_min(f.row_id, f.first_at) AS target_row, arg_min(f.channel, f.first_at) AS target_channel
-          FROM trace_first_use f JOIN trace_art a USING (url)
-          WHERE NOT f.is_human AND NOT a.is_noise GROUP BY ALL)
-        SELECT d.*, CASE WHEN d.target_channel <> 'memory' THEN
-                 ' ' || regexp_replace(lower(coalesce(cm.content, t.agent_action::VARCHAR || ' ' || t.agent_messages::VARCHAR, '')),
-                                       '[^a-z0-9.-]+', ' ', 'g') || ' ' END AS target_text
-        FROM adopt d
-        LEFT JOIN chat_messages cm ON d.target_channel = 'chat' AND cm.id = d.target_row
-        LEFT JOIN computer_use_turns t ON d.target_channel IN ('action', 'model_output') AND t.id = d.target_row""")
+    build(con, "trace_adopt", TRACE_ADOPT_SQL)
 
     # 4b. Name mentions: agents often refer to a repo/site by name without posting its URL. Slug = the URL's last
     #     path segment when it looks like a coined identifier (>= 8 chars, contains '-' or '_').
@@ -153,53 +205,7 @@ def main():
     #    adoption (their latest such post). If the adopter's text names candidates, the most recent NAMED one is
     #    the source (explicit); otherwise the most recent poster (temporal / stale). v2 picked only the most recent
     #    poster, and blind labels showed 3/22 temporal edges credited to the wrong agent that way (2026-09-26).
-    build(con, "trace_edges_scored", f"""
-        WITH names AS (
-          -- Token-normalised aliases: "Claude Opus 5" -> ["claude opus 5", "opus 5"]; matched on word
-          -- boundaries so "gpt-5" does not match "gpt-5.2" and "opus 5's" still matches "opus 5".
-          SELECT id::VARCHAR AS agent_id,
-                 list_distinct(list_transform([name, replace(name, 'Claude ', '')],
-                     x -> trim(regexp_replace(lower(x), '[^a-z0-9.-]+', ' ', 'g')))) AS aliases
-          FROM agents),
-        posts AS (
-          SELECT url, coalesce(agent_id, human) AS actor, created_at, row_id, room_id
-          FROM trace_uses WHERE channel = 'chat'),
-        cand AS (
-          SELECT d.url, d.target, p.actor AS source, max(p.created_at) AS s_at,
-                 arg_max(p.row_id, p.created_at) AS source_row, arg_max(p.room_id, p.created_at) AS source_room
-          FROM trace_adopt d JOIN posts p ON p.url = d.url AND p.created_at < d.t_at AND p.actor <> d.target
-          GROUP BY ALL),
-        scored AS (
-          SELECT c.*, d.target_text IS NOT NULL AND len(list_filter(coalesce(n.aliases, []), x -> length(x) >= 4 AND
-                   (contains(d.target_text, ' ' || x || ' ') OR contains(d.target_text, ' ' || x || '. ')))) > 0 AS named
-          FROM cand c JOIN trace_adopt d USING (url, target) LEFT JOIN names n ON n.agent_id = c.source),
-        ranked AS (
-          SELECT *, row_number() OVER (PARTITION BY url, target ORDER BY named DESC, s_at DESC) AS rk,
-                 count(*) OVER (PARTITION BY url, target) AS prior_posters,
-                 count(*) FILTER (WHERE named) OVER (PARTITION BY url, target) AS named_posters
-          FROM scored)
-        , mention AS (
-          SELECT d.url, d.target, mm.actor AS source, max(mm.created_at) AS s_at,
-                 arg_max(mm.row_id, mm.created_at) AS source_row, arg_max(mm.room_id, mm.created_at) AS source_room
-          FROM trace_adopt d JOIN trace_slug_mentions mm
-            ON mm.url = d.url AND mm.created_at < d.t_at AND mm.actor <> d.target
-          GROUP BY d.url, d.target, mm.actor),
-        mention_best AS (
-          SELECT *, row_number() OVER (PARTITION BY url, target ORDER BY s_at DESC) AS rk FROM mention)
-        SELECT d.url, d.target, d.t_at, d.target_row, d.target_channel,
-               coalesce(r.source, m.source) AS source, coalesce(r.s_at, m.s_at) AS s_at,
-               coalesce(r.source_row, m.source_row) AS source_row, coalesce(r.source_room, m.source_room) AS source_room,
-               coalesce(r.prior_posters, 0) AS prior_posts, coalesce(r.named_posters, 0) AS named_posters,
-               epoch(d.t_at - coalesce(r.s_at, m.s_at)) AS lag_s,
-               CASE WHEN r.source IS NULL AND m.source IS NOT NULL
-                         AND epoch(d.t_at - m.s_at) <= {MENTION_WINDOW_MIN} * 60 THEN 'mention'
-                    WHEN r.source IS NULL THEN 'none'
-                    WHEN r.named THEN 'explicit'
-                    WHEN epoch(d.t_at - r.s_at) <= {WINDOW_HOURS} * 3600 THEN 'temporal'
-                    ELSE 'stale' END AS evidence
-        FROM trace_adopt d
-        LEFT JOIN ranked r ON r.url = d.url AND r.target = d.target AND r.rk = 1
-        LEFT JOIN mention_best m ON m.url = d.url AND m.target = d.target AND m.rk = 1""")
+    build(con, "trace_edges_scored", TRACE_EDGES_SCORED_SQL)
 
     # 6. Artifact summary with origin label.
     build(con, "trace_artifacts", f"""
