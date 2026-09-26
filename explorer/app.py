@@ -342,8 +342,9 @@ EVIDENCE_HELP = {
     "explicit": "adopter's first use names the source agent",
     "temporal": "source posted it in chat within 72 h before",
     "stale": "a prior chat post exists, but older than 72 h",
-    "mention": "no prior URL post, but someone named it (URL slug) in chat within 72 h before",
-    "none": "no earlier public post — independent discovery or an unseen channel",
+    "mention": "no visible prior URL post, but someone named its URL slug in chat within 60 min before",
+    "cross_room": "eligible prior candidates exist, but their rooms were not visible to the adopter",
+    "none": "no earlier visible public post — independent discovery or an unseen channel",
 }
 
 
@@ -414,7 +415,7 @@ def page_trace():
     view = view.sort_values(["ev_explicit", "adopters"], ascending=False)
     st.caption(f"{len(view):,} of {len(art):,} traced URLs · evidence: " +
                " · ".join(f"**{k}** = {v}" for k, v in EVIDENCE_HELP.items()))
-    table = view[["url", "origin", "adopters", "ev_explicit", "ev_temporal", "ev_mention", "ev_stale", "ev_none",
+    table = view[["url", "origin", "adopters", "ev_explicit", "ev_temporal", "ev_mention", "ev_stale", "ev_cross_room", "ev_none",
                   "median_lag_s", "first_at", "first_actor"]].copy()
     table["first_actor"] = table.first_actor.map(lambda a: names.get(a, a))
     table["median_lag"] = table.pop("median_lag_s").map(fmt_lag)
@@ -445,16 +446,22 @@ def page_trace():
     edges["adopter"] = edges.target.map(lambda x: names.get(x, x))
     edges["from"] = edges.source.map(lambda x: names.get(x, x) if isinstance(x, str) else "—")
     edges["lag"] = edges.lag_s.map(fmt_lag)
-    et = edges[["t_at", "adopter", "target_channel", "from", "lag", "evidence", "prior_posts"]]
+    et = edges[["t_at", "adopter", "target_channel", "from", "lag", "evidence", "prior_posts",
+                "dropped_candidates", "room_unknown"]]
     st.markdown("**Exposure edges**")
     st.dataframe(et, width="stretch", hide_index=True)
     if edges.empty:
         return
-    order = edges.evidence.map({"explicit": 0, "temporal": 1, "mention": 2, "stale": 3, "none": 4}).sort_values(kind="stable").index
+    order = edges.evidence.map({"explicit": 0, "temporal": 1, "mention": 2, "stale": 3,
+                                "cross_room": 4, "none": 5}).sort_values(kind="stable").index
     i = st.selectbox("Inspect edge", list(order), format_func=lambda k:
                      f"{edges.adopter[k]} ← {edges['from'][k]} · {edges.evidence[k]} · {fmt_lag(edges.lag_s[k])}")
     e = edges.loc[i]
     st.caption(f"Evidence: **{e.evidence}** — {EVIDENCE_HELP[e.evidence]}")
+    if e.room_unknown:
+        st.caption("Adopter room history is missing or the selected source room is unknown; visibility is unverified.")
+    if e.dropped_candidates:
+        st.caption(f"{int(e.dropped_candidates)} prior candidate posts were excluded by room visibility.")
     l, r = st.columns(2)
     with l:
         if isinstance(e.source_row, str):

@@ -29,6 +29,7 @@ def test_talk_only_adoption_names_prior_poster():
         ('https://example.test/story', 'poster', NULL, '2026-09-26 12:00:00', 'post', 'room', 'chat')""")
     con.execute("""CREATE TABLE trace_slug_mentions (
         url VARCHAR, actor VARCHAR, created_at TIMESTAMP, row_id VARCHAR, room_id VARCHAR)""")
+    con.execute("CREATE TABLE trace_room_presence (agent_id VARCHAR, seen_at TIMESTAMP, room_id VARCHAR)")
 
     con.execute(f"CREATE VIEW trace_adopt AS {TRACE_ADOPT_SQL}")
     texts = dict(con.execute("SELECT target, target_text FROM trace_adopt").fetchall())
