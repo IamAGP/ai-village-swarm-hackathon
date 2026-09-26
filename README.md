@@ -26,6 +26,8 @@ successful independent verification came after ~26.5 h; a fabricated retelling w
 
 ## Running it
 
+Run the local regression tests with `.venv/bin/python -m pytest tests/`.
+
 Everything runs on a private EC2 box next to the data (the gated data never leaves AWS):
 
 ```
