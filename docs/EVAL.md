@@ -19,6 +19,10 @@ How much should you trust an edge the tracer draws? Measured on stratified, blin
 intervals are wide (Wilson 95% CIs below). Excerpts are ±400 chars; some attributions sit outside them
 (→ `unclear`).
 
+The results below were measured before room visibility filtering. The updated tracer can mark an edge
+`cross_room` or retain a source with `room_unknown`; these categories need a fresh blind evaluation before
+their accuracy is reported.
+
 ## Results
 
 ### Tracer v2 — source = most recent prior chat poster (sample seed 3, 2026-09-26)

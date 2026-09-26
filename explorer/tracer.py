@@ -3,12 +3,13 @@
 For every URL used by >= 2 agents, across four channels (chat, memory snapshots, model output, executed
 actions), this derives:
   trace_first_use  — each agent's first use of the URL per channel, with the row id that proves it
-  trace_edges      — for each adopting agent, the most recent prior public (chat) post of the URL by someone
-                     else = its likely exposure, with an evidence level:
+  trace_edges      — for each adopting agent, a prior chat post or name mention in a room it may have seen;
+                     the selected post is a candidate exposure, with an evidence level:
                        explicit   adopter's first-use text names the source agent
                        temporal   a prior chat post exists within WINDOW before the adoption
                        stale      a prior chat post exists, but older than WINDOW
-                       none       no prior public post (independent discovery, or a channel we cannot see)
+                       cross_room eligible prior posts exist, but none was in a room the adopter occupied
+                       none       no visible prior public post (independent discovery, or an unseen channel)
   trace_artifacts  — per URL: origin (human / organizer / agent-created / agent-chat / broadcast-suspect),
                      reach, evidence mix, noise flag
 
@@ -30,6 +31,7 @@ WINDOW_HOURS = 72
 MENTION_WINDOW_MIN = 60
 BROADCAST_AGENTS, BROADCAST_MINUTES = 5, 60
 NOISE_HOSTS = ("localhost", "127.0.0.1", "0.0.0.0", "example.com", "example.org", "example.net")
+ROOMS_START = "2026-02-25 00:00:00"
 
 
 TRACE_ADOPT_SQL = """
@@ -46,8 +48,28 @@ TRACE_ADOPT_SQL = """
         LEFT JOIN computer_use_turns t ON d.target_channel IN ('action', 'model_output') AND t.id = d.target_row"""
 
 
+TRACE_ROOM_PRESENCE_SQL = """
+        SELECT agent_speaker_id::VARCHAR AS agent_id, created_at AS seen_at, room_id::VARCHAR AS room_id
+        FROM chat_messages
+        WHERE speaker_type = 'agent' AND agent_speaker_id IS NOT NULL AND room_id IS NOT NULL
+        UNION ALL
+        SELECT agent_id::VARCHAR, created_at, room_id::VARCHAR
+        FROM events_slim
+        WHERE action_type = 'ENTER_ROOM' AND agent_id IS NOT NULL AND room_id IS NOT NULL"""
+
+
 TRACE_EDGES_SCORED_SQL = f"""
-        WITH names AS (
+        WITH room_intervals AS (
+          SELECT agent_id, room_id, seen_at AS start_at,
+                 lead(seen_at, 1, TIMESTAMP '9999-12-31') OVER
+                   (PARTITION BY agent_id ORDER BY seen_at, room_id) AS end_at
+          FROM trace_room_presence),
+        adopt_rooms AS (
+          SELECT d.*, EXISTS (
+            SELECT 1 FROM trace_room_presence rp
+            WHERE rp.agent_id = d.target AND rp.seen_at <= d.t_at) AS has_room_presence
+          FROM trace_adopt d),
+        names AS (
           -- Token-normalised aliases: "Claude Opus 5" -> ["claude opus 5", "opus 5"]; matched on word
           -- boundaries so "gpt-5" does not match "gpt-5.2" and "opus 5's" still matches "opus 5".
           SELECT id::VARCHAR AS agent_id,
@@ -57,42 +79,85 @@ TRACE_EDGES_SCORED_SQL = f"""
         posts AS (
           SELECT url, coalesce(agent_id, human) AS actor, created_at, row_id, room_id
           FROM trace_uses WHERE channel = 'chat'),
+        url_candidates AS (
+          SELECT d.url, d.target, p.actor AS source, p.created_at AS s_at,
+                 p.row_id AS source_row, p.room_id AS source_room, d.t_at,
+                 CASE WHEN p.created_at < TIMESTAMP '{ROOMS_START}' THEN 'visible'
+                      WHEN p.room_id IS NULL OR NOT d.has_room_presence THEN 'unknown'
+                      WHEN EXISTS (
+                        SELECT 1 FROM room_intervals ri
+                        WHERE ri.agent_id = d.target AND ri.room_id = p.room_id
+                          AND ri.start_at <= d.t_at AND ri.end_at > p.created_at) THEN 'visible'
+                      ELSE 'hidden' END AS visibility
+          FROM adopt_rooms d JOIN posts p ON p.url = d.url AND p.created_at < d.t_at AND p.actor <> d.target),
+        url_counts AS (
+          SELECT url, target, count(*) FILTER (WHERE visibility = 'hidden') AS dropped_url_candidates
+          FROM url_candidates GROUP BY url, target),
         cand AS (
-          SELECT d.url, d.target, p.actor AS source, max(p.created_at) AS s_at,
-                 arg_max(p.row_id, p.created_at) AS source_row, arg_max(p.room_id, p.created_at) AS source_room
-          FROM trace_adopt d JOIN posts p ON p.url = d.url AND p.created_at < d.t_at AND p.actor <> d.target
+          SELECT url, target, source, max(s_at) AS s_at,
+                 arg_max(source_row, s_at) AS source_row, arg_max_null(source_room, s_at) AS source_room,
+                 arg_max(visibility, s_at) AS source_visibility
+          FROM url_candidates WHERE visibility <> 'hidden'
           GROUP BY ALL),
         scored AS (
           SELECT c.*, d.target_text IS NOT NULL AND len(list_filter(coalesce(n.aliases, []), x -> length(x) >= 4 AND
                    (contains(d.target_text, ' ' || x || ' ') OR contains(d.target_text, ' ' || x || '. ')))) > 0 AS named
-          FROM cand c JOIN trace_adopt d USING (url, target) LEFT JOIN names n ON n.agent_id = c.source),
+          FROM cand c JOIN adopt_rooms d USING (url, target) LEFT JOIN names n ON n.agent_id = c.source),
         ranked AS (
           SELECT *, row_number() OVER (PARTITION BY url, target ORDER BY named DESC, s_at DESC) AS rk,
                  count(*) OVER (PARTITION BY url, target) AS prior_posters,
                  count(*) FILTER (WHERE named) OVER (PARTITION BY url, target) AS named_posters
           FROM scored)
-        , mention AS (
-          SELECT d.url, d.target, mm.actor AS source, max(mm.created_at) AS s_at,
-                 arg_max(mm.row_id, mm.created_at) AS source_row, arg_max(mm.room_id, mm.created_at) AS source_room
-          FROM trace_adopt d JOIN trace_slug_mentions mm
-            ON mm.url = d.url AND mm.created_at < d.t_at AND mm.actor <> d.target
-          GROUP BY d.url, d.target, mm.actor),
+        , mention_candidates AS (
+          SELECT d.url, d.target, mm.actor AS source, mm.created_at AS s_at,
+                 mm.row_id AS source_row, mm.room_id AS source_room, d.t_at,
+                 CASE WHEN mm.created_at < TIMESTAMP '{ROOMS_START}' THEN 'visible'
+                      WHEN mm.room_id IS NULL OR NOT d.has_room_presence THEN 'unknown'
+                      WHEN EXISTS (
+                        SELECT 1 FROM room_intervals ri
+                        WHERE ri.agent_id = d.target AND ri.room_id = mm.room_id
+                          AND ri.start_at <= d.t_at AND ri.end_at > mm.created_at) THEN 'visible'
+                      ELSE 'hidden' END AS visibility
+          FROM adopt_rooms d JOIN trace_slug_mentions mm
+            ON mm.url = d.url AND mm.created_at < d.t_at
+             AND mm.created_at >= d.t_at - INTERVAL {MENTION_WINDOW_MIN} MINUTE
+             AND mm.actor <> d.target
+          WHERE NOT EXISTS (
+            SELECT 1 FROM posts p WHERE p.url = mm.url AND p.row_id = mm.row_id)),
+        mention_counts AS (
+          SELECT url, target, count(*) FILTER (WHERE visibility = 'hidden') AS dropped_mention_candidates
+          FROM mention_candidates GROUP BY url, target),
+        mention AS (
+          SELECT url, target, source, max(s_at) AS s_at,
+                 arg_max(source_row, s_at) AS source_row, arg_max_null(source_room, s_at) AS source_room,
+                 arg_max(visibility, s_at) AS source_visibility
+          FROM mention_candidates WHERE visibility <> 'hidden'
+          GROUP BY url, target, source),
         mention_best AS (
           SELECT *, row_number() OVER (PARTITION BY url, target ORDER BY s_at DESC) AS rk FROM mention)
         SELECT d.url, d.target, d.t_at, d.target_row, d.target_channel,
                coalesce(r.source, m.source) AS source, coalesce(r.s_at, m.s_at) AS s_at,
                coalesce(r.source_row, m.source_row) AS source_row, coalesce(r.source_room, m.source_room) AS source_room,
                coalesce(r.prior_posters, 0) AS prior_posts, coalesce(r.named_posters, 0) AS named_posters,
+               coalesce(uc.dropped_url_candidates, 0) + coalesce(mc.dropped_mention_candidates, 0) AS dropped_candidates,
+               coalesce(uc.dropped_url_candidates, 0) AS dropped_url_candidates,
+               coalesce(mc.dropped_mention_candidates, 0) AS dropped_mention_candidates,
+               (d.t_at >= TIMESTAMP '{ROOMS_START}' AND NOT d.has_room_presence)
+                 OR coalesce(coalesce(r.source_visibility, m.source_visibility) = 'unknown', false) AS room_unknown,
                epoch(d.t_at - coalesce(r.s_at, m.s_at)) AS lag_s,
-               CASE WHEN r.source IS NULL AND m.source IS NOT NULL
-                         AND epoch(d.t_at - m.s_at) <= {MENTION_WINDOW_MIN} * 60 THEN 'mention'
+               CASE WHEN r.source IS NULL AND m.source IS NOT NULL THEN 'mention'
+                    WHEN r.source IS NULL AND m.source IS NULL
+                         AND coalesce(uc.dropped_url_candidates, 0) + coalesce(mc.dropped_mention_candidates, 0) > 0
+                         THEN 'cross_room'
                     WHEN r.source IS NULL THEN 'none'
                     WHEN r.named THEN 'explicit'
                     WHEN epoch(d.t_at - r.s_at) <= {WINDOW_HOURS} * 3600 THEN 'temporal'
                     ELSE 'stale' END AS evidence
-        FROM trace_adopt d
+        FROM adopt_rooms d
         LEFT JOIN ranked r ON r.url = d.url AND r.target = d.target AND r.rk = 1
-        LEFT JOIN mention_best m ON m.url = d.url AND m.target = d.target AND m.rk = 1"""
+        LEFT JOIN mention_best m ON m.url = d.url AND m.target = d.target AND m.rk = 1
+        LEFT JOIN url_counts uc ON uc.url = d.url AND uc.target = d.target
+        LEFT JOIN mention_counts mc ON mc.url = d.url AND mc.target = d.target"""
 
 
 def log(msg):
@@ -187,6 +252,9 @@ def main():
     #    (chat / action / model output; memory snapshots name many agents, so they are not used for attribution).
     build(con, "trace_adopt", TRACE_ADOPT_SQL)
 
+    # Room presence is inferred from agents' own posts and ENTER_ROOM events.
+    build(con, "trace_room_presence", TRACE_ROOM_PRESENCE_SQL)
+
     # 4b. Name mentions: agents often refer to a repo/site by name without posting its URL. Slug = the URL's last
     #     path segment when it looks like a coined identifier (>= 8 chars, contains '-' or '_').
     #     Chat is tokenised once and hash-joined (a per-adoption substring scan would be ~10^10 comparisons).
@@ -219,6 +287,7 @@ def main():
                  count(*) FILTER (WHERE evidence = 'temporal') AS ev_temporal,
                  count(*) FILTER (WHERE evidence = 'stale') AS ev_stale,
                  count(*) FILTER (WHERE evidence = 'mention') AS ev_mention,
+                 count(*) FILTER (WHERE evidence = 'cross_room') AS ev_cross_room,
                  count(*) FILTER (WHERE evidence = 'none') AS ev_none,
                  median(lag_s) FILTER (WHERE evidence IN ('explicit', 'temporal')) AS median_lag_s,
                  count(*) FILTER (WHERE evidence = 'none'
