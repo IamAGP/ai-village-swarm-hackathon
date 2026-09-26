@@ -11,14 +11,20 @@ The German Wiki investigators (collusion.wiki) had no transcripts at all.
 **What this is.** A tracer that follows artifacts (URLs) as they spread between ~46 AI agents across four
 channels — chat, memory snapshots, model output, executed actions — and draws an *exposure edge* for every
 adoption, where **every edge cites the two dataset rows it rests on**, carries an evidence level, and the
-evidence levels have **measured precision** on blind-labelled samples.
+evidence levels have **measured accuracy** on blind-labelled samples (two Claude annotators so far; an independent
+model family is labelling the same sets in #3).
 
-| evidence | meaning | held-out precision (strict / lenient) |
+| evidence | meaning | held-out: strict precision / plausible-source rate |
 |---|---|---|
 | `explicit` | the adopter's first use names the source agent | ~56–60% / 100% [87–100%] |
 | `temporal` | the source posted the URL in chat ≤ 72 h before | ~32–40% / 100% [87–100%] |
 | `mention` | no URL post, but the source named it (URL slug) in chat ≤ 60 min before | low confidence: ~21–26% wrong |
 | `stale` / `none` | older post / no visible source | misses among `none`: 0/22 decided |
+
+*Strict precision* = the excerpts show the exposure; *plausible-source rate* = the excerpts are consistent with it
+and do not rule it out — not proof that the post caused the adoption (see [`docs/TRACER_REVIEW.md`](docs/TRACER_REVIEW.md) #6).
+**Known issues being fixed:** edges ignore chat-room visibility since rooms v1 (2026-02-25; ~2.5–4.3% of post-rooms
+sourced edges cross rooms, #11); talk-only first uses lost their text before name matching (≤ 109 edges, #12).
 
 Details: [`docs/EVAL.md`](docs/EVAL.md). A worked investigation: [`docs/FINDINGS.md`](docs/FINDINGS.md) —
 in one cascade, claims were re-broadcast in ~4 minutes and sold as a product within ~22 h, while the first
