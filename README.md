@@ -35,7 +35,9 @@ explorer/build.py        JSONL → typed Parquet + slim tables (bash actions, pr
 explorer/profile.py      aggregate-only data profile → docs/DATA_PROFILE.md
 explorer/tracer.py       URL uses → first uses → adoptions → scored exposure edges → artifact origins
 explorer/label_sample.py stratified, seeded edge sample for blind labelling
-explorer/app.py          Streamlit explorer: Overview, Trace (?url=…), Agent, Session replay, Chat, Day, SQL
+explorer/app.py          Streamlit explorer: Watch it spread (animated), Claim vs. check (Finding 1), Overview,
+                         Trace (?url=…), Agent, Session replay, Chat, Day, SQL
+explorer/findings.py     precomputes Finding 1 tables (key moments, verifier runs) for the story pages
 explorer/connect.sh      start the box if stopped + SSM port-forward → http://localhost:8501
 infra/                   S3 mirror script (HF → S3 via hf_xet) and box bootstrap (idle watchdog)
 ```

@@ -472,6 +472,157 @@ def page_trace():
         show_evidence("Adopter's first use", e.adopter, e.target_channel, e.target_row, url)
 
 
+F1_URL = "https://gitlab.com/ai-village-agents/village/graffiti-verification"
+FINDINGS = "/data/findings"
+SPREAD_FRAMES_S = [0, 60, 120, 240, 480, 900, 1800, 3600, 2 * 3600, 4 * 3600, 8 * 3600, 12 * 3600,
+                   86400, 2 * 86400, 4 * 86400, 7 * 86400, 14 * 86400, 42 * 86400]
+STAGE_COLOR = {"not yet": "#d0d4da", "mentioned it": "#f2c14e", "saved to memory": "#f08a3c",
+               "acted on it": "#d1495b", "origin": "#6a4c93"}
+
+
+def fmt_offset(s):
+    s = int(s)
+    return "start" if s == 0 else f"+{s // 60} min" if s < 3600 else f"+{s // 3600} h" if s < 172800 else f"+{s // 86400} days"
+
+
+def page_spread():
+    """Animated 'village' view: who picked a link up, from whom, and how far it got (hook for first-time viewers)."""
+    import math
+    import plotly.graph_objects as go
+
+    st.header("Watch it spread")
+    st.caption("Each dot is an AI agent in the village. Press ▶ to watch one link travel from agent to agent. "
+               "Colour = how far it got into that agent: mentioned it → saved it to memory → acted on it. "
+               "Lines = the exposure the tracer found (solid: the adopter named the source; thin: timing only).")
+    url = st.text_input("Link to follow", value=st.query_params.get("url", F1_URL))
+    names = agent_names()
+    uses = q(f"SELECT actor, channel, first_at FROM read_parquet('{TRACE}/trace_first_use.parquet') "
+             "WHERE url = ? AND NOT is_human", [url])
+    if uses.empty:
+        st.warning("No agent used this link.")
+        return
+    t0 = uses.first_at.min()
+    origin = uses.sort_values("first_at").actor.iloc[0]
+    # The village at that moment: everyone who used the link, plus every agent active in the week around it.
+    active = q("SELECT DISTINCT agent_id FROM turns_slim WHERE created_at BETWEEN ? AND ?",
+               [t0 - pd.Timedelta(days=1), t0 + pd.Timedelta(days=7)]).agent_id.tolist()
+    ring = sorted(set(active) | set(uses.actor), key=lambda a: names.get(a, a))
+    pos = {a: (math.cos(2 * math.pi * i / len(ring)), math.sin(2 * math.pi * i / len(ring))) for i, a in enumerate(ring)}
+    edges = q(f"SELECT source, target, t_at, evidence FROM read_parquet('{TRACE}/trace_edges_scored.parquet') "
+              "WHERE url = ? AND evidence IN ('explicit', 'temporal', 'mention')", [url])
+    edges = edges[edges.source.isin(pos) & edges.target.isin(pos)]
+    rank = {"model_output": 1, "chat": 1, "memory": 2, "action": 3}
+    label = {1: "mentioned it", 2: "saved to memory", 3: "acted on it"}
+
+    def stage(agent, until):
+        if agent == origin:
+            return "origin"
+        got = uses[(uses.actor == agent) & (uses.first_at <= until)]
+        return label[max(rank[c] for c in got.channel)] if len(got) else "not yet"
+
+    def frame_traces(offset_s):
+        until = t0 + pd.Timedelta(seconds=offset_s)
+        traces = []
+        for ev, width, color in (("explicit", 2.2, "#3a3a3a"), ("temporal", 0.8, "#9aa0a6"), ("mention", 0.8, "#c9b6e4")):
+            xs, ys = [], []
+            for e in edges[(edges.evidence == ev) & (edges.t_at <= until)].itertuples():
+                (x0, y0), (x1, y1) = pos[e.source], pos[e.target]
+                xs += [x0, x1, None]
+                ys += [y0, y1, None]
+            traces.append(go.Scatter(x=xs, y=ys, mode="lines", line=dict(width=width, color=color),
+                                     hoverinfo="skip", name=ev))
+        stages = [stage(a, until) for a in ring]
+        reached = sum(s != "not yet" for s in stages)
+        traces.append(go.Scatter(
+            x=[pos[a][0] for a in ring], y=[pos[a][1] for a in ring], mode="markers+text",
+            marker=dict(size=[26 if s == "origin" else 18 for s in stages], color=[STAGE_COLOR[s] for s in stages],
+                        line=dict(width=1, color="#555")),
+            text=[names.get(a, a).replace("Claude ", "") for a in ring], textposition="top center",
+            textfont=dict(size=11, color="#222"), hovertext=[f"{names.get(a, a)}: {s}" for a, s in zip(ring, stages)],
+            hoverinfo="text", name="agents"))
+        return traces, reached
+
+    frames, steps = [], []
+    for off in SPREAD_FRAMES_S:
+        tr, reached = frame_traces(off)
+        name = fmt_offset(off)
+        frames.append(go.Frame(data=tr, name=name,
+                               layout=go.Layout(title=f"{name}   ·   reached {reached} of {len(ring)} agents")))
+        steps.append(dict(method="animate", label=name,
+                          args=[[name], dict(mode="immediate", frame=dict(duration=0, redraw=True))]))
+    first, reached0 = frame_traces(0)
+    fig = go.Figure(data=first, frames=frames)
+    fig.update_layout(
+        title=f"start   ·   reached {reached0} of {len(ring)} agents", height=720, showlegend=False,
+        xaxis=dict(visible=False, range=[-1.35, 1.35]), yaxis=dict(visible=False, range=[-1.25, 1.3], scaleanchor="x"),
+        margin=dict(l=10, r=10, t=60, b=90), plot_bgcolor="white", paper_bgcolor="white",
+        title_font=dict(color="#222"),
+        updatemenus=[dict(type="buttons", direction="left", x=0.0, xanchor="left", y=-0.02, yanchor="top",
+                          showactive=False, buttons=[
+            dict(label="▶ play", method="animate",
+                 args=[None, dict(frame=dict(duration=900, redraw=True), fromcurrent=True, transition=dict(duration=300))]),
+            dict(label="❚❚ pause", method="animate",
+                 args=[[None], dict(mode="immediate", frame=dict(duration=0, redraw=False))])])],
+        sliders=[dict(active=0, steps=steps, x=0.2, len=0.8, y=-0.02, yanchor="top",
+                      currentvalue=dict(prefix="time since first use: "))])
+    st.plotly_chart(fig, width="stretch")
+    legend = "  ".join(f"<span style='color:{c}'>●</span> {k}" for k, c in STAGE_COLOR.items())
+    st.markdown(legend, unsafe_allow_html=True)
+    st.caption(f"First use: {names.get(origin, origin)} at {t0:%Y-%m-%d %H:%M} UTC. "
+               "Time steps are uneven on purpose — most spreading happens in the first hours.")
+
+
+def page_race():
+    """Finding 1 in one picture: how many agents repeated the claim vs. how many actually checked it."""
+    st.header("Claim vs. check")
+    if not os.path.exists(f"{FINDINGS}/f1_verify.parquet"):
+        st.warning("Run explorer/findings.py on this box first.")
+        return
+    names = agent_names()
+    moments = q(f"SELECT * FROM read_parquet('{FINDINGS}/f1_moments.parquet') ORDER BY created_at")
+    t0 = moments.created_at.min()
+    hours = st.select_slider("Window", options=[12, 24, 48, 72, 168], value=48, format_func=lambda h: f"first {h} h")
+    author = [a for a, n in names.items() if n == "Claude Opus 5"]
+    rep = q(f"SELECT actor, min(first_at) AS t FROM read_parquet('{TRACE}/trace_first_use.parquet') "
+            "WHERE url = ? AND NOT is_human GROUP BY 1", [F1_URL])
+    rep = rep[~rep.actor.isin(author) & (rep.t >= t0)]
+    ver = q(f"SELECT agent, min(created_at) AS t FROM read_parquet('{FINDINGS}/f1_verify.parquet') "
+            "WHERE status = 'success' GROUP BY 1")
+    ver = ver[ver.t >= t0]
+
+    def cumulative(times, series):
+        h = sorted(((t - t0).total_seconds() / 3600 for t in times))
+        pts = [(0.0, 0)] + [(x, i + 1) for i, x in enumerate(h) if x <= hours] + [(float(hours), sum(x <= hours for x in h))]
+        return pd.DataFrame(pts, columns=["hours", "agents"]).assign(series=series)
+
+    df = pd.concat([cumulative(rep.t, "repeated the claim (any channel)"),
+                    cumulative(ver.t, "ran a verifier successfully")])
+    lines = alt.Chart(df).mark_line(interpolate="step-after", strokeWidth=3).encode(
+        x=alt.X("hours:Q", title="hours after Opus 5's announcement", scale=alt.Scale(domain=[0, hours])),
+        y=alt.Y("agents:Q", title="agents (excl. author)"),
+        color=alt.Color("series:N", legend=alt.Legend(orient="top", title=None, labelLimit=400),
+                        # explicit domain: the default alphabetical order swapped the colours
+                        scale=alt.Scale(domain=["repeated the claim (any channel)", "ran a verifier successfully"],
+                                        range=["#d1495b", "#2a9d8f"])))
+    m = moments.assign(hours=(moments.created_at - t0).dt.total_seconds() / 3600)
+    m = m[(m.hours > 0) & (m.hours <= hours)]
+    rules = alt.Chart(m).mark_rule(strokeDash=[4, 4], color="#888").encode(x="hours:Q", tooltip=["label", "created_at", "row_id"])
+    labels = alt.Chart(m).mark_text(angle=270, align="right", baseline="bottom", dx=-6, dy=-3, fontSize=11,
+                                   color="#9aa0a6").encode(x="hours:Q", y=alt.value(6), text="label")
+    # The failed first check is 32 s before the first success: keep its rule + tooltip, drop its text (they overlap).
+    labels = labels.transform_filter(alt.datum.label != "First independent check (fails)")
+    st.altair_chart((lines + rules + labels).properties(height=460), width="stretch")
+    in_1h = int((rep.t <= t0 + pd.Timedelta(hours=1)).sum())
+    first_ok = ver.t.min()
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Agents repeating it within 1 hour", in_1h)
+    c2.metric("First successful independent check", f"+{(first_ok - t0).total_seconds() / 3600:.1f} h" if pd.notna(first_ok) else "—")
+    c3.metric("Agents repeating it before that check", int((rep.t < first_ok).sum()) if pd.notna(first_ok) else len(rep))
+    st.caption("Red: first time each agent used the claim's link in chat, memory, model output or an action. "
+               "Green: first time each agent other than the author ran one of Opus 5's verify_conj*.py scripts "
+               "without an error. Dashed lines: key moments (hover for the row id). Details: docs/FINDINGS.md.")
+
+
 def page_sql():
     st.header("SQL (read-only DuckDB)")
     st.caption("Tables: agents, village_goals, agent_goals, chat_rooms, chat_messages, events, events_slim, "
@@ -487,7 +638,8 @@ def page_sql():
             st.error(str(e))
 
 
-PAGES = {"Overview": page_overview, "Trace": page_trace, "Agent": page_agent, "Session replay": page_session,
+PAGES = {"Watch it spread": page_spread, "Claim vs. check": page_race,
+         "Overview": page_overview, "Trace": page_trace, "Agent": page_agent, "Session replay": page_session,
          "Chat": page_chat, "Day timeline": page_day, "SQL": page_sql}
 st.sidebar.title("AI Village explorer")
 st.sidebar.caption("Private · data stays on this box · rev 838b415")
