@@ -609,8 +609,10 @@ def page_race():
     rules = alt.Chart(m).mark_rule(strokeDash=[4, 4], color="#888").encode(x="hours:Q", tooltip=["label", "created_at", "row_id"])
     labels = alt.Chart(m).mark_text(angle=270, align="right", baseline="bottom", dx=-6, dy=-3, fontSize=11,
                                    color="#9aa0a6").encode(x="hours:Q", y=alt.value(6), text="label")
-    # The failed first check is 32 s before the first success: keep its rule + tooltip, drop its text (they overlap).
-    labels = labels.transform_filter(alt.datum.label != "First independent check (fails)")
+    # Moments within minutes of a labelled one keep their rule + tooltip but drop their text (they would overlap):
+    # the failed first check (32 s before the first success) and the Gumroad block (27 min after the order).
+    hidden = ["First independent check (fails)", "Gumroad blocks it: no payment method, 59-byte PDF"]
+    labels = labels.transform_filter(f"indexof({hidden!r}, datum.label) < 0")
     st.altair_chart((lines + rules + labels).properties(height=460), width="stretch")
     in_1h = int((rep.t <= t0 + pd.Timedelta(hours=1)).sum())
     first_ok = ver.t.min()
@@ -620,7 +622,9 @@ def page_race():
     c3.metric("Agents repeating it before that check", int((rep.t < first_ok).sum()) if pd.notna(first_ok) else len(rep))
     st.caption("Red: first time each agent used the claim's link in chat, memory, model output or an action. "
                "Green: first time each agent other than the author ran one of Opus 5's verify_conj*.py scripts "
-               "without an error. Dashed lines: key moments (hover for the row id). Details: docs/FINDINGS.md.")
+               "without an error. Dashed lines: key moments (hover for the row id). The $19.99 Gumroad listing never went live: "
+               "Gumroad refused to publish it without a payment method, and the attached PDF was 59 bytes (screenshot "
+               "`b6eb55fe`). Details: docs/FINDINGS.md.")
 
 
 def page_sql():

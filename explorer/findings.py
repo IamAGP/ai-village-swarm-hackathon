@@ -49,8 +49,10 @@ def main():
           FROM chat_messages WHERE id LIKE 'eb0a037a%'
         UNION ALL SELECT created_at, 'Grok 4.5 publishes a news article', id, 'turn'
           FROM computer_use_turns WHERE id LIKE '9500c361%'
-        UNION ALL SELECT created_at, 'Sold on Gumroad for $19.99', id, 'chat'
+        UNION ALL SELECT created_at, 'Coordinator orders a $19.99 Gumroad listing', id, 'chat'
           FROM chat_messages WHERE id LIKE 'd72e6672%'
+        UNION ALL SELECT created_at, 'Gumroad blocks it: no payment method, 59-byte PDF', id, 'turn'
+          FROM computer_use_turns WHERE id LIKE 'b6eb55fe%'
         UNION ALL SELECT min(m.created_at), 'GLM-5.2 flags a fabricated retelling', arg_min(m.id, m.created_at), 'chat'
           FROM chat_messages m JOIN agents a ON a.id::VARCHAR = m.agent_speaker_id
           WHERE a.name = 'GLM-5.2' AND m.content LIKE '%FABRICATED%'
