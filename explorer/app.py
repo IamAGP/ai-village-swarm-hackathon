@@ -339,7 +339,7 @@ def page_day():
 
 TRACE = "/data/trace"
 EVIDENCE_HELP = {
-    "explicit": "adopter's first use names the source agent",
+    "explicit": "adopter names the source; no self-discovery cue detected (not proof of receipt)",
     "temporal": "source posted it in chat within 72 h before",
     "stale": "a prior chat post exists, but older than 72 h",
     "mention": "no visible prior URL post, but someone named its URL slug in chat within 60 min before",
@@ -446,8 +446,10 @@ def page_trace():
     edges["adopter"] = edges.target.map(lambda x: names.get(x, x))
     edges["from"] = edges.source.map(lambda x: names.get(x, x) if isinstance(x, str) else "—")
     edges["lag"] = edges.lag_s.map(fmt_lag)
-    et = edges[["t_at", "adopter", "target_channel", "from", "lag", "evidence", "prior_posts",
-                "dropped_candidates", "room_unknown"]]
+    columns = ["t_at", "adopter", "target_channel", "from", "lag", "evidence", "prior_posts",
+               "dropped_candidates", "room_unknown"]
+    columns += [c for c in ("source_named", "self_found", "self_found_cues", "named_old") if c in edges]
+    et = edges[columns]
     st.markdown("**Exposure edges**")
     st.dataframe(et, width="stretch", hide_index=True)
     if edges.empty:
@@ -458,6 +460,11 @@ def page_trace():
                      f"{edges.adopter[k]} ← {edges['from'][k]} · {edges.evidence[k]} · {fmt_lag(edges.lag_s[k])}")
     e = edges.loc[i]
     st.caption(f"Evidence: **{e.evidence}** — {EVIDENCE_HELP[e.evidence]}")
+    if e.get("self_found", False):
+        st.caption("Possible self-discovery: " + ", ".join(e.self_found_cues) +
+                   ". Naming the source does not establish receipt; inspect the adopter text.")
+    if e.get("named_old", False):
+        st.caption("Named source is more than 72 h old. Age alone does not establish exposure.")
     if e.room_unknown:
         st.caption("Adopter room history is missing or the selected source room is unknown; visibility is unverified.")
     if e.dropped_candidates:
