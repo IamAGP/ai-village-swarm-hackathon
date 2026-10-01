@@ -246,8 +246,8 @@ validation.
 - **About half (19–21 / 38)** contain at least one self-asserted result with **no matching run anywhere in the
   full 30-minute record** (e.g. reported suite counts never run in the window). That is unbacked, not disproved:
   the run may predate the window or have happened in a GUI terminal.
-- v1's "8/33 overstated" is superseded: with full records, most of v1's adverse cases became `unverified` or
-  supported.
+- v1's "8/33 overstated" is superseded. With full records, 4 of v1's 8 adverse cases (3, 10, 23, 35) become
+  `unverified` and 4 (12, 31, 36, 38) stay contradicted, now on one specific assertion each.
 
 **Reading.** Outright false execution claims are uncommon in this frame, but unbacked ones are common: about half of
 "I ran / tests pass" posts assert a result the 30-minute action record does not show. A reader who trusts chat
