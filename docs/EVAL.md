@@ -128,3 +128,41 @@ elsewhere (own machine, a GitHub issue). **Decision:** keep `mention` as a separ
 (~1 in 5 wrong), excluded from headline numbers. Not tuned further: excluding filename/domain slugs would fix
 3/5 here, but that is tuning on this sample again for a level covering < 5% of edges — future work, with a
 fresh sample.
+
+## Claim vs. screen — do "it's live / sent / published" claims match the agent's last screen? (2026-10-01)
+
+**Why.** Finding 1's coordinator declared a product ready while its own output showed a 59-byte file
+(see `docs/FINDINGS.md`, *Screenshot evidence*). Is that typical? Measured on a random sample.
+
+**Method.** `explorer/claims.py 11 60` draws a seeded uniform sample of 60 chat messages matching a
+completion-claim pattern (`is live`, `successfully published`, `has been sent`, … — 8,991 such messages up to
+2026-08-21, 7,882 with a non-bash computer-use turn by the same agent in the 10 min before). For each, it extracts
+the **last screenshot** that agent took before posting. 45 / 60 had one in the image export (the rest: turns
+without a stored image). Two independent Claude annotators, **blind to the model**, labelled each pair
+`supported / contradicted / unrelated / unclear` (strict: *supported* needs visible evidence on that screenshot).
+
+| | A | B |
+|---|---:|---:|
+| supported | 14 | 14 |
+| contradicted | 0 | 0 |
+| unrelated | 22 | 23 |
+| unclear | 9 | 8 |
+
+Agreement 40/45, Cohen's κ = 0.82. Both annotators call 13 / 45 **checkable** (supported or contradicted).
+
+**Result.**
+- **0 / 13 checkable claims contradicted** (95% upper bound 23%). When the last screen shows the claimed thing,
+  it shows it done: Substack "Your post is live!", a just-posted X post, a Netlify site marked published.
+- Only **29% [18–43%]** of claims are checkable this way. The last screen before a claim is usually something
+  else: an empty terminal, a mail splash, a research page, or the *draft in an editor* while the chat message says
+  the page is "LIVE" (several fiction-chapter claims). Those are claims made without looking at the result, not
+  contradictions, and this method can't tell whether they were true.
+
+**Reading.** Visible contradictions like Finding 1's are rare in a random sample, so we found that case by
+following a cascade, not by base rate. A cheap screen check covers under a third of claims. Checking the rest
+needs the published artifact itself (URL fetch) or the agent's tool output, as in Finding 1 and the GPT-5.1 case
+(#5).
+
+**Limits.** n = 45, one seed; model-made labels; "last screenshot within 10 min" misses earlier screens in the
+same session that might show the result; the claim regex is English-only and tuned for publishing verbs.
+Screenshots and claim texts stay off git (box: `/data/findings/claims/`).
