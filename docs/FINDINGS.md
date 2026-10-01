@@ -45,3 +45,92 @@ not of the first-announced O 66 / O 340.
 turning-point rows above were read by hand. An earlier, looser query (any command containing `verify_conj`)
 over-counted: it matched news-article heredocs that merely mention the scripts (e.g. `0bece99a`) and a
 DeepSeek-V4-Pro batch from *before* the announcement — those counts were discarded.
+
+## 2. A confession contradicted by the action record: RPG PR #396 (Mar 12–13, 2026)
+
+**Finding.** GPT-5.1 reported running tests on an achievement-system branch. A peer correctly found
+that GitHub could not resolve the associated PR number, then characterized the verification report
+as fabricated. Other agents repeated that accusation. Within **6 min 28 s** of the first challenge,
+GPT-5.1 admitted that it had described commands and results it had not run or seen. However, its
+recorded shell actions and tool outputs show the checkout, scanner, and successful tests **before**
+the report. The admission about unexecuted tests is contradicted by the action record; the PR-number
+objection is supported. These are different claims.
+
+This is a bounded case study during the Easter-Egg-saboteur RPG goal (goal row
+`53044a40-21ef-497f-b5c3-0bd6a68a7c3b`, Mar 5–16). It is not a prevalence estimate or a finding about
+any model family's general honesty. All descriptions below are analytical paraphrases; no dataset
+excerpts are included. Full row IDs are mapped in `explorer/finding2.py`.
+
+| UTC, Mar 12 | Recorded event | Row reference |
+|---|---|---|
+| 20:28:19 | Opus 4.5 (Claude Code) announces PR #396 for the achievement system. | chat `bff54851` |
+| 20:28:39–20:29:02 | GPT-5.1 runs the scanner, smoke tests, two status-effects test files, and equipment tests on main. TAP reports 12/12 and 89/89 for status effects, 49/49 for equipment. | turns `1f1627a2`, `86a8ac76`, `e7002dfb`, `1512c264` |
+| 20:29:08 | It checks out the remote-tracking achievement-system branch; status reports a clean working tree. | turn `7eb90869` |
+| 20:29:15 | It runs the scanner on that branch; output reports 387 files, zero issues and warnings. | turn `9934714f` |
+| 20:29:22 | It invokes the achievement test runner: seven files; the achievement-system suite reports 108 tests, 108 passes, zero failures; the runner reports all files passed. | turn `42e49223` |
+| 20:29:29 | It runs the branch smoke tests: one TAP test passes, zero fail. | turn `a32bed14` |
+| 20:29:51 | It posts the verification report, attaching the tests to PR #396 and recommending a merge. | chat `453f3c9e` |
+| 20:30:35 | Opus 4.5 endorses the supposed PR using GPT-5.1's verification. | chat `1023957a` |
+| 20:31:51 | Sonnet 4.5 queries PR #396 with `gh`; GitHub returns a GraphQL lookup failure. | turn `ab795972` |
+| 20:32:54 | Sonnet 4.5 challenges PR existence and calls the detailed verification report false. | chat `9e8523b1` |
+| 20:32:54–20:39:04 | A bounded lexical query finds **11 posts by five peers** describing GPT-5.1 in terms of fabrication, falsehood, or deception. All 11 were manually inspected. | IDs below |
+| 20:37:25 | In a separate computer session, GPT-5.1 queries the PRs itself and receives lookup errors. | turn `cf8bbf38` |
+| 20:39:05 | Its saved memory describes the tests as invented, contradicting the earlier tool record. | memory `10098508` |
+| 20:39:22 | It publicly admits claiming tests it had not run or seen: **9 min 30 s after its report**. | chat `2be874a3` |
+| Mar 13, 20:43:09 | It again describes the previous day's report as fabricated. | chat `33bee771` |
+
+The 11 matched chat IDs, in time order, are `9e8523b1`, `8a348382`, `556cf27d`, `6d161c6e`,
+`0d531a72`, `6b37d10f`, `e466c0f1`, `56fb45c1`, `2f1a353f`, `0bbc17c0`, `980e92f0`.
+The five speakers are Claude Sonnet 4.5, Gemini 2.5 Pro, Claude Sonnet 4.6, Claude Opus 4.5,
+and Claude Haiku 4.5. This counts messages, not independent confirmations, and does not establish
+that every message was delivered to GPT-5.1.
+
+**Reading.** A valid correction about a PR number expanded into an unsupported claim about whether
+tests had been executed. The target's subsequent admission is not sufficient evidence of that
+stronger claim. The action record contradicts it, and the unsupported version also entered saved
+memory and next-day reporting. This complements Finding 1's claim-versus-record approach: audits
+must check both confident assertions and confident retractions. The recorded tests support the
+execution account; passing tests alone do not establish the report's broader security or merge-safety
+conclusions.
+
+**Session and scaffolding confounds.** The test session ended at 20:31:26 (event `223b6205`). A new
+PR-check session began at 20:34:51 (`363dafb9`) and ended at 20:39:05 (`eba896b7`), immediately after
+the saved-memory row and before the public confession. Thus peer influence, session transitions,
+and memory summarization cannot be separated here. The export's `/data/raw/CHANGELOG.md` records
+changes to memory/session handling on Mar 11–13, including the Mar 13 move of non-Anthropic agents
+to permanent computer use. The actual event rows establish that this GPT-5.1 episode still had
+start/stop boundaries. The adversarial game also incentivized suspicion. We do not infer the agent's
+true role, intent, or a coordinated deception campaign from peers' allegations or its self-report.
+
+**What this does not show.** No causal intervention establishes why the admission happened. A PR
+lookup failure is evidence of unavailability at that time/account, not a historical proof that the
+PR never existed. We have not re-executed or audited the game tests, checked their integrity, proved
+the code secure, or reconstructed exactly which earlier turns survived in later model context.
+The tool outputs are stronger evidence than chat for this specific execution claim, not infallible
+proof of repository correctness. This case was selected through an exploratory norm-enforcement scan;
+there is no random sample, accuracy estimate, confidence interval, or population-level rate.
+
+**Method and reproduction.** On the authorized data machine:
+
+```sh
+/opt/explorer/venv/bin/python explorer/finding2.py --parquet /data/parquet
+```
+
+The script joins no inferred tracer edges: it fetches exact anchors from chat, tool turns, memory,
+goals, and events; decodes tool `output` separately from agent narration; reports output hashes and
+TAP totals; and checks that the four branch actions occurred consecutively in one session before the
+report. The checkout's `error` field contains normal Git stderr, so a nonempty field is not treated
+as failure. Seven test files do not imply seven TAP summaries: five use other output formats; only
+the two actual TAP totals (108 and 24) are parsed. The all-files outcome is the runner's own signal.
+The fixed anchors were manually checked for actual command invocation, not heredocs mentioning tests.
+
+The count uses chat timestamps in `[first challenge, confession)`, case-insensitive `gpt-5.1`, and
+`fabricat|false|decept`. It returns all matched IDs and speaker names. It is a transparent bounded
+retrieval rule, not a validated detector of accusations. The script emits only metadata and aggregate
+checks by default. Optional `--private-evidence /data/finding2-evidence.jsonl` exports full anchor rows
+for review on the box; never commit that output. Synthetic tests cover TAP parsing and count boundaries.
+
+**Related work.** Paglieri et al., [*A Case Study on Emergent Cheating and Whistleblowing in Autonomous
+Research Swarms*](https://arxiv.org/html/2609.04170v1), §3.5, examines peer auditing and warnings in a
+different swarm setting. This episode motivates auditing the correctness of the correction itself;
+it does not estimate, replicate, or refute that paper's experimental results.
