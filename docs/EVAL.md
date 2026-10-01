@@ -23,6 +23,49 @@ The results below were measured before room visibility filtering. The updated tr
 `cross_room` or retain a source with `room_unknown`; these categories need a fresh blind evaluation before
 their accuracy is reported.
 
+### Self-discovery guard (#17, 2026-10-01)
+
+`explicit` now means the first-use text names the selected source **and no self-discovery cue was
+detected**. `self_found` is a heuristic flag, not proof of independent discovery. The inspectable
+`self_found_cues` list records which rule fired: a specific whole-turn plan to find links and search,
+first-person web search/lookup near the URL, or an ownership/creation phrase directly introducing it.
+Generic browsing, negations, and searching a supplied page for errors do not suffice. The rules operate
+on the existing normalised text; they cannot reliably distinguish quoted speech, an unrelated nearby
+URL, or hypothetical plans from completed actions. URL-local rules use the first matching URL occurrence
+and can miss narrative elsewhere in a long turn or a differently spelled URL.
+
+Affected named edges become `temporal` at ≤72 h or `stale` beyond 72 h. Source selection and row IDs are
+preserved: these remain candidate exposures, not newly established discovery routes. `source_named`
+keeps the original name-match signal. `named_old` flags named sources older than 72 h; age alone does
+not downgrade them, because an old but explicitly acknowledged source can still be valid.
+
+An initial 400-character ownership rule incorrectly matched four different-project/channel-list
+mentions. Those development cases were inspected and the rule tightened to direct URL introduction;
+they are not held-out evaluation. Synthetic regressions cover these confounds. The data comparison and
+blinded changed/control set are reproducible with `explorer/compare_self_discovery.py`; samples contain
+full source posts and first-use turns, so accuracy is not directly comparable to the older ±400-character
+excerpts. A changed-edge sample assesses downgrade decisions, not recall of all self-discovered URLs.
+No precision improvement is claimed until independent annotation (and ideally human review).
+
+Measured against v6 on export `838b415`: 73,578 edges before/after, with zero source-row or target-row
+changes. `explicit` 3,519 → 3,518; `temporal` 32,461 → 32,462; `mention` 3,520, `stale` 897,
+`cross_room` 907, and `none` 32,274 unchanged. Seven adoptions have a self-discovery flag; one was
+previously explicit. 227 named edges exceed 72 h and remain explicit, with the age warning.
+The one downgrade is the issue's development example: source chat
+`ac7f7c2c-fb29-42f8-a51d-3374f94f9723`, adopter turn
+`43749844-9aac-4bf2-b6d0-fd93958a263b` (46.8 h). This is a narrow guard, not a measured solution to
+all named-versus-received ambiguity. There are not five or ten final flipped examples to supply.
+
+Private outputs: `/data/trace_v7_codex17`; v6 was SHA-256 checked against `/data/trace` and preserved
+at `/data/trace_v6`. The six unchanged intermediate Parquets were reused; scored edges and artifact
+summaries were rebuilt in 17 s with a separate DuckDB database. The dashboard's current output directory
+was not replaced. Reproduction: run the updated tracer into a fresh output directory (set module `OUT`
+and `DB` before `main()`; optionally reuse the six intermediate Parquets from v6), then run
+`python explorer/compare_self_discovery.py --before /data/trace_v6 --after <new-output-dir>`.
+The comparison writes all transitions, row-ID checks, cue counts, and a seeded blind sample plus separate
+key. Seed 20261001 yields the sole changed edge plus 25 unchanged explicit controls. The changed case
+is already known from development and must not be reported as held-out validation.
+
 ## Results
 
 ### Tracer v2 — source = most recent prior chat poster (sample seed 3, 2026-09-26)
