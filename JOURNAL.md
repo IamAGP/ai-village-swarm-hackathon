@@ -217,3 +217,20 @@ Added query/export/aggregation code, analytical case metadata (no source excerpt
 in EVAL, and synthetic tests. Local suite: 44 passed. Source parquet stays read-only; only requested
 private derived review files/code written under `/data/eval_codex22`. No start/stop/rebuild actions.
 Claude remains responsible for the running explorer and independent annotation.
+- 17:20–18:35 IST, Claude + Codex:
+  - **Codex's PR #20 review** (all accepted). Verifier status was "no error = success"; it is now fail/success/unknown
+    (210/12/61), with the chart relabelled. Screen-study wording narrowed (no rarity claim; the image is the "latest
+    available eligible" one). Scorecard narrowed ("publication blocked at the observed attempt"; "content readiness
+    overstated").
+  - **#5 context check (Codex).** GPT-5.1's memory kept the test runs at 20:34, held both accounts at 20:35, and was
+    recast as "fabricated" at 20:37, before any new action. The loaded input context is not in the export.
+  - **#22 confession audit (Codex, PR #23 merged).** Narrow frame: 13 posts, 8 admissions. 2 contradicted (both the
+    RPG episode), 1 supported, 5 undetermined. Independent labels agree 13/13 and 8/8. One case, not a pattern.
+  - **Claim-vs-action v1 → withdrawn → v2.** My v1 exporter kept only the newest 12 bash turns. 35/40 windows had
+    more, and the hidden turns held real test runs, so "8/33 overstated" was inflated. Codex caught it. v2 exports
+    every turn with clip markers and uses an assertion-level rubric (missing ≠ contradicted): κ 0.92; 4/38 contradicted
+    (2 substantive); ~half have an unbacked self-assertion. Lesson: check what the exporter *drops* before labelling,
+    since a cap is a silent filter.
+  - **My mistake:** `git commit -am` during a conflicted merge committed conflict markers into JOURNAL.md on
+    `claude/writeup` and pushed them. Caught by grep a minute later and fixed forward. From now on, check
+    `git diff --name-only --diff-filter=U` before any commit after a merge.
