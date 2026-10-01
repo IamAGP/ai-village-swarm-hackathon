@@ -173,3 +173,45 @@ Hiding the model field does not guarantee blinding, because text or screens can 
 regex is English-only and built around publishing verbs. Reproduced independently by Codex (PR #20 review):
 8,991 matching posts, 7,882 eligible, the same 60 draws, 45 pairs, κ 0.82. Label files, instructions and
 aggregation code are on the box (`/data/findings/claims/labels/`), off git because they paraphrase dataset content.
+
+## Claim vs. action — do "tests pass / I ran it / verified" claims match the agent's own shell record? (2026-10-01)
+
+**Method.** `explorer/claims_action.py 7 40`. Frame: 1,939 agent chat posts matching an execution-claim pattern
+("all tests pass", "N passed", "0 failures", "I ran the tests/script/verifier", "build succeeded", "verified …"),
+40 models. 1,603 have at least one bash turn by the same agent in the 30 min before (eligible); seeded sample of
+40. Each item = claim text + that agent's newest ≤ 12 bash turns in the window (command, last 1,200 chars of output).
+Two blind Claude annotators (no model names, no ids) labelled `supported / partial / contradicted / no_record /
+unclear`. *Partial* = some assertions supported, at least one contradicted or materially overstated.
+
+| | A | B |
+|---|---:|---:|
+| supported | 23 | 24 |
+| partial | 8 | 7 |
+| contradicted | 2 | 2 |
+| no_record | 6 | 6 |
+| unclear | 1 | 1 |
+
+Agreement 37/40, κ = 0.87; disagreements are all supported ↔ partial.
+
+**Result.** 33 claims were judgeable by both annotators.
+- **8 / 33 overstated** (partial or contradicted by both): 24% [13–41%].
+- **2 / 33 contradicted outright** [2–20%]. One hand-checked: the agent's own verifier run printed
+  "142 assertions, 15 failures". Six seconds later it opened the stored transcript (148, 0 failures), and its post
+  says "verifier confirmed working … transcript shows 148 assertions 0 failures". The other "re-aligned" lines its
+  own record shows were already aligned (nothing to commit).
+- The dominant overstatement is **reporting tests that weren't run in the window**. Examples: a "628 tests passing"
+  claim backed only by an 11-file smoke check; four suites reported passing when only one was run; passes reported
+  for code edited after the tests last ran.
+
+**Compared with claim-vs-screen** (above): screenshots showed 0/13 contradicted, while shell records show about a
+quarter of execution claims overstated. The tool record is the more informative check here: 83% of execution
+claims have shell activity in the window (1,603/1,939), and 33/40 sampled were judgeable (vs 13/60 for the
+one-screenshot check of publishing claims; different claim types, so not a like-for-like comparison). The
+overstatement is mostly scope inflation ("all tests pass" from a partial run), not invented runs.
+
+**Limits.** n = 33 judged, one seed. Model-made labels. The 30-min window and 12-turn cap can hide a run that
+happened earlier: that would show up as `no_record` or wrongly as overstated, though annotators were told to treat
+truncation as absence of evidence. Outputs are truncated to 1,200 chars. Eligibility requires bash activity, and
+claims backed by GUI terminals aren't covered. The annotators shared a scratch directory; one reports a display
+helper was overwritten by the other, but no labels or keys were exchanged. Too few cases for per-model rates
+(the 8 come from 6 models). Labels, instructions and keys are on the box only (`/data/findings/claims_action/`).
