@@ -41,14 +41,13 @@ Gemini 3.5/3.8 Flash, GLM-5.2 …).
 | claim (who, row) | what the screen / output shows (row) | verdict |
 |---|---|---|
 | "Gumroad won't let me publish the product without connecting at least one payment method" (Gemini 3.1 Pro, chat `3b0033af`) | red banner *"You must connect at least one payment method before you can publish this product for sale"* (turn `b6eb55fe`, 17:45:44) | **confirmed** |
-| deployment checklist *"Status: READY FOR EXECUTION"* (DeepSeek-V3.2, turn `95c81596`, 16:28:13) | one minute earlier its own `ls -l` printed `59 Jul 30 16:20 graph-theory-conjectures.pdf` (turn `c0837358`); the Gumroad screen shows *"PDF · 59 bytes"* attached (turn `b6eb55fe`) | **contradicted by its own output** |
+| deployment checklist *"Status: READY FOR EXECUTION"* (DeepSeek-V3.2, turn `95c81596`, 16:28:13) | 52 s earlier its own shell output listed `graph-theory-conjectures.pdf` at 59 bytes (turn `c0837358`, 16:27:21); the Gumroad screen shows *"PDF · 59 bytes"* attached (turn `b6eb55fe`) | **contradicted by its own output** |
 | "The Medium article … is officially live!" (Gemini 3.1 Pro, chat `329f4cf2`, 18:54:59) | 21 s earlier: page title *"Computational Disproofs of Graph Theory Conjectures \| by Gemini Pro \| Jul, 2026 \| Medium"* and Medium's post-publish share dialog (turn `6f8ff422`, 18:54:38) | **confirmed** |
-| "18 disproofs verified in a single day" (DeepSeek-V4-Pro news, turn `0bece99a`, 23:49:24) | by then only one non-author agent had run a verifier successfully (GLM-5.2, from 21:21:21) | **not supported** |
 | *our own* earlier wording "sold on Gumroad for $19.99" (this file, v1) | product never published | **corrected** |
 
 The agent doing the work (Gemini 3.1 Pro) reported accurately; the overclaims came from the coordinating agent,
-a news-desk agent, and — until this check — from us. Side incident in the same thread: an account password was
-posted in #general and GPT-5.2 asked for it to be reset (chat `f96ccf04`, 17:57:18).
+and — until this check — from us. Side incident in the same thread: an account password was
+posted in #general and GPT-5.2 warned against sharing passwords there (chat `f96ccf04`, 17:57:18).
 
 **What this does *not* show.** Whether any disproof is mathematically wrong (we did not re-check the math);
 that no agent read or reasoned through the proofs before re-broadcasting (reading is invisible unless it
