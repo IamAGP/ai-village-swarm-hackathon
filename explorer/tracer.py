@@ -5,7 +5,7 @@ actions), this derives:
   trace_first_use  — each agent's first use of the URL per channel, with the row id that proves it
   trace_edges      — for each adopting agent, a prior chat post or name mention in a room it may have seen;
                      the selected post is a candidate exposure, with an evidence level:
-                       explicit   adopter's first-use text names the source agent
+                       explicit   adopter names the source, without a detected self-discovery cue
                        temporal   a prior chat post exists within WINDOW before the adoption
                        stale      a prior chat post exists, but older than WINDOW
                        cross_room eligible prior posts exist, but none was in a room the adopter occupied
@@ -33,6 +33,50 @@ BROADCAST_AGENTS, BROADCAST_MINUTES = 5, 60
 NOISE_HOSTS = ("localhost", "127.0.0.1", "0.0.0.0", "example.com", "example.org", "example.net")
 ROOMS_START = "2026-02-25 00:00:00"
 
+# Deliberately small, auditable heuristic, not a claim of independent discovery.
+# Text is token-normalised by TRACE_ADOPT_SQL ("I'll" -> "i ll"). Most cues must
+# be within 400 characters of this URL; only an explicit URL-search plan can
+# apply to the whole turn (e.g. a list of teammates' links assembled by search).
+SELF_FOUND_PATTERNS = (
+    ("url_search_plan", "target_text",
+     r"\bi (ll |will )?(have to |need to )?find (the |their |these )?(urls?|links?) first[^.]{0,120}\bsearch(ing)?\b"),
+    ("web_search", "url_context",
+     r"\bi (ll |will |am |m |just |have |ve |need to |should |can )?(search(ed|ing)? (on |using )?(google|bing|the web|the internet)|googl(e|ed|ing))\b"),
+    ("link_lookup", "url_context",
+     r"\bi (ll |will |am |m |just |have |ve |need to |should |can )?(search(ed|ing)? for|look(ed|ing)? up) (the |their |a |an )?(urls?|links?|website|site|substack)\b"),
+    ("search_result", "url_context",
+     r"\bi (have |ve |just )?(found|discovered|located) [^.]{0,100}\b(via|through|using|in|from) (a |the )?(web |google |bing )?search( results?)?\b"),
+    # Ownership must introduce THIS URL directly, not a different project in a
+    # nearby sentence or an approved-channel list inside a copied document.
+    ("own_resource", "url_prefix",
+     r"\b(my own|our own) (website|site|repo(sitory)?|blog|article|page|project) (is |at |is at |is live at )?https? $"),
+    ("created_resource", "url_prefix",
+     r"\bi (have |ve |just |previously |already )?(created|published|built|launched) (my |our |this |the )?(website|site|repo(sitory)?|blog|article|page|project) (at |here |at this url )?https? $"),
+)
+SELF_FOUND_CUES_SQL = "list_filter([" + ", ".join(
+    f"CASE WHEN regexp_matches(coalesce({scope}, ''), '{pattern}') THEN '{name}' END"
+    for name, scope, pattern in SELF_FOUND_PATTERNS
+) + "], x -> x IS NOT NULL)"
+
+# Separate constant so cue classification can be tested without a full rebuild.
+TRACE_DISCOVERY_SQL = f"""
+    WITH located AS (
+      SELECT *, strpos(target_text, trim(regexp_replace(lower(
+        regexp_replace(url, '^https?://', '')), '[^a-z0-9.-]+', ' ', 'g'))) AS url_position
+      FROM trace_adopt),
+    contexts AS (
+      SELECT *, CASE WHEN url_position > 0 THEN
+        substring(target_text, greatest(1, url_position - 400),
+                  url_position - greatest(1, url_position - 400) + length(url) + 400)
+        END AS url_context,
+        CASE WHEN url_position > 0 THEN
+          substring(target_text, greatest(1, url_position - 160),
+                    url_position - greatest(1, url_position - 160)) END AS url_prefix
+      FROM located),
+    cues AS (SELECT *, {SELF_FOUND_CUES_SQL} AS self_found_cues FROM contexts)
+    SELECT * EXCLUDE (url_position, url_context, url_prefix), len(self_found_cues) > 0 AS self_found FROM cues
+"""
+
 
 TRACE_ADOPT_SQL = """
         WITH adopt AS (
@@ -59,7 +103,7 @@ TRACE_ROOM_PRESENCE_SQL = """
 
 
 TRACE_EDGES_SCORED_SQL = f"""
-        WITH room_intervals AS (
+        WITH discovery AS ({TRACE_DISCOVERY_SQL}), room_intervals AS (
           SELECT agent_id, room_id, seen_at AS start_at,
                  lead(seen_at, 1, TIMESTAMP '9999-12-31') OVER
                    (PARTITION BY agent_id ORDER BY seen_at, room_id) AS end_at
@@ -68,7 +112,7 @@ TRACE_EDGES_SCORED_SQL = f"""
           SELECT d.*, EXISTS (
             SELECT 1 FROM trace_room_presence rp
             WHERE rp.agent_id = d.target AND rp.seen_at <= d.t_at) AS has_room_presence
-          FROM trace_adopt d),
+          FROM discovery d),
         names AS (
           -- Token-normalised aliases: "Claude Opus 5" -> ["claude opus 5", "opus 5"]; matched on word
           -- boundaries so "gpt-5" does not match "gpt-5.2" and "opus 5's" still matches "opus 5".
@@ -145,12 +189,15 @@ TRACE_EDGES_SCORED_SQL = f"""
                (d.t_at >= TIMESTAMP '{ROOMS_START}' AND NOT d.has_room_presence)
                  OR coalesce(coalesce(r.source_visibility, m.source_visibility) = 'unknown', false) AS room_unknown,
                epoch(d.t_at - coalesce(r.s_at, m.s_at)) AS lag_s,
+               coalesce(r.named, false) AS source_named,
+               d.self_found, d.self_found_cues,
+               coalesce(r.named AND epoch(d.t_at - r.s_at) > {WINDOW_HOURS} * 3600, false) AS named_old,
                CASE WHEN r.source IS NULL AND m.source IS NOT NULL THEN 'mention'
                     WHEN r.source IS NULL AND m.source IS NULL
                          AND coalesce(uc.dropped_url_candidates, 0) + coalesce(mc.dropped_mention_candidates, 0) > 0
                          THEN 'cross_room'
                     WHEN r.source IS NULL THEN 'none'
-                    WHEN r.named THEN 'explicit'
+                    WHEN r.named AND NOT d.self_found THEN 'explicit'
                     WHEN epoch(d.t_at - r.s_at) <= {WINDOW_HOURS} * 3600 THEN 'temporal'
                     ELSE 'stale' END AS evidence
         FROM adopt_rooms d
