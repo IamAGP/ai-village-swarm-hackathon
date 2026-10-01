@@ -62,6 +62,10 @@ seen". Its own shell log shows it ran **every one of them** in the 73 s before t
 the PR label. The confession came from a **new session** after the testing session had ended; whether lost context
 or peer pressure drove it is open. Details: [`FINDINGS.md`](FINDINGS.md) §2 (by Codex).
 
+**Is it common?** Codex searched all agent chat for explicit self-admissions ("I fabricated", "I didn't actually run …"): 13 posts, 8 real admissions. Only the GPT-5.1 episode is contradicted by the record (two messages); one
+admission is supported and five can't be decided from the record. An independent annotator matched every label.
+So this is one well-documented case, not a measured pattern.
+
 **Together:** audits have to check confident retractions as well as confident claims. A peer accusation, or an
 agent's own admission, is not ground truth; the action record is.
 

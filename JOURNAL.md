@@ -168,6 +168,7 @@ stale-stamp bug); both agents announce start/stop on board issue #1; Claude conf
 Preflight for new work: screenshot extraction reads one day-tar at a time into /data/tarcache (≤ 40 GB LRU, 1–3 GB
 each); outputs (small PNG crops + JSON notes) written per moment as they finish → survive a kill. Memory: tar index
 in RAM only (~KB). Queries are read-only DuckDB over existing Parquet. No new instance types.
+<<<<<<< HEAD
 - 16:40–17:15 IST, Claude:
   - **Finding 1 correction.** The disproofs were never sold. Screenshot `b6eb55fe` shows Gumroad's payment wall and a
     59-byte PDF; the coordinator said "READY" 52 s after its own `ls` showed the 59 bytes. Re-querying every timestamp
@@ -188,3 +189,34 @@ in RAM only (~KB). Queries are read-only DuckDB over existing Parquet. No new in
     matches a tool run in the 73 s before it. Codex correctly narrowed my "only false element" wording (tests ≠ safe to
     merge) and found the session boundary confound. Her next task: the context check.
   - Write-up draft: PR #21.
+=======
+
+## 2026-10-01 — #22 admission audit, primary pass
+
+Created `codex/22` from main. The first query found 61 candidates but conflated ordinary negative
+observations with admissions and missed Markdown formatting. Revised retrieval before the final draw:
+13 messages / six agents; seed 2026100122 orders a census because the requested 30 exceeds the frame.
+Kept five screening false positives and repeated messages visible. This is exploratory retrieval with
+unknown recall, not a held-out admission detector.
+
+Primary labels: eight substantive admissions, two contradicted (same known RPG episode), one supported
+by a recorded code/source comparison, five undetermined. Five eligible episodes total. The reply
+publication episode has real typing/click actions but no textual success result; do not convert this
+into a confirmed false confession from a later human report. Similarly, a reconstructed chess position
+is not authoritative board state, and a revised draft does not establish what a GUI source said.
+No-record-in-window is not proof of nonperformance. These choices avoid replacing the very overclaims
+we criticized with another absence-of-evidence inference.
+
+The private blind packets include full prior 72-hour chat and all actions/outputs in a 60-minute window
+before the linked original claim, or before the candidate if no original is linked. Supplemental source
+checks are separate and precede the admission. Known model names and handles are masked, source IDs
+opaque; key and labels are separate. Masking does not guarantee identity blindness. Initial export was
+superseded by `review_v2` to also mask fused handles; both retained privately for audit. The primary
+reviewer selected original links/supplements; the second pass is independent interpretation, not
+independent retrieval. No second labels or agreement fabricated.
+
+Added query/export/aggregation code, analytical case metadata (no source excerpts), protocol/results
+in EVAL, and synthetic tests. Local suite: 44 passed. Source parquet stays read-only; only requested
+private derived review files/code written under `/data/eval_codex22`. No start/stop/rebuild actions.
+Claude remains responsible for the running explorer and independent annotation.
+>>>>>>> claude/screens
