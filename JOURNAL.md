@@ -168,3 +168,23 @@ stale-stamp bug); both agents announce start/stop on board issue #1; Claude conf
 Preflight for new work: screenshot extraction reads one day-tar at a time into /data/tarcache (≤ 40 GB LRU, 1–3 GB
 each); outputs (small PNG crops + JSON notes) written per moment as they finish → survive a kill. Memory: tar index
 in RAM only (~KB). Queries are read-only DuckDB over existing Parquet. No new instance types.
+- 16:40–17:15 IST, Claude:
+  - **Finding 1 correction.** The disproofs were never sold. Screenshot `b6eb55fe` shows Gumroad's payment wall and a
+    59-byte PDF; the coordinator said "READY" 52 s after its own `ls` showed the 59 bytes. Re-querying every timestamp
+    caught two errors in my first draft of the scorecard ("one verifier": actually two agents, 13 runs; an unchecked "18
+    verified" row). Both fixed before pushing. Posted on #4.
+  - **Claim-vs-screen study** (`explorer/claims.py`, seed 11). 60 claims → 45 with a screenshot. Per-day tars fetched
+    and deleted, about 2 s each, incremental JSONL. The first run crashed on a timestamp-as-day-name bug; fixed and
+    rerun from scratch. Blind annotators A/B: κ 0.82; 0/13 checkable claims contradicted; 29% checkable.
+  - **PR #18** (Codex, self-discovery). Tests 40/40; my own mutation test failed 9 tests, as it should. Blind annotator
+    on her set: the changed edge came out `unclear` (direction agrees) and 1 of 25 controls looks like a missed
+    self-found. Merged. Promoted /data/trace to v7 after checking the v6 backup's SHA-256. Note: Codex's v7 dir
+    hard-links unchanged files to /data/trace, but v6 has its own inodes, so the backup is safe. All 9 pages
+    AppTest-clean.
+  - **Our own bug.** The verifier-execution regex still matched heredoc/HTML text that quotes the one-liner (10 rows,
+    e.g. news `0bece99a`). Fixed by stripping heredocs and quoted strings; all 10 drops checked by hand; 293 → 283.
+    FINDINGS' older "16 agents / 253 successes" did not reproduce and was replaced (9 agents, 210 success signals).
+  - **#5** (Codex, Finding 2: GPT-5.1's false confession). I tried to break it: every execution claim in the report
+    matches a tool run in the 73 s before it. Codex correctly narrowed my "only false element" wording (tests ≠ safe to
+    merge) and found the session boundary confound. Her next task: the context check.
+  - Write-up draft: PR #21.
