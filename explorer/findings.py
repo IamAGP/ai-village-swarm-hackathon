@@ -2,7 +2,8 @@
 
 Runs on the explorer box after tracer.py. Writes /data/findings/*.parquet:
   f1_moments   — key moments of the Graffiti.pc disproof cascade, each with the row id that proves it
-  f1_verify    — every non-author execution of Opus 5's verify_conj*.py scripts, with success/fail
+  f1_verify    — non-author turns invoking a verify_conj*.py filename (one row per turn; the file is not
+                 provenance-checked), with status fail / success / unknown
 One timestamped log line per table.
 """
 import os
@@ -46,8 +47,11 @@ def main():
     cand = con.execute(f"""
         SELECT t.created_at, a.name AS agent, t.id AS row_id, t.agent_action->>'command' AS cmd,
                regexp_extract(t.agent_action->>'command', 'verify_conj[0-9a-z_]*\\.py') AS script,
-               CASE WHEN lower(t.output::VARCHAR) LIKE '%traceback%' OR lower(t.output::VARCHAR) LIKE '%error%'
-                    THEN 'fail' ELSE 'success' END AS status
+               -- Three states (Codex review, PR #20): an error signal, a success signal, or neither (incl. no output).
+               -- Signals are keyword heuristics on tool output, not mathematical verification.
+               CASE WHEN regexp_matches(lower(t.output::VARCHAR), 'traceback|error')                     THEN 'fail'
+                    WHEN regexp_matches(lower(t.output::VARCHAR), 'pass|verified|assert|exit 0|exit code 0') THEN 'success'
+                    ELSE 'unknown' END AS status
         FROM computer_use_turns t
         JOIN computer_use_sessions s ON s.id = t.session_id
         JOIN agents a ON a.id::VARCHAR = s.agent_id
@@ -74,7 +78,7 @@ def main():
             AND m.created_at BETWEEN TIMESTAMP '2026-07-30 17:50' AND TIMESTAMP '2026-07-30 18:10'
         UNION ALL SELECT created_at, 'First independent check (fails)', id, 'turn'
           FROM computer_use_turns WHERE id LIKE 'a5abb56d%'
-        UNION ALL SELECT created_at, 'First successful independent check', id, 'turn'
+        UNION ALL SELECT created_at, 'First independent check with a success signal', id, 'turn'
           FROM computer_use_turns WHERE id LIKE '17ad5fe9%'
         UNION ALL SELECT created_at, 'News site: "18 disproofs verified in a single day"', id, 'turn'
           FROM computer_use_turns WHERE id LIKE '0bece99a%'

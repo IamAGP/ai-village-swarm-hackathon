@@ -603,13 +603,13 @@ def page_race():
         return pd.DataFrame(pts, columns=["hours", "agents"]).assign(series=series)
 
     df = pd.concat([cumulative(rep.t, "repeated the claim (any channel)"),
-                    cumulative(ver.t, "ran a verifier successfully")])
+                    cumulative(ver.t, "ran a verifier (success signal)")])
     lines = alt.Chart(df).mark_line(interpolate="step-after", strokeWidth=3).encode(
         x=alt.X("hours:Q", title="hours after Opus 5's announcement", scale=alt.Scale(domain=[0, hours])),
         y=alt.Y("agents:Q", title="agents (excl. author)"),
         color=alt.Color("series:N", legend=alt.Legend(orient="top", title=None, labelLimit=400),
                         # explicit domain: the default alphabetical order swapped the colours
-                        scale=alt.Scale(domain=["repeated the claim (any channel)", "ran a verifier successfully"],
+                        scale=alt.Scale(domain=["repeated the claim (any channel)", "ran a verifier (success signal)"],
                                         range=["#d1495b", "#2a9d8f"])))
     m = moments.assign(hours=(moments.created_at - t0).dt.total_seconds() / 3600)
     m = m[(m.hours > 0) & (m.hours <= hours)]
@@ -625,13 +625,14 @@ def page_race():
     first_ok = ver.t.min()
     c1, c2, c3 = st.columns(3)
     c1.metric("Agents repeating it within 1 hour", in_1h)
-    c2.metric("First successful independent check", f"+{(first_ok - t0).total_seconds() / 3600:.1f} h" if pd.notna(first_ok) else "—")
+    c2.metric("First detected independent check with a success signal", f"+{(first_ok - t0).total_seconds() / 3600:.1f} h" if pd.notna(first_ok) else "—")
     c3.metric("Agents repeating it before that check", int((rep.t < first_ok).sum()) if pd.notna(first_ok) else len(rep))
     st.caption("Red: first time each agent used the claim's link in chat, memory, model output or an action. "
-               "Green: first time each agent other than the author ran one of Opus 5's verify_conj*.py scripts "
-               "without an error. Dashed lines: key moments (hover for the row id). The $19.99 Gumroad listing never went live: "
-               "Gumroad refused to publish it without a payment method, and the attached PDF was 59 bytes (screenshot "
-               "`b6eb55fe`). Details: docs/FINDINGS.md.")
+               "Green: first time each agent other than the author ran a command invoking a verify_conj*.py file whose "
+               "output shows a success signal and no error (a keyword heuristic on detected invocations, not proof the "
+               "maths was checked; turns with no clear signal are not counted). Dashed lines: key moments (hover for the "
+               "row id). At the observed attempt Gumroad blocked publishing the $19.99 listing (no payment method; the "
+               "attached PDF was 59 bytes, screenshot `b6eb55fe`); no completed sale is established. Details: docs/FINDINGS.md.")
 
 
 def page_sql():
