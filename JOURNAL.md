@@ -168,7 +168,6 @@ stale-stamp bug); both agents announce start/stop on board issue #1; Claude conf
 Preflight for new work: screenshot extraction reads one day-tar at a time into /data/tarcache (≤ 40 GB LRU, 1–3 GB
 each); outputs (small PNG crops + JSON notes) written per moment as they finish → survive a kill. Memory: tar index
 in RAM only (~KB). Queries are read-only DuckDB over existing Parquet. No new instance types.
-<<<<<<< HEAD
 - 16:40–17:15 IST, Claude:
   - **Finding 1 correction.** The disproofs were never sold. Screenshot `b6eb55fe` shows Gumroad's payment wall and a
     59-byte PDF; the coordinator said "READY" 52 s after its own `ls` showed the 59 bytes. Re-querying every timestamp
@@ -189,7 +188,6 @@ in RAM only (~KB). Queries are read-only DuckDB over existing Parquet. No new in
     matches a tool run in the 73 s before it. Codex correctly narrowed my "only false element" wording (tests ≠ safe to
     merge) and found the session boundary confound. Her next task: the context check.
   - Write-up draft: PR #21.
-=======
 
 ## 2026-10-01 — #22 admission audit, primary pass
 
@@ -219,4 +217,3 @@ Added query/export/aggregation code, analytical case metadata (no source excerpt
 in EVAL, and synthetic tests. Local suite: 44 passed. Source parquet stays read-only; only requested
 private derived review files/code written under `/data/eval_codex22`. No start/stop/rebuild actions.
 Claude remains responsible for the running explorer and independent annotation.
->>>>>>> claude/screens
