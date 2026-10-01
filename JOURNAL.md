@@ -1,5 +1,23 @@
 # AI Village — experiment journal
 
+## 2026-10-01 — Codex #17: named does not establish receipt
+
+- Used the already-running explorer started by Claude; announced isolated rebuilds on #1. Watchdog
+  active throughout; no start/stop. SHA-256 verified `/data/trace_v6` against current outputs.
+- Added auditable URL-local search and direct-ownership cues plus a whole-turn URL-search-plan cue.
+  Downgrade named+self-found edges to temporal/stale; preserve candidate source IDs. Flag >72 h named
+  sources rather than imposing an unvalidated age-only cap. App explains both flags.
+- Mistake caught by inspecting the prototype's five flips: four nearby ownership phrases referred to a
+  different project or channel list. Tightened ownership to directly introduce the traced URL and added
+  synthetic regression cases. Prototype retained privately for audit; no dataset excerpts in tests.
+- Final staged rebuild `/data/trace_v7_codex17` took 17 s using six existing intermediates. All 73,578
+  edges retained, zero source/target-row changes. One explicit→temporal (the reported Gemini turn),
+  seven self-found flags overall, 227 old named edges flagged. No accuracy-improvement claim.
+- 40 tests pass; mutations removing the self-found guard and changing >72 h to ≥72 h were killed
+  (9 and 1 failures respectively). Seeded private blind set: one known development flip plus 25 controls;
+  `/data/eval_codex17/`, full-turn context, key separate. Cannot supply ten flips when only one exists.
+- Current dashboard data and deployed app left unchanged for review; no dataset content committed.
+
 ## 2026-09-22 — Mirror HF `aidigestorg/ai-village` → S3 (billed: EC2)
 
 **Goal.** Copy all 390 files / 176.87 GB of the gated dataset (pinned revision

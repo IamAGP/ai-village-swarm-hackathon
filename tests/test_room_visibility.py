@@ -31,15 +31,15 @@ def test_presence_combines_own_chat_posts_and_enter_room_events():
     ]
 
 
-def edge(*, adoption="2026-03-01 12:10:00", posts=(), mentions=(), presence=()):
+def edge(*, adoption="2026-03-01 12:10:00", posts=(), mentions=(), presence=(), target_text=" story "):
     con = duckdb.connect()
     con.execute("CREATE TABLE agents (id VARCHAR, name VARCHAR)")
     con.execute("INSERT INTO agents VALUES ('alice', 'Alice'), ('bob', 'Bob')")
     con.execute("""CREATE TABLE trace_adopt (
         url VARCHAR, target VARCHAR, t_at TIMESTAMP, target_row VARCHAR,
         target_channel VARCHAR, target_text VARCHAR)""")
-    con.execute("INSERT INTO trace_adopt VALUES (?, 'target', ?, 'target-row', 'action', ' story ')",
-                [URL, adoption])
+    con.execute("INSERT INTO trace_adopt VALUES (?, 'target', ?, 'target-row', 'action', ?)",
+                [URL, adoption, target_text])
     con.execute("""CREATE TABLE trace_uses (
         url VARCHAR, agent_id VARCHAR, human VARCHAR, created_at TIMESTAMP,
         row_id VARCHAR, room_id VARCHAR, channel VARCHAR)""")
