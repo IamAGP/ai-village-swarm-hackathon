@@ -6,6 +6,7 @@ Runs on the explorer box after tracer.py. Writes /data/findings/*.parquet:
 One timestamped log line per table.
 """
 import os
+import re
 import sys
 import time
 
@@ -15,6 +16,14 @@ PQ, OUT = "/data/parquet", "/data/findings"
 AUTHOR = "Claude Opus 5"
 # Executed = a shell line invoking python on a verify_conj*.py file (docs/FINDINGS.md, *Method*).
 EXEC_RE = r"(^|\n|&&|;|\|)\s*(timeout \d+\s+)?python3?\s+[^\n;&|]*verify_conj[0-9a-z_]*\.py"
+# Text that is written, not run: heredoc bodies and quoted strings. Without stripping these, EXEC_RE matched a
+# news article that *quotes* "git clone && python3 verify/verify_conj605.py" (turn 0bece99a).
+HEREDOC_RE = re.compile(r"<<-?\s*['\"]?(\w+)['\"]?[^\n]*\n.*?(\n\s*\1\b|\Z)", re.S)
+QUOTED_RE = re.compile(r"'[^']*'|\"(?:[^\"\\]|\\.)*\"", re.S)
+
+
+def executes_verifier(cmd):
+    return bool(cmd) and re.search(EXEC_RE, QUOTED_RE.sub("''", HEREDOC_RE.sub("", cmd))) is not None
 
 
 def log(msg):
@@ -33,15 +42,21 @@ def main():
     for t in ("agents", "chat_messages", "computer_use_turns", "computer_use_sessions"):
         con.execute(f"CREATE VIEW {t} AS SELECT * FROM read_parquet('{PQ}/{t}.parquet')")
 
-    write(con, "f1_verify", f"""
-        SELECT t.created_at, a.name AS agent, t.id AS row_id,
+    # Candidates by SQL regex, then drop matches that only occur inside heredocs / quoted strings.
+    cand = con.execute(f"""
+        SELECT t.created_at, a.name AS agent, t.id AS row_id, t.agent_action->>'command' AS cmd,
                regexp_extract(t.agent_action->>'command', 'verify_conj[0-9a-z_]*\\.py') AS script,
                CASE WHEN lower(t.output::VARCHAR) LIKE '%traceback%' OR lower(t.output::VARCHAR) LIKE '%error%'
                     THEN 'fail' ELSE 'success' END AS status
         FROM computer_use_turns t
         JOIN computer_use_sessions s ON s.id = t.session_id
         JOIN agents a ON a.id::VARCHAR = s.agent_id
-        WHERE a.name <> '{AUTHOR}' AND regexp_matches(t.agent_action->>'command', '{EXEC_RE.replace("'", "''")}')""")
+        WHERE a.name <> '{AUTHOR}' AND regexp_matches(t.agent_action->>'command', ?)""", [EXEC_RE]).df()
+    keep = cand.cmd.map(executes_verifier)
+    for _, r in cand[~keep].iterrows():
+        log(f"DROPPED written-not-run {r.row_id[:8]} {r.agent} {r.created_at}")
+    con.register("f1_verify_df", cand[keep].drop(columns="cmd"))
+    write(con, "f1_verify", "SELECT * FROM f1_verify_df")
 
     # Key moments. Row-id prefixes come from docs/FINDINGS.md; the GLM-5.2 catch is located by content.
     write(con, "f1_moments", """
