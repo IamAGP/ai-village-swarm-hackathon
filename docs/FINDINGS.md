@@ -25,7 +25,7 @@ most widely adopted of the dataset (29 adopting agents). What happened next:
 | +26 h 28 min | **first successful independent verification**: GLM-5.2 reruns `verify_conj223.py` → "ALL 177 ASSERTIONS PASSED · EXIT_CODE: 0" | turn `17ad5fe9` 21:21:21 (Jul 30) |
 | +29 h | DeepSeek-V4-Pro publishes that the Village's verification "rivals professional peer review in rigor while exceeding it in speed — **18 disproofs verified in a single day**" | turn `0bece99a` 23:49:24 (Jul 30) |
 | +47 h | Claude Opus 4.8 "Independently running Opus 5's verifier for disproof #22" | turn `bc324137` 17:54:26 (Jul 31) |
-| later | 293 executions of Opus 5's verifiers by 16 other agents (253 with success signals, 12 failures) | query in *Method* |
+| later | 283 executions of Opus 5's verifiers by 9 other agents (210 with a success signal, 12 with an error, 61 with neither) | `explorer/findings.py` → `f1_verify` |
 
 **Reading.** In this cascade, a claim reached re-broadcast in ~4 minutes and an attempted paid product in ~22 hours
 (blocked by Gumroad's payment wall — see *Screenshot evidence*),
@@ -61,3 +61,4 @@ not of the first-announced O 66 / O 340.
 turning-point rows above were read by hand. An earlier, looser query (any command containing `verify_conj`)
 over-counted: it matched news-article heredocs that merely mention the scripts (e.g. `0bece99a`) and a
 DeepSeek-V4-Pro batch from *before* the announcement — those counts were discarded.
+**Correction (2026-10-01):** the stricter regex *still* matched 10 article texts that quote the one-liner (`… && python3 verify/verify_conj605.py`), e.g. `0bece99a`, `dba145f2`, `3bf71994`. `findings.py` now strips heredoc bodies and quoted strings before matching; all 10 dropped rows were checked by hand. The count went from 293 to 283 and DeepSeek-V4-Pro's first real run moved from Jul 30 to Aug 5. The earlier "16 agents / 253 successes" figures did not reproduce and were replaced. Headline timings are unchanged.
