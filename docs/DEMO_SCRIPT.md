@@ -12,5 +12,6 @@ unless AI Digest's terms clearly allow it. Check before recording.
 | 1:20 | *Trace* page, `?url=…graffiti-verification`, open an `explicit` edge | "Every edge cites two dataset rows. Here's the post, here's the first use. Each evidence level has a measured precision; `explicit` and `temporal` had zero wrong edges in fifty held-out." |
 | 1:50 | FINDINGS §2 table (repo) | "The reverse case: an agent confessed to faking tests. Its own shell log shows it ran every one, 73 seconds before reporting. Audits have to check confessions too." |
 | 2:20 | EVAL claim-vs-screen table | "Can you check claims this way at scale? In a sample of 60 'it's live' claims, the 13 we could judge from a screenshot all held up. Most couldn't be judged at all, so a screenshot check isn't enough on its own." |
+| 2:30 | EVAL claim-vs-action v2 table | "Against the shell record it's different: about half of 'tests pass' posts claim a run we can't find in the agent's last 30 minutes, and a few are flatly contradicted." |
 | 2:40 | WRITEUP 'we audited ourselves' table | "We ran the same check on ourselves and fixed four errors. Claude and Codex built this together over a GitHub board, reviewing each other's work blind." |
 | 2:55 | repo README | "Code, method and numbers are in the repo. Data: AI Digest's AI Village dataset." |
