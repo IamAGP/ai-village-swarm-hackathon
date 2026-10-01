@@ -40,6 +40,13 @@ EVENTS = {
     'check_session_stop': 'eba896b7-3d45-48bd-b237-47d0a8b312a9',
 }
 MEMORY_ID = '10098508-498b-4a4e-bd5b-c6726ba23215'
+CONTEXT_MEMORY_IDS = [
+    'f9621a23-37e1-4d3f-a70c-45e8e52565b1',
+    '8b01a7a5-0ff7-4e22-b112-0bcc9e51d45c',
+    'cf712506-4867-4b96-a4a0-6a441c965007',
+    '25f2496c-072b-43e3-bb3a-6936eb7d47a9',
+    MEMORY_ID,
+]
 GOAL_ID = '53044a40-21ef-497f-b5c3-0bd6a68a7c3b'
 ACCUSATIONS_SQL = """
 SELECT m.id, m.created_at, a.name, m.content
@@ -90,6 +97,34 @@ def one(c, table, identifier):
 def require(condition, message):
     if not condition:
         raise ValueError('Evidence check failed: ' + message)
+
+
+def context_audit(c, private_rows):
+    """Stored records, not reconstructed model inputs. Read the private rows to interpret them."""
+    memories = [one(c, 'agent_memories', identifier) for identifier in CONTEXT_MEMORY_IDS]
+    start = one(c, 'events', EVENTS['check_session_start'])
+    agent_id = memories[0]['agent_id']
+    latest = rows(c, '''SELECT id FROM agent_memories WHERE agent_id=? AND created_at<?
+        ORDER BY created_at DESC LIMIT 1''', [agent_id, start['created_at']])[0]['id']
+    require(latest == CONTEXT_MEMORY_IDS[1], 'latest saved pre-session memory')
+    turns = rows(c, '''SELECT * FROM computer_use_turns WHERE session_id=?
+        ORDER BY created_at, id''', ['631b6b16-42e0-4ca8-adeb-b7704976444a'])
+    for table, records in [('agent_memories', memories), ('computer_use_turns', turns),
+                           ('events', [start])]:
+        private_rows.extend({'table': table, 'anchor': 'context_audit', 'row': row}
+                            for row in records)
+    return {'latest_saved_memory_before_start': latest,
+            'loaded_input_context_available': False,
+            'note': 'Exported fields do not establish which saved memory or turns were loaded.',
+            'memories': [{'id': row['id'], 'at': row['created_at'],
+                          'characters': len(row['content']),
+                          'sha256': hashlib.sha256(row['content'].encode()).hexdigest(),
+                          'mentions_achievement_branch': 'feat/achievement-system' in row['content'],
+                          'mentions_108_tests': '108 tests' in row['content'],
+                          'contains_fabricat_stem': 'fabricat' in row['content'].lower()}
+                         for row in memories],
+            'new_session_turns': [{'id': row['id'], 'at': row['created_at'],
+                                   'system_is_null': row['system'] is None} for row in turns]}
 
 
 def analyze(c, private_rows):
@@ -152,7 +187,7 @@ def analyze(c, private_rows):
             'bounded_lexical_matches': {'posts': len(accusations),
                 'agents': len({r['name'] for r in accusations}),
                 'rows': [{k: v for k, v in r.items() if k != 'content'} for r in accusations]},
-            'checks_passed': True}
+            'context_audit': context_audit(c, private_rows), 'checks_passed': True}
 
 
 def main():
@@ -163,7 +198,7 @@ def main():
     c = duckdb.connect()
     c.execute("SET threads=2; SET memory_limit='4GB'")
     for table in ('chat_messages', 'agents', 'computer_use_turns', 'computer_use_sessions',
-                  'events_slim', 'agent_memories', 'village_goals'):
+                  'events_slim', 'events', 'agent_memories', 'village_goals'):
         path = str(args.parquet / (table + '.parquet')).replace("'", "''")
         c.execute(f"CREATE VIEW {table} AS SELECT * FROM read_parquet('{path}')")
     private_rows = []

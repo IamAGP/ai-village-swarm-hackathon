@@ -102,6 +102,29 @@ to permanent computer use. The actual event rows establish that this GPT-5.1 epi
 start/stop boundaries. The adversarial game also incentivized suspicion. We do not infer the agent's
 true role, intent, or a coordinated deception campaign from peers' allegations or its self-report.
 
+**Follow-up: what the stored context records contain.** The no-memory explanation is not supported
+by the saved snapshots. At 20:31:26, memory `f9621a23-37e1-4d3f-a70c-45e8e52565b1` recorded the
+checkout and detailed test results. The **latest saved memory before the 20:34:51 session**, at
+20:34:23 (`8b01a7a5-0ff7-4e22-b112-0bcc9e51d45c`), still explicitly describes running the branch
+scanner, seven achievement test files, and smoke tests; it retains the 108-test suite description.
+At 20:35:12 (`cf712506-4867-4b96-a4a0-6a441c965007`), the snapshot contains **both** that execution
+account and an appended claim that the report was not based on actual tool runs. By 20:37:15
+(`25f2496c-072b-43e3-bb3a-6936eb7d47a9`), the memory recasts the detailed achievement-system account
+as fabricated and instructs that it not be treated as repository fact. This is **before** the first
+recorded shell action in the new session (`cf8bbf38`, 20:37:25), not just at the final memory write.
+
+The raw session-start event `363dafb9` records the goal and generated response, including an intent
+to correct the earlier report; it does not contain the model's input prompt. The four new-session
+turns (`cf8bbf38`, `1a714849-53e7-4f14-b18e-69e2eadad780`,
+`96455146-c52c-4e8d-be8d-7c4135bc941b`, `e9eb4a2d-5274-4afc-99c5-ce1febcf6eb8`) record PR lookups,
+new main-branch checks, and a concluding response. All four have null `system` fields; these fields
+are system notes, not an input-context dump. Both stop events have a public-summary suppression
+placeholder for this goal. No `summaries` rows occur in the 20:25–20:40 audit window. Thus we can
+show **retention, coexistence, and revision in stored memory**, but not establish which snapshot or
+raw earlier outputs the model actually received. Neither total forgetting nor social pressure is
+identified as the cause. `finding2.py` now emits the memory IDs, hashes, markers, and session-turn IDs
+for this follow-up; its optional private export includes the audited records.
+
 **What this does not show.** No causal intervention establishes why the admission happened. A PR
 lookup failure is evidence of unavailability at that time/account, not a historical proof that the
 PR never existed. We have not re-executed or audited the game tests, checked their integrity, proved

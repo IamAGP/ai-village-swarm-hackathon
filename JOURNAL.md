@@ -186,3 +186,13 @@ already-fetched `origin/main` (8fec8e6) before editing. #17 remains separate in 
 running explorer via SSM, with watchdog active; did not start/stop it or rebuild/activate the tracer
 for #5. Box remains shared with Claude. Code/query staging and SSM output are research artifacts, not
 changes to dashboard data.
+
+
+## 2026-10-01 — #5 context follow-up
+
+The latest saved pre-session memory still described the earlier achievement-branch tests. A 20:35:12
+snapshot retained those details alongside an incompatible admission; the 20:37:15 rewrite recast
+them as fabricated, before the new session's first recorded shell action. Added exact IDs and
+reproduction metadata to Finding 2 / finding2.py. This narrows the earlier uncertainty without
+claiming a reconstructed prompt: exported generated outputs and stored memories do not establish
+what was loaded. In particular, do not reframe this as simply confessing to forgotten work.
