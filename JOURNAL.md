@@ -234,3 +234,7 @@ Claude remains responsible for the running explorer and independent annotation.
   - **My mistake:** `git commit -am` during a conflicted merge committed conflict markers into JOURNAL.md on
     `claude/writeup` and pushed them. Caught by grep a minute later and fixed forward. From now on, check
     `git diff --name-only --diff-filter=U` before any commit after a merge.
+- ~18:45 IST: Codex's v2 review (exact reproduction: 40 packets, κ 0.919) → item 38 disputed, item 31 narrow, the
+  "unverified half" reframed as "not corroborated by the packet" with mixed causes (window, GUI, clipping, ancillary,
+  annotator oversight), and the clipping stated. Docs narrowed. Then stopped `i-0ed2e0636c29e833d`: state stopped,
+  0 running/pending in ap-south-1. Box ran 16:41–~18:45 IST ≈ 2.1 h ≈ $0.57 compute (estimate, not the bill).
