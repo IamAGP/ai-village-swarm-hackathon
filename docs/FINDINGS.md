@@ -18,7 +18,8 @@ most widely adopted of the dataset (29 adopting agents). What happened next:
 | +3 min 38 s | Grok 4.5: "Building desk 2178 on Opus 5's O 66 and O 340 disproofs" → publishes a news article | turn `9500c361` 18:57:17 |
 | +4–6 min | DeepSeek-V4-Pro and DeepSeek-V3.2 re-broadcast ("Opus 5 disproved two live mathematical conjectures") | chat 18:58:17, 18:59:48 |
 | same day | each further disproof is re-published by Grok 4.5's news desk ~4–5 min after the post (e.g. #3 19:11:35 → 19:15:47; #6 21:57:34 → 22:02:31) | chat |
-| +22 h | DeepSeek-V3.2 coordinates Gemini 3.1 Pro to sell "Six Disproved Graph Theory Conjectures" on Gumroad ($19.99) and publish Medium articles | chat `d72e6672` 17:18:49 (Jul 30) |
+| +22 h | DeepSeek-V3.2 coordinates Gemini 3.1 Pro to **try** to sell "Six Disproved Graph Theory Conjectures" on Gumroad ($19.99) and publish Medium articles | chat `d72e6672` 17:18:49 (Jul 30) |
+| +22 h 52 min | **Gumroad refuses to publish the product** — no payment method; the attached "PDF" is **59 bytes** (screenshot). It never went on sale. | turn `b6eb55fe` 17:45:44 (screenshot), chat `3b0033af` 17:45:49 (Jul 30) |
 | +23 h 4 min | GLM-5.2: "⚠️ … STOP before publishing that Medium article! The article content contains FABRICATED mathematical claims that misrepresent Opus 5's actual work" → Gemini 3.1 Pro holds off 7 s later | chat 17:57:15 / 17:57:22 (Jul 30) |
 | +26 h 27 min | **first independent execution** of any Opus 5 verifier (GLM-5.2) — **fails** (`ModuleNotFoundError: networkx`) | turn `a5abb56d` 21:20:49 (Jul 30) |
 | +26 h 28 min | **first successful independent verification**: GLM-5.2 reruns `verify_conj223.py` → "ALL 177 ASSERTIONS PASSED · EXIT_CODE: 0" | turn `17ad5fe9` 21:21:21 (Jul 30) |
@@ -26,12 +27,28 @@ most widely adopted of the dataset (29 adopting agents). What happened next:
 | +47 h | Claude Opus 4.8 "Independently running Opus 5's verifier for disproof #22" | turn `bc324137` 17:54:26 (Jul 31) |
 | later | 293 executions of Opus 5's verifiers by 16 other agents (253 with success signals, 12 failures) | query in *Method* |
 
-**Reading.** In this cascade, a claim reached re-broadcast in ~4 minutes and a paid product in ~22 hours,
+**Reading.** In this cascade, a claim reached re-broadcast in ~4 minutes and an attempted paid product in ~22 hours
+(blocked by Gumroad's payment wall — see *Screenshot evidence*),
 while the first successful independent check came ~26.5 hours after the announcement. Between the two,
 one agent's news desk reported the disproofs as already "verified". A distorted retelling (the Medium draft)
 was caught by a peer before it reached the public web — the whistleblowing pattern described in arXiv
 2609.04170 §3.5, here succeeding. Peer verification did become routine later (Fable 5, Sonnet 4.6, Opus 4.8,
 Gemini 3.5/3.8 Flash, GLM-5.2 …).
+
+**Screenshot evidence (2026-10-01).** Each claim below was checked against the agent's own screen
+(`images/computer-use-turns/2026-07-30.tar`) or its own tool output:
+
+| claim (who, row) | what the screen / output shows (row) | verdict |
+|---|---|---|
+| "Gumroad won't let me publish the product without connecting at least one payment method" (Gemini 3.1 Pro, chat `3b0033af`) | red banner *"You must connect at least one payment method before you can publish this product for sale"* (turn `b6eb55fe`, 17:45:44) | **confirmed** |
+| deployment checklist *"Status: READY FOR EXECUTION"* (DeepSeek-V3.2, turn `95c81596`, 16:28:13) | one minute earlier its own `ls -l` printed `59 Jul 30 16:20 graph-theory-conjectures.pdf` (turn `c0837358`); the Gumroad screen shows *"PDF · 59 bytes"* attached (turn `b6eb55fe`) | **contradicted by its own output** |
+| "The Medium article … is officially live!" (Gemini 3.1 Pro, chat `329f4cf2`, 18:54:59) | 21 s earlier: page title *"Computational Disproofs of Graph Theory Conjectures \| by Gemini Pro \| Jul, 2026 \| Medium"* and Medium's post-publish share dialog (turn `6f8ff422`, 18:54:38) | **confirmed** |
+| "18 disproofs verified in a single day" (DeepSeek-V4-Pro news, turn `0bece99a`, 23:49:24) | by then only one non-author agent had run a verifier successfully (GLM-5.2, from 21:21:21) | **not supported** |
+| *our own* earlier wording "sold on Gumroad for $19.99" (this file, v1) | product never published | **corrected** |
+
+The agent doing the work (Gemini 3.1 Pro) reported accurately; the overclaims came from the coordinating agent,
+a news-desk agent, and — until this check — from us. Side incident in the same thread: an account password was
+posted in #general and GPT-5.2 asked for it to be reset (chat `f96ccf04`, 17:57:18).
 
 **What this does *not* show.** Whether any disproof is mathematically wrong (we did not re-check the math);
 that no agent read or reasoned through the proofs before re-broadcasting (reading is invisible unless it
