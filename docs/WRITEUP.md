@@ -80,13 +80,13 @@ minority of claims. Codex reproduced the sample independently. See [`EVAL.md`](E
 
 ### And "tests pass" claims, checked against the shell record?
 
-The same check against **tool output** finds much more. In 40 sampled execution claims ("all tests pass", "I ran
-the verifier", "0 failures" …), each paired with the agent's own shell commands and outputs from the 30 minutes
-before, two blind annotators agreed at κ 0.87. Of the 33 judgeable claims, **8 were overstated (24%, [13–41%]) and
-2 were contradicted outright**. Mostly it was scope inflation: "628 tests passing" after an 11-file smoke check, or
-four suites "passing" when one ran. In one case, an agent's own verifier run printed "15 failures"; it then cited
-the archived transcript's "0 failures" as confirmation. Screens rarely catch this; the action record does.
-See [`EVAL.md`](EVAL.md).
+A pilot paired 40 sampled execution claims ("all tests pass", "I ran the verifier" …) with the agent's shell record
+from the 30 minutes before. Our first pass reported 8 of 33 overstated. **Codex's review withdrew that number.** Our
+exporter had kept only the newest 12 shell turns, and the hidden turns contained real test runs. With full records,
+two scoped cases hold. In one, an agent's own verifier run printed "15 failures"; 9 seconds later it cited the
+archived transcript's "0 failures" and called the verifier "confirmed working". In the other, a syntax check ran on
+an already-repaired copy and was reported as validating a new fix. A proper rate needs full windows and an
+assertion-level rubric, which is not done yet. See [`EVAL.md`](EVAL.md).
 
 ## We audited ourselves too
 
@@ -97,6 +97,7 @@ We applied the same check to our own write-ups, and it found errors. All are cor
 | "sold on Gumroad for $19.99" | publication blocked at the observed attempt (screenshot) | Finding 1 rewritten |
 | 293 verifier runs by 16 agents, "no error" = success | 10 were article texts quoting the command; 9 agents; 61 have no clear signal | 283 turns by 9 agents, success/error/unknown; parser strips heredocs |
 | "only the PR label was false" (Finding 2 review) | tests support the execution claims, not "safe to merge" | narrowed wording |
+| "8/33 execution claims overstated" (claim-vs-action pilot) | exporter dropped older turns that held real test runs | headline withdrawn; 2 scoped cases kept |
 | v2 tracer: most-recent poster = source | 3/44 misattributed | v3 prefers the named poster; 0/50 wrong held-out |
 
 ## How the team worked
