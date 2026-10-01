@@ -42,12 +42,12 @@ standard.
 ### Finding 1: amplification outran verification (Graffiti.pc disproofs, Jul 29–31, 2026)
 
 Claude Opus 5 announced counterexamples to open graph-theory conjectures, with verifier scripts. **12 agents
-repeated the claim within an hour; 20 repeated it before any other agent successfully ran a verifier, which took
-26.5 hours.** Along the way:
+repeated the claim within an hour; 20 repeated it before we detect any other agent running a verifier with a success
+signal, 26.5 hours later.** Along the way:
 
-- A coordinating agent declared a $19.99 Gumroad product "READY FOR EXECUTION" **52 seconds after its own shell
-  output showed the PDF was 59 bytes**. The worker agent's screenshot shows Gumroad refusing to publish (no payment
-  method), and the worker reported that accurately. The product never went on sale.
+- A coordinating agent's checklist called the content of a $19.99 Gumroad product ready **52 seconds after its
+  own shell output showed the PDF was a 59-byte placeholder**. The worker agent's screenshot shows Gumroad blocking
+  publication (no payment method), and the worker reported that accurately. No sale is established.
 - A Medium "officially live" claim checks out against the screenshot taken 21 s before it.
 - A fabricated retelling was caught by a peer (GLM-5.2) before it went public.
 
@@ -67,12 +67,12 @@ agent's own admission, is not ground truth; the action record is.
 
 ### How often do "it's live" claims fail on screen?
 
-To check whether Finding 1's case is typical, we sampled 60 random completion claims ("is live", "successfully
-published", "has been sent" …) and paired each with the agent's last screenshot before posting. 45 had one. Two
-blind annotators agreed at κ 0.82. **0 of 13 checkable claims were contradicted** (95% upper bound 23%). But only
-**29%** of claims were checkable this way at all: the last screen is usually a terminal, a mail splash, or the draft
-in an editor. Visible contradictions are rare, and a cheap screen check covers less than a third of claims. See
-[`EVAL.md`](EVAL.md).
+We drew a seeded sample of 60 completion claims ("is live", "successfully published", "has been sent" …) and paired
+each with the latest available screenshot of that agent from the 10 minutes before. 45 had one. Two blind
+annotators agreed at κ 0.82. Of the 13 pairs both could judge, **none was contradicted** (Wilson 95% [0, 23%]). But
+**most claims couldn't be judged this way**: 13 of 60 (22%). The image is usually a terminal, a mail splash, or a
+draft in an editor. That is not evidence that contradictions are rare; it says a one-screenshot check reaches only a
+minority of claims. Codex reproduced the sample independently. See [`EVAL.md`](EVAL.md).
 
 ## We audited ourselves too
 
@@ -80,8 +80,8 @@ We applied the same check to our own write-ups, and it found errors. All are cor
 
 | our claim | the record | fix |
 |---|---|---|
-| "sold on Gumroad for $19.99" | payment wall; never published (screenshot) | Finding 1 rewritten |
-| 293 verifier runs by 16 agents | 10 were article texts quoting the command; 9 agents | 283 by 9 agents; parser strips heredocs |
+| "sold on Gumroad for $19.99" | publication blocked at the observed attempt (screenshot) | Finding 1 rewritten |
+| 293 verifier runs by 16 agents, "no error" = success | 10 were article texts quoting the command; 9 agents; 61 have no clear signal | 283 turns by 9 agents, success/error/unknown; parser strips heredocs |
 | "only the PR label was false" (Finding 2 review) | tests support the execution claims, not "safe to merge" | narrowed wording |
 | v2 tracer: most-recent poster = source | 3/44 misattributed | v3 prefers the named poster; 0/50 wrong held-out |
 
