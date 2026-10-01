@@ -131,13 +131,14 @@ fresh sample.
 
 ## Claim vs. screen — do "it's live / sent / published" claims match the agent's last screen? (2026-10-01)
 
-**Why.** Finding 1's coordinator declared a product ready while its own output showed a 59-byte file
-(see `docs/FINDINGS.md`, *Screenshot evidence*). Is that typical? Measured on a random sample.
+**Why.** In Finding 1, a coordinator's checklist called the content ready while its own output showed a 59-byte
+placeholder (see `docs/FINDINGS.md`, *Screenshot evidence*). How often can a completion claim be checked against
+the agent's screen, and what does the check show? Measured on a seeded sample.
 
 **Method.** `explorer/claims.py 11 60` draws a seeded uniform sample of 60 chat messages matching a
 completion-claim pattern (`is live`, `successfully published`, `has been sent`, … — 8,991 such messages up to
 2026-08-21, 7,882 with a non-bash computer-use turn by the same agent in the 10 min before). For each, it extracts
-the **last screenshot** that agent took before posting. 45 / 60 had one in the image export (the rest: turns
+the latest available eligible screenshot (see *Limits*). 45 / 60 had one in the image export (the rest: turns
 without a stored image). Two independent Claude annotators, **blind to the model**, labelled each pair
 `supported / contradicted / unrelated / unclear` (strict: *supported* needs visible evidence on that screenshot).
 
@@ -151,18 +152,24 @@ without a stored image). Two independent Claude annotators, **blind to the model
 Agreement 40/45, Cohen's κ = 0.82. Both annotators call 13 / 45 **checkable** (supported or contradicted).
 
 **Result.**
-- **0 / 13 checkable claims contradicted** (95% upper bound 23%). When the last screen shows the claimed thing,
-  it shows it done: Substack "Your post is live!", a just-posted X post, a Netlify site marked published.
-- Only **29% [18–43%]** of claims are checkable this way. The last screen before a claim is usually something
-  else: an empty terminal, a mail splash, a research page, or the *draft in an editor* while the chat message says
-  the page is "LIVE" (several fiction-chapter claims). Those are claims made without looking at the result, not
-  contradictions, and this method can't tell whether they were true.
+- **13 of 45** pairs are checkable by **both** annotators (each called 14 `supported`; the intersection is 13), and
+  all 13 are `supported`: **0 / 13 contradicted** (Wilson 95% [0, 22.8%]). Where the screen showed the claimed
+  thing, it showed it done: Substack "Your post is live!", a just-posted X post, a Netlify site marked published.
+- **Most claims can't be judged this way.** 13/45 = 29% [17.7–43.4%] of image-bearing pairs, or 13/60 = 21.7% of
+  the draw. The image is usually something else: an empty terminal, a mail splash, a research page, or a draft in
+  an editor while the message says the page is "LIVE".
 
-**Reading.** Visible contradictions like Finding 1's are rare in a random sample, so we found that case by
-following a cascade, not by base rate. A cheap screen check covers under a third of claims. Checking the rest
-needs the published artifact itself (URL fetch) or the agent's tool output, as in Finding 1 and the GPT-5.1 case
-(#5).
+**Reading.** No contradictions were labelled among the mutually checkable pairs, and most sampled claims cannot be
+adjudicated from this one image. This does **not** show that contradictions are rare overall. The unjudgeable 71%
+could hide them, and the intervals are descriptive (several claims come from the same agents; two share one
+image). Finding 1's case was found by following a cascade, not from this sample. Checking the rest needs the
+artifact itself or the agent's tool output, as in Finding 1 and Finding 2.
 
-**Limits.** n = 45, one seed; model-made labels; "last screenshot within 10 min" misses earlier screens in the
-same session that might show the result; the claim regex is English-only and tuned for publishing verbs.
-Screenshots and claim texts stay off git (box: `/data/findings/claims/`).
+**Limits.** The frame is *eligible* posts (a non-bash, non-redacted turn by the same agent ≤ 10 min before), not
+all completion claims; the 15 draws without an image are not known to be missing at random. The image is the
+**latest available eligible image in the newest candidate's day tar**, not necessarily the last screen the agent
+saw (33/45 fell back to an older turn; 44 distinct images for 45 claims). n = 45, one seed, model-made labels.
+Hiding the model field does not guarantee blinding, because text or screens can reveal the agent. The claim
+regex is English-only and built around publishing verbs. Reproduced independently by Codex (PR #20 review):
+8,991 matching posts, 7,882 eligible, the same 60 draws, 45 pairs, κ 0.82. Label files, instructions and
+aggregation code are on the box (`/data/findings/claims/labels/`), off git because they paraphrase dataset content.
