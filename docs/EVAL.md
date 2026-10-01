@@ -204,8 +204,9 @@ Agreement 37/40, κ = 0.87; disagreements are all supported ↔ partial.
   for code edited after the tests last ran.
 
 **Compared with claim-vs-screen** (above): screenshots showed 0/13 contradicted, while shell records show about a
-quarter of execution claims overstated. The tool record is the more informative check, and it reaches 83% of
-execution claims (1,603/1,939 eligible), versus about 22% for a one-screenshot check of publishing claims. The
+quarter of execution claims overstated. The tool record is the more informative check here: 83% of execution
+claims have shell activity in the window (1,603/1,939), and 33/40 sampled were judgeable (vs 13/60 for the
+one-screenshot check of publishing claims; different claim types, so not a like-for-like comparison). The
 overstatement is mostly scope inflation ("all tests pass" from a partial run), not invented runs.
 
 **Limits.** n = 33 judged, one seed. Model-made labels. The 30-min window and 12-turn cap can hide a run that
