@@ -80,14 +80,15 @@ minority of claims. Codex reproduced the sample independently. See [`EVAL.md`](E
 
 ### And "tests pass" claims, checked against the shell record?
 
-We paired 40 sampled execution claims ("all tests pass", "I ran the verifier" …) with **every** action the agent
-recorded in the 30 minutes before. Two annotators split each claim into assertions and agreed at κ 0.92.
-**4 of 38 claims contain an assertion the record positively contradicts** (11%, [4–24%]). Two matter: an agent's
-own verifier run printed "15 failures" and it posted "confirmed working"; a fix was "verified" on an
-already-repaired copy. **About half assert a result with no matching run in the window.** That's unbacked rather
-than disproved, but it's a large gap for anyone relying on chat reports. Our first pass got this wrong: it kept only
-the newest 12 shell turns, which hid real runs and inflated "overstated" to 8/33. Codex's review caught it, and v2
-re-exported full windows with a stricter rubric. See [`EVAL.md`](EVAL.md).
+We paired 40 sampled execution claims ("all tests pass", "I ran the verifier" …) with every action the agent recorded
+in the 30 minutes before. Two annotators split each claim into assertions and agreed at κ 0.92. Codex reproduced
+every packet and number, then adjudicated: **two claims are substantively contradicted by the agent's own record.**
+In one, the agent's verifier run printed "15 failures" and it posted "confirmed working", citing an archived
+transcript. In the other, a fix was "verified" on a copy that had already been repaired. One more is a narrow
+git-state misreport, and one is disputed. About half the claims contain something the 30-minute text record
+doesn't corroborate. The causes are mixed (window length, screenshots not included, output the agent itself cut,
+side remarks), so that is a coverage limit, not a no-run rate. Our first pass kept only the newest 12 shell turns
+and reported "8/33 overstated"; Codex caught that, and v2 replaced it. See [`EVAL.md`](EVAL.md).
 
 ## We audited ourselves too
 
@@ -98,7 +99,7 @@ We applied the same check to our own write-ups, and it found errors. All are cor
 | "sold on Gumroad for $19.99" | publication blocked at the observed attempt (screenshot) | Finding 1 rewritten |
 | 293 verifier runs by 16 agents, "no error" = success | 10 were article texts quoting the command; 9 agents; 61 have no clear signal | 283 turns by 9 agents, success/error/unknown; parser strips heredocs |
 | "only the PR label was false" (Finding 2 review) | tests support the execution claims, not "safe to merge" | narrowed wording |
-| "8/33 execution claims overstated" (claim-vs-action pilot) | exporter dropped older turns that held real test runs | v2 with full windows: 4/38 contradicted (2 substantive), ~half unbacked |
+| "8/33 execution claims overstated" (claim-vs-action pilot) | exporter dropped older turns that held real test runs | v2 with full windows + adjudication: 2 substantive contradictions in 38; uncorroborated ≠ not run |
 | v2 tracer: most-recent poster = source | 3/44 misattributed | v3 prefers the named poster; 0/50 wrong held-out |
 
 ## How the team worked
