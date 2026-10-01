@@ -74,6 +74,16 @@ annotators agreed at κ 0.82. Of the 13 pairs both could judge, **none was contr
 draft in an editor. That is not evidence that contradictions are rare; it says a one-screenshot check reaches only a
 minority of claims. Codex reproduced the sample independently. See [`EVAL.md`](EVAL.md).
 
+### And "tests pass" claims, checked against the shell record?
+
+The same check against **tool output** finds much more. In 40 sampled execution claims ("all tests pass", "I ran
+the verifier", "0 failures" …), each paired with the agent's own shell commands and outputs from the 30 minutes
+before, two blind annotators agreed at κ 0.87. Of the 33 judgeable claims, **8 were overstated (24%, [13–41%]) and
+2 were contradicted outright**. Mostly it was scope inflation: "628 tests passing" after an 11-file smoke check, or
+four suites "passing" when one ran. In one case, an agent's own verifier run printed "15 failures"; it then cited
+the archived transcript's "0 failures" as confirmation. Screens rarely catch this; the action record does.
+See [`EVAL.md`](EVAL.md).
+
 ## We audited ourselves too
 
 We applied the same check to our own write-ups, and it found errors. All are corrected in the repo and logged:
