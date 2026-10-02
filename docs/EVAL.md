@@ -13,7 +13,8 @@ How much should you trust an edge the tracer draws? Measured on stratified, blin
    - with a source post: did the adopter plausibly get the URL from this source? `yes / plausible / no / unclear`
    - without one: does the adopter's text show it received the URL from someone? `yes / no / unclear`
 4. Precision per evidence level = labelled-correct / decided (unclear excluded); *strict* counts `yes` only,
-   *lenient* counts `yes + plausible`. For `none`, the miss rate = `yes` / decided.
+   *plausible-source rate* counts `yes + plausible` — it means the excerpts do not rule the attribution out,
+   **not** that the post caused the adoption (renamed from "lenient precision" after review #2 / `docs/TRACER_REVIEW.md` #6). For `none`, the miss rate = `yes` / decided.
 
 **Caveats.** Labels are model-made, not human; a human spot-check is pending. Samples are small, so the
 intervals are wide (Wilson 95% CIs below). Excerpts are ±400 chars; some attributions sit outside them
@@ -70,7 +71,7 @@ is already known from development and must not be reported as held-out validatio
 
 ### Tracer v2 — source = most recent prior chat poster (sample seed 3, 2026-09-26)
 
-| evidence | n | yes | plausible | no | unclear | precision strict | lenient |
+| evidence | n | yes | plausible | no | unclear | precision strict | plausible-source rate |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | explicit | 25 | 18 | 5 | 0 | 2 | 78% (18/23) | 100% (23/23) |
 | temporal | 25 | 8 | 11 | 3 | 3 | 36% (8/22) | 86% (19/22) |
@@ -84,7 +85,7 @@ one the adopter names; otherwise the most recent poster.
 
 Fresh sample (0 overlap with seed 3), labelled blind by **two** annotators (A = the v2 annotator, B = new).
 
-| evidence | annotator | yes | plausible | no | unclear | precision strict | lenient |
+| evidence | annotator | yes | plausible | no | unclear | precision strict | plausible-source rate |
 |---|---|---:|---:|---:|---:|---:|---:|
 | explicit | A | 15 | 10 | 0 | 0 | 60% [41–77%] | 100% [87–100%] |
 | explicit | B | 14 | 11 | 0 | 0 | 56% [37–73%] | 100% [87–100%] |
@@ -98,7 +99,7 @@ Fresh sample (0 overlap with seed 3), labelled blind by **two** annotators (A = 
 ### Summary
 
 - v3 removed the only failure mode seen: **0 wrong edges in 50 held-out sourced edges under both annotators**
-  (v2: 3/44). Sourced edges are right-or-plausible essentially always (lenient ≥ 87% lower CI bound).
+  (v2: 3/44). Sourced edges were never judged wrong (plausible-source rate lower CI bound ≥ 87%) — consistent-with, not proof of, exposure.
 - **Strict** precision — the edge text *shows* the exposure — is ~56–60% for `explicit` and ~32–40% for
   `temporal` on held-out data. v2's 78% came from a friendlier sample (same annotator A: 78% → 60%).
 - `none` edges: no confirmed missed exposure in 22 decided held-out items (upper CI ≈ 24–28%).
@@ -106,7 +107,7 @@ Fresh sample (0 overlap with seed 3), labelled blind by **two** annotators (A = 
 
 ### `mention` evidence (v4, 72 h window) — sample seed 4242, annotator A
 
-| n | yes | plausible | no | unclear | strict | lenient | wrong |
+| n | yes | plausible | no | unclear | strict | plausible-source | wrong |
 |---:|---:|---:|---:|---:|---:|---:|---:|
 | 25 | 5 | 12 | 6 | 2 | 22% [10–42%] | 74% [54–87%] | 26% [13–46%] |
 
@@ -117,7 +118,7 @@ flagged as noise. Because these changes were chosen on this sample, v5 is re-mea
 
 ### `mention` evidence (v5, 60 min window, dotless hosts = noise) — fresh sample seed 9090, annotator B
 
-| n | yes | plausible | no | unclear | strict | lenient | wrong |
+| n | yes | plausible | no | unclear | strict | plausible-source | wrong |
 |---:|---:|---:|---:|---:|---:|---:|---:|
 | 25 | 6 | 13 | 5 | 1 | 25% [12–45%] | 79% [60–91%] | 21% [9–40%] |
 
@@ -128,6 +129,34 @@ elsewhere (own machine, a GitHub issue). **Decision:** keep `mention` as a separ
 (~1 in 5 wrong), excluded from headline numbers. Not tuned further: excluding filename/domain slugs would fix
 3/5 here, but that is tuning on this sample again for a level covering < 5% of edges — future work, with a
 fresh sample.
+
+## Known issues (tracer review, 2026-09-26 — `docs/TRACER_REVIEW.md`)
+
+Measured on v5 outputs before fixing; **#11 and #12 were fixed in v6 (PRs #15, #14)** — see *v6 measured effect* below.
+- **Room visibility (#11).** Since rooms v1 (2026-02-25) agents only see their current room. Of 34,030 sourced
+  edges with a post-rooms source, the adopter's last known room differs from the source post's room for explicit
+  77/2,943 (2.6%), temporal 700/27,878 (2.5%), mention 137/3,209 (4.3%). Those edges are likely not direct
+  chat exposure. The samples above did not stratify by room, so their numbers include such edges.
+- **Talk-only text loss (#12).** 324/20,673 model_output adoptions had NULL `agent_action`, blanking their text;
+  ≤ 109 had a candidate source and could flip to `explicit`.
+- **Adoption time is an observation bound** (first *recorded* use), and a source row is a *representative*
+  prior post, not proven transmission (review #3, #4).
+
+### v6 measured effect (PRs #14 + #15, rebuilt 2026-09-26)
+
+| evidence | v5 | v6 |
+|---|---:|---:|
+| temporal | 33,149 | 32,461 |
+| explicit | 3,547 | 3,519 |
+| mention | 3,581 | 3,520 |
+| stale | 1,027 | 897 |
+| cross_room | – | 907 (1.2%) |
+| none | 32,274 | 32,274 |
+
+Transitions: temporal→cross_room 633, stale→cross_room 125, mention→cross_room 85, explicit→cross_room 64
+(adopter names the source, but the source's post was in a room the adopter wasn't in — likely learned via another
+channel); temporal→explicit 41 (#12). 48 edges `room_unknown`. The held-out precision above was measured on v3–v5 and
+includes edges that v6 now labels `cross_room`; a fresh blind sample stratified by room visibility is still to do.
 
 ## Confession audit — narrow lexical frame (#22, 2026-10-01)
 
