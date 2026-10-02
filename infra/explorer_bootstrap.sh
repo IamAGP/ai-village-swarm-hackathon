@@ -67,7 +67,7 @@ dnf install -y -q python3.11 python3.11-pip >/dev/null 2>&1 && PY=python3.11 || 
 log "PYTHON $($PY --version 2>&1)"
 $PY -m venv /opt/explorer/venv
 /opt/explorer/venv/bin/pip install -q -U pip >/dev/null
-/opt/explorer/venv/bin/pip install -q duckdb pyarrow pandas streamlit >/dev/null \
+/opt/explorer/venv/bin/pip install -q duckdb pyarrow pandas streamlit plotly >/dev/null \
   || { log "FATAL pip install"; exit 1; }
 log "PIP $(/opt/explorer/venv/bin/python -c 'import duckdb,pyarrow,pandas,streamlit as s;print("duckdb",duckdb.__version__,"pyarrow",pyarrow.__version__,"streamlit",s.__version__)')"
 
