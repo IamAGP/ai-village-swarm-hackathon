@@ -795,7 +795,14 @@ BELIEF_HTML = r"""
 <script src="https://cdn.jsdelivr.net/npm/vis-network@9/standalone/umd/vis-network.min.js"></script>
 <script>
 const G = __DATA__;
-const D = (__DRIFT__).agents || {};      // claim drift per agent (how its first text relates to the original claim)
+const D = (__DRIFT__).agents || {};      // claim drift per agent: a timeline of stances (first text + 72 h of chat)
+const PRI = {neutral: 0, hedges: 1, repeats: 2, checks: 3, flags: 4, amplifies: 5, original: 6};
+Object.values(D).forEach(d => { if (!d.timeline) d.timeline = [{at: d.at, stance: d.stance, gist: d.gist, cue: d.cue, row: d.row, src: "first text"}]; });
+function stanceAt(id) {                  // most escalated stance among this agent's labelled texts up to NOW
+  const d = D[id]; if (!d) return null; let best = null;
+  d.timeline.forEach(e => { if (mins(e.at) <= NOW && (!best || PRI[e.stance] > PRI[best.stance])) best = e; });
+  return best;
+}
 const STANCE = {original: ["#b28dff", "the original claim"], repeats: ["#ff5c6c", "repeated it"], amplifies: ["#ff2fb4", "amplified it"],
   hedges: ["#f2c14e", "passed it on with caution"], checks: ["#2ec4b6", "checked it itself"], flags: ["#4ea8ff", "flagged it as wrong"],
   neutral: ["#5b6070", "only touched the link"]};
@@ -832,7 +839,7 @@ const ALL = 1e12; let NOW = ALL;           // 'all time' must stay finite: Infin
 const on = m => m <= NOW;
 function agentColors(id) {
   const s = st[id], touched = on(s.said) || on(s.did) || on(s.ok) || on(s.bad);
-  const top = !touched ? "#3a3f4b" : D[id] ? STANCE[D[id].stance]?.[0] || "#ff5c6c" : "#ff5c6c";
+  const sa = stanceAt(id), top = !touched && !sa ? "#3a3f4b" : D[id] ? STANCE[(sa || {stance: "neutral"}).stance]?.[0] || "#ff5c6c" : "#ff5c6c";
   let bot = "#3a3f4b", crack = false;
   if (on(s.did)) bot = "#f2a541";
   if (on(s.ok)) bot = "#3ddc97";
@@ -908,8 +915,8 @@ function update(v) {
   const bad = G.nodes.filter(n => isClaim(n) && on(st[n.id].bad)).length;
   const okClaims = G.nodes.filter(n => isClaim(n) && on(st[n.id].ok)).length;
   const lit = agents.filter(a => [st[a.id].said, st[a.id].did, st[a.id].ok, st[a.id].bad].some(on));
-  const cnt = k => lit.filter(a => D[a.id]?.stance === k).length;
-  const drift = Object.keys(D).length ? ` · <span style="color:#ff5c6c">${cnt("repeats") + cnt("amplifies")} passed it on</span> (<span style="color:#ff2fb4">${cnt("amplifies")} amplified</span>) · <span style="color:#9aa0a6">${cnt("neutral")} only touched the link</span>` : "";
+  const cnt = k => agents.filter(a => (stanceAt(a.id) || (lit.includes(a) && D[a.id] ? {stance: "neutral"} : null))?.stance === k).length;
+  const drift = Object.keys(D).length ? ` · <span style="color:#ff5c6c">${cnt("repeats") + cnt("amplifies")} passed it on</span> (<span style="color:#ff2fb4">${cnt("amplifies")} amplified</span>)` + (cnt("flags") ? ` · <span style="color:#4ea8ff">${cnt("flags")} flagged it</span>` : "") + ` · <span style="color:#9aa0a6">${cnt("neutral")} only touched the link</span>` : "";
   clock.innerHTML = (NOW === ALL ? "all time" : "+" + fmt(NOW)) + (Object.keys(D).length ? drift : ` · <span style="color:#ff5c6c">${believed} agents took it up</span>`) +
     (G.seed.kind === "url" ? ` · <span style="color:#3ddc97">${ok} ran a check that passed ✔</span>` : "") +
     (okClaims ? ` · <span style="color:#3ddc97">${okClaims} claims backed by the screen ✔</span>` : "") +
@@ -931,7 +938,11 @@ net.on("click", p => {
     const line = (lab, m, col) => m < Infinity ? `<div><span style="color:${col}">●</span> ${lab} at <b>+${fmt(m)}</b></div>` : "";
     if (n.kind === "agent") {
       const ins = told.filter(e => e.target === n.id).map(e => `<div>← told by <b>${esc(short(byId[e.source]?.label))}</b> (${e.evidence}, +${fmt(mins(e.at))})</div>`).join("");
-      const dd = D[n.id], stance = dd ? `<div style="margin:4px 0 8px;padding:8px;border-radius:6px;background:#1f2330"><span style="color:${STANCE[dd.stance]?.[0]};font-weight:700">● ${STANCE[dd.stance]?.[1] || dd.stance}</span><br>${esc(dd.gist)}<br><span style="color:#9aa0a6">“${esc(dd.cue)}”</span><br><span style="color:#9aa0a6;font-size:12px">first text: ${dd.channel} · row <code>${esc(dd.row).slice(0, 8)}</code></span></div>` : "";
+      const dd = D[n.id], pk = stanceAt(n.id);
+      const stance = dd ? `<div style="margin:4px 0 8px;padding:8px;border-radius:6px;background:#1f2330">` +
+        (pk ? `<span style="color:${STANCE[pk.stance]?.[0]};font-weight:700">● at its strongest: ${STANCE[pk.stance]?.[1]}</span><br>${esc(pk.gist)}<br><span style="color:#9aa0a6">“${esc(pk.cue)}”</span><br><span style="color:#9aa0a6;font-size:12px">+${fmt(mins(pk.at))} · ${pk.src} · row <code>${esc(pk.row).slice(0, 8)}</code></span>` : "") +
+        `<div style="margin-top:6px;font-size:12px;color:#c9ccd4">` + dd.timeline.filter(e => mins(e.at) <= NOW).slice(0, 10).map(e => `<div><span style="color:${STANCE[e.stance]?.[0]}">●</span> +${fmt(mins(e.at))} ${esc(e.gist)}</div>`).join("") +
+        (dd.timeline.length > 10 ? `<div style="color:#9aa0a6">… ${dd.timeline.length - 10} more</div>` : "") + `</div></div>` : "";
       info.innerHTML = `<div style="font-size:16px;font-weight:700;margin-bottom:6px">${esc(n.label)}</div>` + stance + line("said", s.said, "#ff5c6c") + line("did / acted", s.did, "#f2a541") +
         line("a check held up", s.ok, "#3ddc97") + line("a verifier run errored (not proof either way)", s.err ?? Infinity, "#9aa0a6") + line("its claim was contradicted by its screen", s.bad, "#ff5c6c") + (ins ? `<div style="margin-top:8px;font-weight:600">Heard it from</div>${ins}` : "") +
         `<div style="margin-top:8px;font-weight:600">Rows</div>` + rowList(s.edges.filter(e => e.source === n.id));
@@ -1007,7 +1018,8 @@ def page_belief():
         return
     drift = {}
     if seed.get("kind") == "url" and seed.get("value") == F1_URL and os.path.exists(f"{FINDINGS}/belief_drift_graffiti.json"):
-        drift = json.load(open(f"{FINDINGS}/belief_drift_graffiti.json"))  # claim-drift labels (first text per agent)
+        f72 = f"{FINDINGS}/belief_drift_graffiti_72h.json"  # first text + 72 h of chat, per-agent stance timeline
+        drift = json.load(open(f72 if os.path.exists(f72) else f"{FINDINGS}/belief_drift_graffiti.json"))
     html = BELIEF_HTML.replace("__DATA__", json.dumps(g)).replace("__DRIFT__", json.dumps(drift)).replace("__H__", "720")
     components.html(html, height=820, scrolling=False)
     meta = g.get("meta", {})
