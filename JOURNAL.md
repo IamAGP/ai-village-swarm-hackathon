@@ -253,3 +253,17 @@ Claude remains responsible for the running explorer and independent annotation.
   incrementally per image; (3) memory: each sub-agent holds ≤50 images (~52k image tokens) in context; (4) if
   killed, labels written so far survive and batches can be re-pulled from S3. The pilot (batch 0, 5×50) measures
   tokens and time before scaling to 26 batches.
+- 13:43–14:05 IST: **headless Claude Code on the box** for the screen audit (Read/Write/Edit only, `labeler` user,
+  subscription token from SSM `/ai-village/claude-oauth-token`, pasted by the user; it contained whitespace from
+  terminal wrapping, so the loader strips it). Test chunk 50/50 in 154 s; 2 descriptions checked against images.
+  10 parallel runs → **3,646 labels in 22 min**, then HTTP 429 "session limit" at 08:35 UTC. All remaining chunks
+  failed fast, and the watchdog stopped the box at 09:38 (correct behaviour). Did not resume: the labelled set is a
+  uniform random 61% of the frame, and resuming would burn the same limit that blocks the chat session.
+- Screen audit adjudication: 46 flags → 14 undetermined (actions after the screenshot), 12 weak, 1 labeller error,
+  **19 confirmed** (7 viewed by me). With the pilot's 2: 21 / 1,385 checkable = 1.5% [1.0–2.3%]. Pattern: "sent"
+  while still a draft (7/19). My first EVAL draft had three wrong counts (28 not "2–3×"; 7 models not 9; 10
+  descriptions checked not 8), caught on re-read before pushing.
+- Codex #24 (gpt-6.1-sol): 200 fresh packets, 152 eligible, 98 supported / 0 contradicted / 54 unverified (90 min).
+  Independent labels on 49 (seeded subset + her 4 hard cases), headless on the box with Grep allowed: κ 0.185.
+  Mine are lenient (45 supported vs 27), but **0 contradicted under both**. Not run on the other 151 (plan budget).
+- Box stopped ~11:00 UTC; 0 running.
