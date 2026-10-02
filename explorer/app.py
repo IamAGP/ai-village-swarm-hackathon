@@ -780,7 +780,7 @@ BELIEF_HTML = r"""
   <div id="net" style="height:__H__px;border-radius:10px;background:radial-gradient(circle at 50% 50%,#1b1d26 0%,#0e1117 70%)"></div>
   <div style="font-size:12.5px;color:#a9adb8;margin:6px 4px;line-height:1.6">
    Rings = time since the start (log): 1 min · 1 h · 1 day · 1 week. <b>Agents</b> are split circles:
-   top = what it <b>said</b>, bottom = what it <b>did</b> (<span style="color:#f2a541">●</span> acted,
+   top = what it <b>said</b> <span id="stlegend"></span>, bottom = what it <b>did</b> (<span style="color:#f2a541">●</span> acted,
    <span style="color:#3ddc97">●</span> checked &amp; held, <span style="color:#ff5c6c">✕</span> checked &amp; failed).
    <b>Claims</b> are diamonds: <span style="color:#3ddc97">◆</span> screen backs it · <span style="color:#ff5c6c">◆ cracked</span>
    screen contradicts it · <span style="color:#d9dbe1">◇</span> not checked. Dots = links/files touched.
@@ -795,6 +795,10 @@ BELIEF_HTML = r"""
 <script src="https://cdn.jsdelivr.net/npm/vis-network@9/standalone/umd/vis-network.min.js"></script>
 <script>
 const G = __DATA__;
+const D = (__DRIFT__).agents || {};      // claim drift per agent (how its first text relates to the original claim)
+const STANCE = {original: ["#b28dff", "the original claim"], repeats: ["#ff5c6c", "repeated it"], amplifies: ["#ff2fb4", "amplified it"],
+  hedges: ["#f2c14e", "passed it on with caution"], checks: ["#2ec4b6", "checked it itself"], flags: ["#4ea8ff", "flagged it as wrong"],
+  neutral: ["#5b6070", "only touched the link"]};
 const P = iso => Date.parse(iso.endsWith("Z") ? iso : iso + "Z");
 const T0 = P(G.t0), mins = iso => (P(iso) - T0) / 60000;
 const RMAX = 10080, rad = m => 80 + 330 * Math.log10(1 + Math.max(m, 0)) / Math.log10(1 + RMAX);
@@ -827,7 +831,8 @@ others.forEach((n, i) => { const ang = i * 2.39996 + (n.kind === "agent" ? 0 : 0
 const ALL = 1e12; let NOW = ALL;           // 'all time' must stay finite: Infinity <= Infinity is true
 const on = m => m <= NOW;
 function agentColors(id) {
-  const s = st[id], top = on(s.said) || on(s.did) || on(s.ok) || on(s.bad) ? "#ff5c6c" : "#3a3f4b";
+  const s = st[id], touched = on(s.said) || on(s.did) || on(s.ok) || on(s.bad);
+  const top = !touched ? "#3a3f4b" : D[id] ? STANCE[D[id].stance]?.[0] || "#ff5c6c" : "#ff5c6c";
   let bot = "#3a3f4b", crack = false;
   if (on(s.did)) bot = "#f2a541";
   if (on(s.ok)) bot = "#3ddc97";
@@ -902,7 +907,10 @@ function update(v) {
   const ok = agents.filter(a => on(st[a.id].ok)).length;
   const bad = G.nodes.filter(n => isClaim(n) && on(st[n.id].bad)).length;
   const okClaims = G.nodes.filter(n => isClaim(n) && on(st[n.id].ok)).length;
-  clock.innerHTML = (NOW === ALL ? "all time" : "+" + fmt(NOW)) + ` · <span style="color:#ff5c6c">${believed} agents took it up</span>` +
+  const lit = agents.filter(a => [st[a.id].said, st[a.id].did, st[a.id].ok, st[a.id].bad].some(on));
+  const cnt = k => lit.filter(a => D[a.id]?.stance === k).length;
+  const drift = Object.keys(D).length ? ` · <span style="color:#ff5c6c">${cnt("repeats") + cnt("amplifies")} passed it on</span> (<span style="color:#ff2fb4">${cnt("amplifies")} amplified</span>) · <span style="color:#9aa0a6">${cnt("neutral")} only touched the link</span>` : "";
+  clock.innerHTML = (NOW === ALL ? "all time" : "+" + fmt(NOW)) + (Object.keys(D).length ? drift : ` · <span style="color:#ff5c6c">${believed} agents took it up</span>`) +
     (G.seed.kind === "url" ? ` · <span style="color:#3ddc97">${ok} ran a check that passed ✔</span>` : "") +
     (okClaims ? ` · <span style="color:#3ddc97">${okClaims} claims backed by the screen ✔</span>` : "") +
     (bad ? ` · <span style="color:#ff5c6c">${bad} claims contradicted by the agent's own screen ✕</span>` : "");
@@ -923,7 +931,8 @@ net.on("click", p => {
     const line = (lab, m, col) => m < Infinity ? `<div><span style="color:${col}">●</span> ${lab} at <b>+${fmt(m)}</b></div>` : "";
     if (n.kind === "agent") {
       const ins = told.filter(e => e.target === n.id).map(e => `<div>← told by <b>${esc(short(byId[e.source]?.label))}</b> (${e.evidence}, +${fmt(mins(e.at))})</div>`).join("");
-      info.innerHTML = `<div style="font-size:16px;font-weight:700;margin-bottom:6px">${esc(n.label)}</div>` + line("said", s.said, "#ff5c6c") + line("did / acted", s.did, "#f2a541") +
+      const dd = D[n.id], stance = dd ? `<div style="margin:4px 0 8px;padding:8px;border-radius:6px;background:#1f2330"><span style="color:${STANCE[dd.stance]?.[0]};font-weight:700">● ${STANCE[dd.stance]?.[1] || dd.stance}</span><br>${esc(dd.gist)}<br><span style="color:#9aa0a6">“${esc(dd.cue)}”</span><br><span style="color:#9aa0a6;font-size:12px">first text: ${dd.channel} · row <code>${esc(dd.row).slice(0, 8)}</code></span></div>` : "";
+      info.innerHTML = `<div style="font-size:16px;font-weight:700;margin-bottom:6px">${esc(n.label)}</div>` + stance + line("said", s.said, "#ff5c6c") + line("did / acted", s.did, "#f2a541") +
         line("a check held up", s.ok, "#3ddc97") + line("a verifier run errored (not proof either way)", s.err ?? Infinity, "#9aa0a6") + line("its claim was contradicted by its screen", s.bad, "#ff5c6c") + (ins ? `<div style="margin-top:8px;font-weight:600">Heard it from</div>${ins}` : "") +
         `<div style="margin-top:8px;font-weight:600">Rows</div>` + rowList(s.edges.filter(e => e.source === n.id));
     } else {
@@ -939,6 +948,7 @@ net.on("click", p => {
       (e.rows ? `source post <code>${esc(e.rows[0])}</code><br>first use <code>${esc(e.rows[1])}</code>` : `row <code>${esc(e.row)}</code>`);
   }
 });
+if (Object.keys(D).length) document.getElementById("stlegend").innerHTML = "(" + ["repeats", "amplifies", "hedges", "checks", "flags", "neutral"].map(k => `<span style="color:${STANCE[k][0]}">●</span> ${STANCE[k][1]}`).join(" · ") + ")";
 update(1000);
 setTimeout(() => net.fit({animation: false}), 50);
 </script>
@@ -995,7 +1005,10 @@ def page_belief():
     if not [n for n in g["nodes"] if n["kind"] == "agent"]:
         st.warning("Nothing to draw for this seed.")
         return
-    html = BELIEF_HTML.replace("__DATA__", json.dumps(g)).replace("__H__", "720")
+    drift = {}
+    if seed.get("kind") == "url" and seed.get("value") == F1_URL and os.path.exists(f"{FINDINGS}/belief_drift_graffiti.json"):
+        drift = json.load(open(f"{FINDINGS}/belief_drift_graffiti.json"))  # claim-drift labels (first text per agent)
+    html = BELIEF_HTML.replace("__DATA__", json.dumps(g)).replace("__DRIFT__", json.dumps(drift)).replace("__H__", "720")
     components.html(html, height=820, scrolling=False)
     meta = g.get("meta", {})
     st.caption(f"{len(g['nodes'])} nodes, {len(g['edges'])} edges. Engine: explorer/belief_graph.py (docs/BELIEF_GRAPH.md). "
