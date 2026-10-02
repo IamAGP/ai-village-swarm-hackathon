@@ -1,0 +1,4 @@
+family,sample_n,eligible_n,excluded_n,supported_30,contradicted_30,unverified_30,supported_90,contradicted_90,unverified_90
+Claude,55,38,17,21,0,17,21,0,17
+Gemini,48,39,9,28,0,11,29,0,10
+OpenAI,72,60,12,39,0,21,39,0,21
