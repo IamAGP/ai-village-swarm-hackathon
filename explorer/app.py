@@ -579,6 +579,151 @@ def page_spread():
                "Time steps are uneven on purpose — most spreading happens in the first hours.")
 
 
+CHANNEL_WORD = {"chat": "repeated it in chat", "model_output": "repeated it in its reasoning",
+                "memory": "saved it to memory", "action": "acted on it"}
+CASCADE_FRAMES_MIN = [1, 2, 5, 10, 30, 60, 180, 360, 720, 1440, 1590, 2160, 2880]
+
+
+def fmt_minutes(m):
+    if m < 1:
+        return "<1 min"
+    if m < 60:
+        return f"{m:.0f} min"
+    if m < 48 * 60:
+        return f"{m / 60:.1f} h"
+    return f"{m / 1440:.1f} days"
+
+
+def page_cascade():
+    """Finding 1 as one story: who repeated the claim, how fast, and when anyone first checked it."""
+    import math
+    import plotly.graph_objects as go
+
+    if not os.path.exists(f"{FINDINGS}/f1_verify.parquet"):
+        st.warning("Run explorer/findings.py on this box first.")
+        return
+    names = agent_names()
+    short = lambda n: n.replace("Claude ", "")  # noqa: E731
+    moments = q(f"SELECT * FROM read_parquet('{FINDINGS}/f1_moments.parquet') ORDER BY created_at")
+    t0 = moments.created_at.min()  # Opus 5's announcement (chat eb0a037a)
+    author = {a for a, n in names.items() if n == "Claude Opus 5"}
+    uses = q(f"SELECT actor, channel, first_at, row_id FROM read_parquet('{TRACE}/trace_first_use.parquet') "
+             "WHERE url = ? AND NOT is_human", [F1_URL])
+    rep = (uses[~uses.actor.isin(author) & (uses.first_at >= t0)].sort_values("first_at")
+           .groupby("actor", as_index=False).head(1))
+    rep = rep.assign(name=rep.actor.map(lambda a: names.get(a, a)),
+                     m=(rep.first_at - t0).dt.total_seconds() / 60)
+    ver = q(f"SELECT agent AS name, created_at, row_id FROM read_parquet('{FINDINGS}/f1_verify.parquet') "
+            "WHERE status = 'success' ORDER BY created_at")
+    ver = ver[ver.created_at >= t0].groupby("name", as_index=False).head(1)
+    ver = ver.assign(m=(ver.created_at - t0).dt.total_seconds() / 60)
+    horizon = 48 * 60
+    first_check = ver.m.min()
+    n1h = int((rep.m <= 60).sum())
+    n_before = int((rep.m < first_check).sum())
+
+    st.markdown(f"<div style='font-size:2.0rem;font-weight:700;line-height:1.25'>One AI announced a maths "
+                f"breakthrough. <span style='color:#ff5c6c'>{n1h} others repeated it within an hour.</span><br>"
+                f"<span style='color:#3ddc97'>The first independent check came {first_check / 60:.1f} hours later.</span>"
+                f"</div>", unsafe_allow_html=True)
+    st.markdown(f"Claude Opus 5 posted *\"two open conjectures … are now **disproved**\"* with verifier scripts "
+                f"({t0:%b %d, %H:%M} UTC). By the time any other agent ran a verifier successfully, "
+                f"**{n_before} agents** had already passed the claim on: in chat, in their notes, in news articles.")
+
+    late = int((rep.m > horizon).sum())
+    rep, ver = rep[rep.m <= horizon], ver[ver.m <= horizon]  # draw the first 48 h only; later repeats are counted below
+    rows = list(rep.name) + [n for n in ver.name if n not in set(rep.name)]
+    y = {n: i + 1 for i, n in enumerate(rows)}
+    ylabels = ["Opus 5 (author)"] + [short(n) for n in rows]
+    x_of = lambda m: max(m, 0.5)  # noqa: E731  log axis: put sub-minute events at 30 s
+
+    def traces(until_m):
+        r = rep[rep.m <= until_m]
+        v = ver[ver.m <= until_m]
+        out = [go.Scatter(x=[0.5], y=[0], mode="markers", marker=dict(symbol="star", size=22, color="#b28dff"),
+                          hovertext=[f"Claude Opus 5 announces the disproofs<br>{t0:%Y-%m-%d %H:%M} UTC<br>chat eb0a037a"],
+                          hoverinfo="text", name="announcement"),
+               go.Scatter(x=[x_of(m) for m in r.m], y=[y[n] for n in r.name], mode="markers",
+                          marker=dict(size=13, color="#ff5c6c", line=dict(width=1, color="#ffffff")),
+                          hovertext=[f"<b>{n}</b><br>+{fmt_minutes(m)}: {CHANNEL_WORD.get(c, c)}<br>row {rid[:8]}"
+                                     for n, m, c, rid in zip(r.name, r.m, r.channel, r.row_id)],
+                          hoverinfo="text", name="repeated the claim"),
+               go.Scatter(x=[x_of(m) for m in v.m], y=[y[n] for n in v.name], mode="markers+text",
+                          marker=dict(symbol="diamond", size=15, color="#3ddc97", line=dict(width=1, color="#ffffff")),
+                          text=["✔"] * len(v), textposition="middle right", textfont=dict(color="#3ddc97", size=14),
+                          hovertext=[f"<b>{n}</b><br>+{fmt_minutes(m)}: ran a verifier, success signal<br>row {rid[:8]}"
+                                     for n, m, rid in zip(v.name, v.m, v.row_id)],
+                          hoverinfo="text", name="checked it (verifier passed)")]
+        return out
+
+    def shapes(until_m):
+        end = min(until_m, first_check)
+        sh = [dict(type="rect", xref="x", yref="paper", x0=0.5, x1=x_of(end), y0=0, y1=1,
+                   fillcolor="rgba(255,92,108,0.10)", line=dict(width=0), layer="below"),
+              dict(type="line", xref="x", yref="paper", x0=x_of(until_m), x1=x_of(until_m), y0=0, y1=1,
+                   line=dict(color="rgba(255,255,255,0.35)", width=1, dash="dot"))]
+        if until_m >= 60:
+            sh.append(dict(type="line", xref="x", yref="paper", x0=60, x1=60, y0=0, y1=1,
+                           line=dict(color="#ff5c6c", width=1, dash="dash")))
+        if until_m >= first_check:
+            sh.append(dict(type="line", xref="x", yref="paper", x0=first_check, x1=first_check, y0=0, y1=1,
+                           line=dict(color="#3ddc97", width=2)))
+        return sh
+
+    def notes(until_m):
+        a = []
+        if until_m >= 60:
+            a.append(dict(x=1.778, xref="x", y=1.02, yref="paper", text=f"1 hour: {n1h} repeats",
+                          showarrow=False, font=dict(color="#ff5c6c", size=13), xanchor="center"))
+        if until_m >= first_check:
+            a.append(dict(x=math.log10(first_check), xref="x", y=1.02, yref="paper",
+                          text=f"first real check: +{first_check / 60:.1f} h", showarrow=False,
+                          font=dict(color="#3ddc97", size=13), xanchor="center"))
+        a.append(dict(x=0.02, xref="paper", y=0.02, yref="paper", text="unchecked window", showarrow=False,
+                      font=dict(color="rgba(255,92,108,0.7)", size=12), xanchor="left"))
+        last_rep = rep.m[rep.m < first_check].max()
+        if until_m >= last_rep + 60:
+            gap_x = (math.log10(last_rep) + math.log10(first_check)) / 2
+            a.append(dict(x=gap_x, xref="x", y=0.45, yref="paper", showarrow=False, align="center",
+                          text=f"<b>{(first_check - last_rep) / 60:.0f} hours: no new repeats, no checks</b><br>"
+                               f"{n_before} agents had already passed it on.<br>Nobody had run the verifier.",
+                          font=dict(color="rgba(255,255,255,0.8)", size=14)))
+        return a
+
+    def title(until_m):
+        r = int((rep.m <= until_m).sum())
+        v = int((ver.m <= until_m).sum())
+        return f"+{fmt_minutes(until_m)}   ·   {r} agents repeated it   ·   {v} checked it"
+
+    frames = [go.Frame(data=traces(t), name=fmt_minutes(t),
+                       layout=go.Layout(shapes=shapes(t), annotations=notes(t), title=dict(text=title(t))))
+              for t in CASCADE_FRAMES_MIN]
+    ticks = [1, 5, 15, 60, 180, 720, 1440, 2880]
+    fig = go.Figure(data=traces(horizon), frames=frames)
+    fig.update_layout(
+        height=max(520, 26 * len(ylabels) + 160), template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        title=dict(text=title(horizon), font=dict(size=15), x=0.01, xanchor="left"), shapes=shapes(horizon),
+        annotations=notes(horizon),
+        xaxis=dict(type="log", range=[-0.35, 3.55], tickvals=ticks,
+                   ticktext=["1 min", "5 min", "15 min", "1 h", "3 h", "12 h", "1 day", "2 days"],
+                   title="time since the announcement (log scale)", gridcolor="rgba(255,255,255,0.08)"),
+        yaxis=dict(tickvals=list(range(len(ylabels))), ticktext=ylabels, autorange="reversed",
+                   gridcolor="rgba(255,255,255,0.05)"),
+        legend=dict(orientation="h", y=-0.10, x=0.14, yanchor="top"), margin=dict(l=10, r=30, t=70, b=120),
+        updatemenus=[dict(type="buttons", direction="left", x=0, xanchor="left", y=-0.10, yanchor="top",
+                          bgcolor="#ff5c6c", font=dict(color="#ffffff", size=14), showactive=False, buttons=[
+            dict(label="▶  replay", method="animate",
+                 args=[[fmt_minutes(t) for t in CASCADE_FRAMES_MIN],
+                       dict(frame=dict(duration=700, redraw=True), transition=dict(duration=250), mode="immediate")])])])
+    st.plotly_chart(fig, width="stretch")
+    st.caption("Red: the first time each agent used the claim's link (chat, reasoning, memory or an action). "
+               "Green ✔: the first time each other agent ran one of Opus 5's verify_conj*.py scripts with a success "
+               "signal in the output (a keyword heuristic, not proof the maths was checked). Hover any mark for the "
+               f"dataset row behind it. Shown: first 48 h; {late} later repeats not drawn. "
+               "Method and caveats: docs/FINDINGS.md §1.")
+
+
 def page_race():
     """Finding 1 in one picture: how many agents repeated the claim vs. how many actually checked it."""
     st.header("Claim vs. check")
@@ -650,7 +795,7 @@ def page_sql():
             st.error(str(e))
 
 
-PAGES = {"Watch it spread": page_spread, "Claim vs. check": page_race,
+PAGES = {"The cascade": page_cascade, "Watch it spread": page_spread, "Claim vs. check": page_race,
          "Overview": page_overview, "Trace": page_trace, "Agent": page_agent, "Session replay": page_session,
          "Chat": page_chat, "Day timeline": page_day, "SQL": page_sql}
 st.sidebar.title("AI Village explorer")
