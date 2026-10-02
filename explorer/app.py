@@ -724,6 +724,201 @@ def page_cascade():
                "Method and caveats: docs/FINDINGS.md §1.")
 
 
+
+# ------------------------------------------------------------------ belief graph
+BELIEF_JSON = f"{FINDINGS}/belief_graffiti.json"
+
+
+def _belief_graph_url(url):
+    """Temporary builder (issue #26 contract) for a URL seed; replaced by explorer/belief_graph.py when it lands."""
+    names = agent_names()
+    uses = q(f"SELECT actor, channel, first_at, row_id FROM read_parquet('{TRACE}/trace_first_use.parquet') "
+             "WHERE url = ? AND NOT is_human ORDER BY first_at", [url])
+    edges = q(f"SELECT source, target, t_at, evidence, source_row, target_row FROM "
+              f"read_parquet('{TRACE}/trace_edges_scored.parquet') WHERE url = ? "
+              "AND evidence IN ('explicit', 'temporal', 'mention') ORDER BY t_at", [url])
+    t0 = uses.first_at.min()
+    iso = lambda t: pd.Timestamp(t).strftime("%Y-%m-%dT%H:%M:%S")  # noqa: E731
+    nodes = [{"id": f"artifact:{url}", "kind": "artifact", "label": url.split("/")[-1] or url, "first_at": iso(t0)}]
+    seen = set()
+    out = []
+    for r in uses.itertuples():
+        a = f"agent:{r.actor}"
+        if a not in seen:
+            seen.add(a)
+            nodes.append({"id": a, "kind": "agent", "label": names.get(r.actor, r.actor), "first_at": iso(r.first_at)})
+        kind = "said" if r.channel in ("chat", "model_output") else "did"
+        out.append({"id": f"{kind}:{r.row_id}", "kind": kind, "source": a, "target": f"artifact:{url}",
+                    "at": iso(r.first_at), "channel": r.channel, "row": r.row_id})
+    for e in edges.itertuples():
+        out.append({"id": f"told:{e.source_row}:{e.target_row}", "kind": "told", "source": f"agent:{e.source}",
+                    "target": f"agent:{e.target}", "at": iso(e.t_at), "evidence": e.evidence,
+                    "rows": [e.source_row, e.target_row]})
+    if url == F1_URL and os.path.exists(f"{FINDINGS}/f1_verify.parquet"):
+        by_name = {v: k for k, v in names.items()}
+        ver = q(f"SELECT agent, created_at, row_id, status FROM read_parquet('{FINDINGS}/f1_verify.parquet') ORDER BY created_at")
+        for r in ver.itertuples():
+            a = f"agent:{by_name.get(r.agent, r.agent)}"
+            if a not in seen:
+                seen.add(a)
+                nodes.append({"id": a, "kind": "agent", "label": r.agent, "first_at": iso(r.created_at)})
+            out.append({"id": f"checked:{r.row_id}", "kind": "checked", "source": a, "target": f"artifact:{url}",
+                        "at": iso(r.created_at), "row": r.row_id, "basis": "verifier",
+                        "status": {"success": "supported", "fail": "contradicted"}.get(r.status, "unknown")})
+    out.sort(key=lambda e: (e["at"], e["id"]))
+    return {"seed": {"kind": "url", "value": url, "label": url}, "t0": iso(t0), "nodes": nodes, "edges": out}
+
+
+BELIEF_HTML = r"""
+<div id="wrap" style="display:flex;gap:14px;font-family:Inter,system-ui,sans-serif;color:#e8e8ea">
+ <div style="flex:1;min-width:0">
+  <div id="hud" style="display:flex;align-items:center;gap:14px;margin:0 0 6px 4px">
+   <button id="play" style="background:#ff5c6c;color:#fff;border:0;border-radius:6px;padding:8px 16px;font-size:15px;cursor:pointer">▶ play</button>
+   <input id="t" type="range" min="0" max="1000" value="1000" style="flex:1">
+   <div id="clock" style="min-width:250px;font-size:15px;font-weight:600"></div>
+  </div>
+  <div id="net" style="height:__H__px;border-radius:10px;background:radial-gradient(circle at 50% 50%,#1b1d26 0%,#0e1117 70%)"></div>
+  <div style="font-size:12.5px;color:#a9adb8;margin:6px 4px">
+   Rings = time since the first use (log): inner 1 min · 1 h · 1 day · outer 1 week. Each agent is split:
+   <b>top = what it said</b>, <b>bottom = what it did</b>.
+   <span style="color:#ff5c6c">● said/believed</span> &nbsp;<span style="color:#f2a541">● acted on it</span>
+   &nbsp;<span style="color:#3ddc97">● checked, held up</span> &nbsp;<span style="color:#ff5c6c">✕ checked, failed</span>
+   &nbsp;· arrows: who told whom (thick = adopter named the source, thin = timing only).
+  </div>
+ </div>
+ <div id="side" style="width:300px;flex:none;background:#161922;border-radius:10px;padding:14px;font-size:13.5px;line-height:1.45;height:__H__px;overflow:auto">
+  <div style="font-weight:700;font-size:15px;margin-bottom:6px">Evidence</div>
+  <div id="info" style="color:#c9ccd4">Click any agent or arrow to see what it said, what it did, and the dataset rows behind it.</div>
+ </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9/standalone/umd/vis-network.min.js"></script>
+<script>
+const G = __DATA__;
+const T0 = Date.parse(G.t0 + "Z");
+const mins = iso => (Date.parse(iso + "Z") - T0) / 60000;
+const RMAX = 10080;                        // 1 week, outer ring
+const rad = m => 70 + 330 * Math.log10(1 + Math.max(m, 0)) / Math.log10(1 + RMAX);
+const fmt = m => m < 1 ? "<1 min" : m < 60 ? Math.round(m) + " min" : m < 2880 ? (m / 60).toFixed(1) + " h" : (m / 1440).toFixed(1) + " days";
+const seed = G.nodes.find(n => n.kind === "artifact");
+const agents = G.nodes.filter(n => n.kind === "agent").map(n => ({...n, m: mins(n.first_at)}));
+agents.sort((a, b) => a.m - b.m);
+const st = {};                               // per-agent timeline
+agents.forEach(a => st[a.id] = {said: Infinity, did: Infinity, ok: Infinity, bad: Infinity, rows: []});
+G.edges.forEach(e => {
+  const s = st[e.source]; if (!s) return; const m = mins(e.at);
+  if (e.kind === "said") s.said = Math.min(s.said, m);
+  if (e.kind === "did") s.did = Math.min(s.did, m);
+  if (e.kind === "checked" && e.status === "supported") s.ok = Math.min(s.ok, m);
+  if (e.kind === "checked" && e.status === "contradicted") s.bad = Math.min(s.bad, m);
+  if (e.kind !== "told") s.rows.push(e);
+});
+// golden-angle placement on log-time radius: early believers near the claim, late ones far out
+const pos = {}; agents.forEach((a, i) => { const ang = i * 2.39996; const r = rad(a.m); pos[a.id] = {x: r * Math.cos(ang), y: r * Math.sin(ang)}; });
+const ALL = 1e12;                          // 'all time' must stay finite: Infinity <= Infinity is true
+let NOW = ALL;
+function colors(id) {
+  const s = st[id], top = s.said <= NOW || s.did <= NOW ? "#ff5c6c" : "#3a3f4b";
+  let bot = "#3a3f4b", crack = false;
+  if (s.did <= NOW) bot = "#f2a541";
+  if (s.ok <= NOW) bot = "#3ddc97";
+  if (s.bad <= NOW && !(s.ok <= NOW)) { bot = "#ff5c6c"; crack = true; }
+  return {top, bot, crack, lit: top !== "#3a3f4b" || bot !== "#3a3f4b"};
+}
+const R = 15;
+function agentRenderer({ctx, id, x, y, state: {selected, hover}, label}) {
+  return {drawNode() {
+    const c = colors(id), r = selected || hover ? R + 3 : R;
+    ctx.save(); ctx.globalAlpha = c.lit ? 1 : 0.45;
+    ctx.beginPath(); ctx.arc(x, y, r, Math.PI, 0); ctx.closePath(); ctx.fillStyle = c.top; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI); ctx.closePath(); ctx.fillStyle = c.bot; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x - r, y); ctx.lineTo(x + r, y); ctx.strokeStyle = "#0e1117"; ctx.lineWidth = 2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.strokeStyle = selected ? "#ffffff" : "rgba(255,255,255,0.55)"; ctx.lineWidth = selected ? 2.5 : 1; ctx.stroke();
+    if (c.crack) { ctx.beginPath(); ctx.moveTo(x - 6, y + 3); ctx.lineTo(x - 1, y + 9); ctx.lineTo(x + 3, y + 4); ctx.lineTo(x + 7, y + 11); ctx.strokeStyle = "#0e1117"; ctx.lineWidth = 2; ctx.stroke(); }
+    ctx.globalAlpha = c.lit ? 1 : 0.5; ctx.fillStyle = "#e8e8ea"; ctx.font = "12px Inter, sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(label, x, y + r + 14); ctx.restore();
+  }, nodeDimensions: {width: 2 * R, height: 2 * R}};
+}
+const nodes = new vis.DataSet([{id: seed.id, label: "the claim", shape: "star", size: 26, fixed: true, x: 0, y: 0,
+  color: {background: "#b28dff", border: "#ffffff"}, font: {color: "#e8e8ea", size: 14, vadjust: -6}}]
+  .concat(agents.map(a => ({id: a.id, label: a.label.replace("Claude ", ""), shape: "custom", ctxRenderer: agentRenderer, fixed: true, x: pos[a.id].x, y: pos[a.id].y}))));
+// one incoming "told" edge per agent: the strongest evidence, then the earliest (keeps it readable)
+const rankEv = {explicit: 0, temporal: 1, mention: 2};
+const bestIn = {};
+G.edges.filter(e => e.kind === "told" && st[e.source] && st[e.target] && e.source !== e.target).forEach(e => {
+  const b = bestIn[e.target];
+  if (!b || rankEv[e.evidence] < rankEv[b.evidence] || (rankEv[e.evidence] === rankEv[b.evidence] && e.at < b.at)) bestIn[e.target] = e;
+});
+const told = Object.values(bestIn);
+const edges = new vis.DataSet(told.map(e => ({id: e.id, from: e.source, to: e.target, arrows: {to: {enabled: true, scaleFactor: 0.5}},
+  width: e.evidence === "explicit" ? 2.6 : 0.8, dashes: e.evidence === "mention", color: {color: "rgba(255,92,108,0.55)", highlight: "#ffffff"},
+  smooth: {type: "curvedCW", roundness: 0.15}, hidden: false})));
+const net = new vis.Network(document.getElementById("net"), {nodes, edges}, {physics: false, interaction: {hover: true, zoomView: true}});
+function rings(ctx) {
+  [[1, "1 min"], [60, "1 h"], [1440, "1 day"], [RMAX, "1 week"]].forEach(([m, t]) => {
+    const r = rad(m); ctx.beginPath(); ctx.arc(0, 0, r, 0, 2 * Math.PI); ctx.strokeStyle = "rgba(255,255,255,0.10)"; ctx.setLineDash([4, 6]); ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(255,255,255,0.40)"; ctx.font = "12px Inter"; ctx.fillText(t, r + 4, -4);
+  });
+  if (NOW < ALL) { const r = rad(NOW); ctx.beginPath(); ctx.arc(0, 0, r, 0, 2 * Math.PI); ctx.strokeStyle = "rgba(255,92,108,0.35)"; ctx.lineWidth = 2; ctx.stroke(); }
+}
+net.on("beforeDrawing", rings);
+const sl = document.getElementById("t"), clock = document.getElementById("clock");
+const toM = v => Math.pow(10, v / 1000 * Math.log10(1 + RMAX)) - 1;
+function update(v) {
+  NOW = v >= 1000 ? ALL : toM(v);
+  edges.update(told.map(e => ({id: e.id, hidden: mins(e.at) > NOW})));
+  const said = agents.filter(a => Math.min(st[a.id].said, st[a.id].did) <= NOW).length;
+  const ok = agents.filter(a => st[a.id].ok <= NOW).length;
+  clock.innerHTML = (NOW === ALL ? "all time" : "+" + fmt(NOW)) + ` · <span style="color:#ff5c6c">${said} believed</span> · <span style="color:#3ddc97">${ok} checked</span>`;
+  net.redraw();
+}
+sl.oninput = () => update(+sl.value);
+let timer = null;
+document.getElementById("play").onclick = () => {
+  if (timer) { clearInterval(timer); timer = null; document.getElementById("play").textContent = "▶ play"; return; }
+  let v = 0; document.getElementById("play").textContent = "❚❚ pause";
+  timer = setInterval(() => { v += 4; sl.value = v; update(v); if (v >= 1000) { clearInterval(timer); timer = null; document.getElementById("play").textContent = "▶ play"; } }, 40);
+};
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c]));
+net.on("click", p => {
+  const info = document.getElementById("info");
+  if (p.nodes.length && st[p.nodes[0]]) {
+    const a = agents.find(x => x.id === p.nodes[0]), s = st[a.id];
+    const line = (lab, m, col) => m < Infinity ? `<div><span style="color:${col}">●</span> ${lab} at <b>+${fmt(m)}</b></div>` : "";
+    const ins = told.filter(e => e.target === a.id).map(e => `<div>← told by <b>${esc(agents.find(x => x.id === e.source).label)}</b> (${e.evidence}, +${fmt(mins(e.at))})<br><code>${esc(e.rows[0]).slice(0,8)} → ${esc(e.rows[1]).slice(0,8)}</code></div>`).join("");
+    info.innerHTML = `<div style="font-size:16px;font-weight:700;margin-bottom:6px">${esc(a.label)}</div>` +
+      line("said it", s.said, "#ff5c6c") + line("acted on it", s.did, "#f2a541") + line("checked it, held up", s.ok, "#3ddc97") + line("checked it, failed", s.bad, "#ff5c6c") +
+      (ins ? `<div style="margin-top:8px;font-weight:600">Where it came from</div>${ins}` : "") +
+      `<div style="margin-top:8px;font-weight:600">Rows</div>` + s.rows.slice(0, 12).map(e => `<div><code>${esc(e.row).slice(0,8)}</code> ${e.kind}${e.channel ? " · " + e.channel : ""}${e.status ? " · " + e.status : ""} · +${fmt(mins(e.at))}</div>`).join("");
+  } else if (p.edges.length) {
+    const e = told.find(x => x.id === p.edges[0]);
+    if (e) info.innerHTML = `<b>${esc(agents.find(x => x.id === e.source).label)}</b> → <b>${esc(agents.find(x => x.id === e.target).label)}</b><br>evidence: <b>${e.evidence}</b> at +${fmt(mins(e.at))}<br>source post <code>${esc(e.rows[0])}</code><br>first use <code>${esc(e.rows[1])}</code>`;
+  }
+});
+update(1000);
+setTimeout(() => net.fit({animation: false}), 50);
+</script>
+"""
+
+
+def page_belief():
+    """Belief ripples: who believed a claim, from whom, how fast, and who actually checked it."""
+    import streamlit.components.v1 as components
+
+    st.markdown("<div style='font-size:1.9rem;font-weight:700;line-height:1.2'>Belief ripples</div>"
+                "<div style='color:#a9adb8;margin-bottom:6px'>A claim sits at the centre. Each agent appears on the "
+                "ring of <i>when</i> it first believed it, split into what it <b>said</b> and what it <b>did</b>. "
+                "Press play to watch belief spread, and see who actually checked.</div>", unsafe_allow_html=True)
+    url = st.text_input("Claim / link at the centre", value=st.query_params.get("url", F1_URL))
+    if url == F1_URL and os.path.exists(BELIEF_JSON):
+        g = json.load(open(BELIEF_JSON))  # Codex's engine output (issue #26), when present
+    else:
+        g = _belief_graph_url(url)
+    if len([n for n in g["nodes"] if n["kind"] == "agent"]) == 0:
+        st.warning("No agent used this link.")
+        return
+    html = BELIEF_HTML.replace("__DATA__", json.dumps(g)).replace("__H__", "720")
+    components.html(html, height=820, scrolling=False)
+
 def page_race():
     """Finding 1 in one picture: how many agents repeated the claim vs. how many actually checked it."""
     st.header("Claim vs. check")
@@ -795,7 +990,7 @@ def page_sql():
             st.error(str(e))
 
 
-PAGES = {"The cascade": page_cascade, "Watch it spread": page_spread, "Claim vs. check": page_race,
+PAGES = {"Belief ripples": page_belief, "The cascade": page_cascade, "Watch it spread": page_spread, "Claim vs. check": page_race,
          "Overview": page_overview, "Trace": page_trace, "Agent": page_agent, "Session replay": page_session,
          "Chat": page_chat, "Day timeline": page_day, "SQL": page_sql}
 st.sidebar.title("AI Village explorer")
