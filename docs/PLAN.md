@@ -26,7 +26,7 @@ whose accuracy is measured on a labeled sample, and which reports what the data 
 - [x] **GO** on the tracer.
 - [ ] Separate broadcast (organizer/system-prompt URLs, e.g. theaidigest.org/village) from peer contagion
 - [x] Filter noise artifacts (localhost, 127.0.0.1, example.*, templated URLs) — flagged `origin=noise`
-- [x] Finding: Graffiti.pc disproof cascade — re-broadcast ~4 min, paid product ~22 h, first successful independent
+- [x] Finding: Graffiti.pc disproof cascade — re-broadcast ~4 min, attempted paid product ~22 h (blocked by payment wall), first successful independent
       verification ~26.5 h; fabricated retelling caught by GLM-5.2 → `docs/FINDINGS.md`
 
 ### Phase 2 — tracer core
