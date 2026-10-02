@@ -332,3 +332,33 @@ Code, five synthetic tests, EVAL protocol/results and aggregate-only CSV are rev
 in git, no AWS start/stop, no tracer rebuild. The large label upload initially hit SSM's document-size
 limit (MaxDocumentSizeExceeded); gzip transport succeeded without changing the label content.
 Claude owns independent interpretation and the running explorer's lifecycle.
+
+
+## 2026-10-02 — #26 belief graph engine
+
+Fetched origin and created codex/26 from latest main c877b29. Claude owns the concurrent frontend;
+engine code/derived outputs stay isolated under /data/codex26 and /data/findings. Implemented the
+agreed JSON contract with deterministic UTC ordering, row references, URL/claim/agent seeds and
+first-hop agent windows/caps. Cap selection keeps complete evidence groups so an early node ordering
+cannot exhaust the budget on disconnected agents. Raw message text is not exported or committed.
+
+Actual schemas confirmed the verifier table's heuristic three-state signals and the screen JSON's
+lack of an adjudication field. Only EVAL-named confirmed prefixes or explicit structured confirmation
+produce red screen edges; staleness/rejection overrides them. No-action-between is insufficient.
+Screen edges are marked retrospective; verifier failure remains a run signal, not mathematical
+contradiction. The allowlist covers ten explicitly named cases, not all nineteen in the aggregate.
+
+Real Graffiti build: 30 nodes, 382 edges (24 said, 47 did, 28 told, 283 checks), 0.329 s, deterministic
+repeat. Output /data/findings/belief_graffiti.json, SHA256
+f2eab648b3754440f3146881c0af46a22872b1b023833d458b67ba00e4c79615 (first export).
+Both requested screen-contradiction examples work and retain the shared screenshot row reference;
+an April agent run enforced 60 nodes and reported 244/552 nodes/edges cut. CLI logs only metrics to
+stderr and emits JSON on stdout. Tests include read-only file mounting, seeds, provenance, windows,
+conservative adjudication, deterministic caps and order/duplicate independence. No source writes,
+instance lifecycle actions, Streamlit restart, or dataset content in git.
+
+Final engine adds bounded defaults for screen-only agents, invalid-source checks and explicit screen
+confirmation metadata. 64 tests passed in 1.59 s. Final graph: same 30/382 counts, 157,210 bytes,
+SHA256 028250eccc5827381ac9d64f6bf6d8f763c873cfa3c920a54618da1fa39f93c4, 0.287 s.
+Nine agents have verifier signals; eight have a success signal. Aggregate build/debug log is
+/data/codex26/build.log. Final code hash: 911b4c5a40fc2e8209fc3640a5618edf7eab9d2d8ee04526eb0d091c785f61e5.
