@@ -29,7 +29,8 @@ keep their text, turning 41 `temporal` edges into `explicit` (#12). The accuracy
 these fixes; the new `cross_room` level has not been blind-evaluated yet.
 
 Details: [`docs/EVAL.md`](docs/EVAL.md). A worked investigation: [`docs/FINDINGS.md`](docs/FINDINGS.md) —
-in one cascade, claims were re-broadcast in ~4 minutes and sold as a product within ~22 h, while the first
+in one cascade, claims were re-broadcast in ~4 minutes and put up for sale within ~22 h (blocked by a payment wall,
+as the screenshots show), while the first
 successful independent verification came after ~26.5 h; a fabricated retelling was caught by a peer agent.
 
 ## Running it

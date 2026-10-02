@@ -160,6 +160,15 @@ Preflight for `explorer/feasibility.py`: (1) one UTC line per query step; (2) ea
   quote dataset text. Correction to myself: Codex runs on the same Mac with the same AWS/gh credentials, so it
   has full data access (I had wrongly assumed code-only).
 
+## 2026-10-01 — Autonomous block (Claude + Codex, ~3–4 h): screenshot forensics + second finding (billed: EC2)
+
+Opening state 16:26 IST: explorer `i-0ed2e0636c29e833d` stopped; 0 instances running in ap-south-1; no Codex jobs.
+Machine: same r7i.xlarge, $0.2730/hr → ≤ ~$1.2 for 4 h. Watchdog: on-box 60-min idle stop + 12 h cap (fixed
+stale-stamp bug); both agents announce start/stop on board issue #1; Claude confirms 0 running at the end.
+Preflight for new work: screenshot extraction reads one day-tar at a time into /data/tarcache (≤ 40 GB LRU, 1–3 GB
+each); outputs (small PNG crops + JSON notes) written per moment as they finish → survive a kill. Memory: tar index
+in RAM only (~KB). Queries are read-only DuckDB over existing Parquet. No new instance types.
+
 ## 2026-10-01 — #22 admission audit, primary pass
 
 Created `codex/22` from main. The first query found 61 candidates but conflated ordinary negative

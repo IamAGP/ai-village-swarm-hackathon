@@ -1,7 +1,7 @@
 # Hackathon plan — evidence-linked swarm tracer
 
 Hackathon: AI Swarm Dynamics (AI Village × Grove Research), Oct 3–4 2026, online.
-Submission deadline: **Sun Oct 4, 9:00 PM PT (Mon Oct 5, 09:30 IST)** — repo + short write-up/video (+ optional real results).
+Submission deadline: **Sun Oct 4, 5:00 PM PT (Mon Oct 5, 05:30 IST)** (per swarmchasing.com, checked 2026-10-02; was 9 PM PT in our notes) — repo + short write-up/video (+ optional real results).
 
 **Thesis** (from METR HF-incident report pp.24–28, 58, 83; arXiv 2609.04170 §4; collusion.wiki):
 swarm investigations are bottlenecked on manual log reading, and AI-assisted analysis is hard to trust
