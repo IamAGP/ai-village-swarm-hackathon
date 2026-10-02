@@ -238,3 +238,18 @@ Claude remains responsible for the running explorer and independent annotation.
   "unverified half" reframed as "not corroborated by the packet" with mixed causes (window, GUI, clipping, ancillary,
   annotator oversight), and the clipping stated. Docs narrowed. Then stopped `i-0ed2e0636c29e833d`: state stopped,
   0 running/pending in ap-south-1. Box ran 16:41–~18:39 IST ≈ 2.0 h ≈ $0.54 compute (estimate, not the bill).
+
+## 2026-10-02 — Sprint day 1: full-frame screen audit + claim-vs-action v3 (billed: EC2; Claude/Codex plan usage)
+
+- Deadline re-checked on swarmchasing.com: **5:00 pm PT Sun Oct 4 = Mon 05:30 IST** (our notes said 9 pm PT).
+- HF dataset still at `838b415` (HF API, commit 2026-09-20), so we are on the latest export.
+- Codex now runs on **gpt-6.1-sol, medium** (user instruction; verified in her rollout `turn_context`).
+- 12:55 IST: box started. `claims.py` full frame → 7,882 claims, 6,350 with a screenshot, packed into 26 S3
+  batches of 250 (`_explorer/findings/shotbatches/`). ~10 min of extraction.
+- **Mistake:** I started pulling the 1.2 GB bundle to the Mac without checking free disk space. The Mac had
+  ~1.2 GB free (460 GB disk at 100%). The user caught it, and I killed the download and deleted the partial file
+  (back to 2.3 GB free). From now on: one 48 MB batch at a time, deleted after labelling.
+- Preflight for the screen audit: (1) progress = one labels line per image, per sub-agent; (2) labels are written
+  incrementally per image; (3) memory: each sub-agent holds ≤50 images (~52k image tokens) in context; (4) if
+  killed, labels written so far survive and batches can be re-pulled from S3. The pilot (batch 0, 5×50) measures
+  tokens and time before scaling to 26 batches.
