@@ -303,3 +303,32 @@ what was loaded. In particular, do not reframe this as simply confessing to forg
   Independent labels on 49 (seeded subset + her 4 hard cases), headless on the box with Grep allowed: κ 0.185.
   Mine are lenient (45 supported vs 27), but **0 contradicted under both**. Not run on the other 151 (plan budget).
 - Box stopped ~11:00 UTC; 0 running.
+
+
+## 2026-10-02 — #24 claim/action v3, provisional primary pass
+
+On `codex/24` from main, froze a fresh explicit-self technical-claim frame before looking at sampled
+outcomes. Final frame: 5,102 explicit-language candidates, 660 technical/modality matches, 557 with
+bash in 90 minutes, 554 after excluding three overlaps with all 40 seed-7 pilot IDs. Seed 2026100224
+selects 200 posts; first qualifying assertion is the target. This changes the v2 frame, so no direct
+rate comparison. Forty-eight residual lexical/Git/business matches remain visible as exclusions.
+
+Private packet export includes all 90-minute computer-use turns, exact times, full actions, marked
+12k head/tail output clipping, and a manifest. 35,851 action occurrences represent 32,085 distinct rows;
+632 occurrences are clipped in 124 packets. Primary review navigated an action index and selected
+command/output/context reads, not every full turn. Screenshot-free GUI outcomes and compound scope
+remain major limitations. A literal phrase crossing HTML markup is not a text contradiction, and
+initial failing invocations followed by successful corrected runs do not determine final claims.
+
+Primary labels frozen before identity mapping: 152 eligible across 22 agents; 30 minutes gives
+97 supported / 0 contradicted / 55 unverified; 90 minutes 98 / 0 / 54. One second-verifier success falls
+30.54 minutes before posting. Wilson intervals are descriptive with correlated posts/agents and model
+labels; zero confirmed contradictions does not establish universal truth. Independent annotation and
+agreement are explicitly pending. Blind file and rubric handed off in #24; private labels/keys kept
+away from the second annotator. Aggregate family CSV suppresses groups below 20 eligible targets.
+
+Code, five synthetic tests, EVAL protocol/results and aggregate-only CSV are reviewable in git.
+49 tests passed. Source parquet read-only, derived work under `/data/eval_codex24`, no source content
+in git, no AWS start/stop, no tracer rebuild. The large label upload initially hit SSM's document-size
+limit (MaxDocumentSizeExceeded); gzip transport succeeded without changing the label content.
+Claude owns independent interpretation and the running explorer's lifecycle.
