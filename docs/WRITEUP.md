@@ -69,14 +69,20 @@ So this is one well-documented case, not a measured pattern.
 **Together:** audits have to check confident retractions as well as confident claims. A peer accusation, or an
 agent's own admission, is not ground truth; the action record is.
 
-### How often do "it's live" claims fail on screen?
+### How often do "it's live / sent" claims fail on screen? (3,896 claims)
 
-We drew a seeded sample of 60 completion claims ("is live", "successfully published", "has been sent" …) and paired
-each with the latest available screenshot of that agent from the 10 minutes before. 45 had one. Two blind
-annotators agreed at κ 0.82. Of the 13 pairs both could judge, **none was contradicted** (Wilson 95% [0, 23%]). But
-**most claims couldn't be judged this way**: 13 of 60 (22%). The image is usually a terminal, a mail splash, or a
-draft in an editor. That is not evidence that contradictions are rare; it says a one-screenshot check reaches only a
-minority of claims. Codex reproduced the sample independently. See [`EVAL.md`](EVAL.md).
+We paired a random 3,896 of the 6,350 completion claims that have a screenshot ("is live", "published", "has been
+sent" …) with the agent's last screenshot from the 10 minutes before. Claude Code labelled them on a private server
+next to the data, with no shell or web access, writing a short description of each screen. Every "contradicted"
+flag was then checked against what the agent did *after* the screenshot, and by hand.
+
+- **21 confirmed contradictions out of 1,385 checkable claims: 1.5% [1.0–2.3%].** That's a lower bound: another 28
+  flags were undetermined or too weak to count, and most screenshots don't show the claimed thing at all.
+- **The recurring form is "sent" when it's still a draft** (7 of the 19 server-batch cases). Twice the same agent
+  repeated it: Claude Sonnet 4.5 posted "✅ Email sent … at 10:19 AM" and later "confirmed the help email was
+  successfully sent", and both of its screenshots show the email still in Drafts.
+- Others: an "implemented" file that is 0 bytes, an article "published" but still marked Draft, a story
+  "published" whose `git push` never ran, and a "live" form never published and shared under a garbled ID.
 
 ### And "tests pass" claims, checked against the shell record?
 
@@ -89,6 +95,12 @@ git-state misreport, and one is disputed. About half the claims contain somethin
 doesn't corroborate. The causes are mixed (window length, screenshots not included, output the agent itself cut,
 side remarks), so that is a coverage limit, not a no-run rate. Our first pass kept only the newest 12 shell turns
 and reported "8/33 overstated"; Codex caught that, and v2 replaced it. See [`EVAL.md`](EVAL.md).
+
+**At scale (Codex, 200 fresh claims).** Codex restricted the frame to explicit first-person technical claims ("I ran
+the tests …") and checked each against 90 minutes of the agent's own record: **0 contradicted** among 152 eligible.
+An independent Claude check of 49 also found **0**, though the two disagreed on how many of the rest count as
+"supported" vs. merely unbacked (κ 0.19). **Taken together:** agents rarely invent command runs. What goes wrong is
+mostly announcing work as *sent / published / live* before it is.
 
 ## We audited ourselves too
 
