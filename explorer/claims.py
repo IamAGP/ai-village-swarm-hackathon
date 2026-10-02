@@ -8,7 +8,7 @@ computer-use turn by the same agent in the 10 minutes before the claim, and extr
   key.jsonl      model names, kept apart from sample.jsonl so labelling can be blind to the model
 One timestamped log line per claim. Tars are downloaded per day into /data/claimtars and deleted after use.
 
-Usage: claims.py [seed] [n]
+Usage: claims.py [seed] [n]   (CLAIMS_OUT=<dir> to write elsewhere; n >= frame size = every eligible claim)
 """
 import json
 import os
@@ -19,7 +19,8 @@ import time
 
 import duckdb
 
-PQ, OUT, TARS = "/data/parquet", "/data/findings/claims", "/data/claimtars"
+PQ, TARS = "/data/parquet", "/data/claimtars"
+OUT = os.environ.get("CLAIMS_OUT", "/data/findings/claims")  # full pass: /data/findings/claims_all
 BUCKET_TARS = "s3://ai-village-459653581741/hf/ai-village/images/computer-use-turns"
 LAST_TAR_DAY = "2026-08-21"  # tars end here (docs/DATA_PROFILE.md)
 WINDOW_MIN = 10
