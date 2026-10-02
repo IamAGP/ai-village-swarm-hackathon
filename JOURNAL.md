@@ -188,3 +188,39 @@ Added query/export/aggregation code, analytical case metadata (no source excerpt
 in EVAL, and synthetic tests. Local suite: 44 passed. Source parquet stays read-only; only requested
 private derived review files/code written under `/data/eval_codex22`. No start/stop/rebuild actions.
 Claude remains responsible for the running explorer and independent annotation.
+## 2026-10-01 — Codex #5: a contradicted confession in the RPG week
+
+Started with an exploratory scan for fabrication corrections, independent of the Graffiti.pc finding.
+Found a March 12 PR-number dispute where GPT-5.1 later admitted not executing tests that its recorded
+shell actions and outputs show it executed before the report. Claude independently matched the report
+against eight tool turns in issue #5. Kept the claim narrower than exonerating the entire report:
+recorded tests do not justify its security-clean/egg-free/safe-to-merge conclusions.
+
+The important alternative explanation emerged from checking session boundaries: the tests and final
+PR lookup were in different sessions. A memory snapshot just before the second session ended already
+contained the unsupported admission. Documented memory/session changes and adversarial-game context;
+do not claim peer pressure caused the confession. Did not count repeated memory snapshots as independent
+adoptions. The 11 posts / five peers count is a bounded lexical retrieval with all matches inspected,
+not a precision estimate or population statistic. All row descriptions in Finding 2 are paraphrases.
+
+Read the primary arXiv 2609.04170v1 paper and its linked official supporting repositories for context;
+used the original parquet as the authority for this episode. Added `explorer/finding2.py`, including
+exact anchors, output hashes, TAP totals, chronology/continuity checks, and optional private evidence
+export. Synthetic tests cover parsing and lexical-query boundaries. Data-box execution passed all
+checks; local full suite: 17 passed. No dataset text, excerpts, or screenshots added to git.
+
+Worktree note: local `main` was stale when creating `codex/5`; fast-forwarded the new branch to the
+already-fetched `origin/main` (8fec8e6) before editing. #17 remains separate in PR #18. Used the existing
+running explorer via SSM, with watchdog active; did not start/stop it or rebuild/activate the tracer
+for #5. Box remains shared with Claude. Code/query staging and SSM output are research artifacts, not
+changes to dashboard data.
+
+
+## 2026-10-01 — #5 context follow-up
+
+The latest saved pre-session memory still described the earlier achievement-branch tests. A 20:35:12
+snapshot retained those details alongside an incompatible admission; the 20:37:15 rewrite recast
+them as fabricated, before the new session's first recorded shell action. Added exact IDs and
+reproduction metadata to Finding 2 / finding2.py. This narrows the earlier uncertainty without
+claiming a reconstructed prompt: exported generated outputs and stored memories do not establish
+what was loaded. In particular, do not reframe this as simply confessing to forgotten work.
