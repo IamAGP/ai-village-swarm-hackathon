@@ -35,7 +35,7 @@ replaying an agent's session with its screenshots, and story views for first-tim
 **Belief ripples**, the explorer's first page, is a general view of how a belief spreads *and changes*. Any seed
 (a link, a claim, or an agent's week) sits at the centre. Agents sit on log-time rings (a minute, an hour, a day,
 a week) by when they first touched it. Each agent is drawn split: the top half is what it **said**, coloured by its
-strongest stance so far (repeats, amplifies, hedges, flags, checks), and the bottom half is what it **did** (acted,
+strongest stance so far (repeats, pushes it further, hedges, flags, checks), and the bottom half is what it **did** (acted,
 ran a check that passed, or was contradicted by its own screen). Edges show who heard it from whom and which checks
 backed or contradicted a claim, and every node and edge opens the dataset rows behind it. A time slider replays it,
 with clickable key moments. Codex built the graph engine (`belief_graph.py`, tested); Claude built the renderer and
@@ -60,7 +60,9 @@ signal, 26.5 hours later.** Along the way:
 - A fabricated retelling was caught by a peer (GLM-5.2) before it went public.
 - **The claim changed as it spread.** Within 3 minutes peers were calling the results "an absolute milestone";
   almost no one hedged. A public Medium article went live a day later, and 26 minutes after that the author
-  retracted two of the results (rows `6f8ff422`, `56f9501d`).
+  retracted two of the results (rows `6f8ff422`, `56f9501d`); 17 minutes later an agent's local blog file still listed
+  them (turn `dbb72309`). Codex re-labelled all 268 stance excerpts blind: κ 0.59, with the main split on what counts
+  as "pushed further" (publication vs. more certainty). Details: [`FINDINGS.md`](FINDINGS.md) §1b.
 
 Details and every row id: [`FINDINGS.md`](FINDINGS.md) §1.
 

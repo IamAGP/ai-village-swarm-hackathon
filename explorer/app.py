@@ -807,7 +807,7 @@ function stanceAt(id) {                  // most escalated stance among this age
   d.timeline.forEach(e => { if (mins(e.at) <= NOW && (!best || PRI[e.stance] > PRI[best.stance])) best = e; });
   return best;
 }
-const STANCE = {original: ["#b28dff", "the original claim"], repeats: ["#ff5c6c", "repeated it"], amplifies: ["#ff2fb4", "amplified it"],
+const STANCE = {original: ["#b28dff", "the original claim"], repeats: ["#ff5c6c", "repeated it"], amplifies: ["#ff2fb4", "pushed it further (more certain, published or promoted)"],
   hedges: ["#f2c14e", "passed it on with caution"], checks: ["#2ec4b6", "checked it itself"], flags: ["#4ea8ff", "flagged it as wrong"],
   neutral: ["#5b6070", "only touched the link"]};
 const P = iso => Date.parse(iso.endsWith("Z") ? iso : iso + "Z");
@@ -920,7 +920,7 @@ function update(v) {
   const okClaims = G.nodes.filter(n => isClaim(n) && on(st[n.id].ok)).length;
   const lit = agents.filter(a => [st[a.id].said, st[a.id].did, st[a.id].ok, st[a.id].bad].some(on));
   const cnt = k => agents.filter(a => (stanceAt(a.id) || (lit.includes(a) && D[a.id] ? {stance: "neutral"} : null))?.stance === k).length;
-  const drift = Object.keys(D).length ? ` · <span style="color:#ff5c6c">${cnt("repeats") + cnt("amplifies")} passed it on</span> (<span style="color:#ff2fb4">${cnt("amplifies")} amplified</span>)` + (cnt("flags") ? ` · <span style="color:#4ea8ff">${cnt("flags")} flagged it</span>` : "") + ` · <span style="color:#9aa0a6">${cnt("neutral")} only touched the link</span>` : "";
+  const drift = Object.keys(D).length ? ` · <span style="color:#ff5c6c">${cnt("repeats") + cnt("amplifies")} passed it on</span> (<span style="color:#ff2fb4">${cnt("amplifies")} pushed it further</span>)` + (cnt("flags") ? ` · <span style="color:#4ea8ff">${cnt("flags")} flagged it</span>` : "") + ` · <span style="color:#9aa0a6">${cnt("neutral")} only touched the link</span>` : "";
   clock.innerHTML = (NOW === ALL ? "all time" : "+" + fmt(NOW)) + (Object.keys(D).length ? drift : ` · <span style="color:#ff5c6c">${believed} agents took it up</span>`) +
     (G.seed.kind === "url" ? ` · <span style="color:#3ddc97">${ok} ran a check that passed ✔</span>` : "") +
     (okClaims ? ` · <span style="color:#3ddc97">${okClaims} claims backed by the screen ✔</span>` : "") +
@@ -1045,15 +1045,16 @@ def page_belief():
                     "background:#161922;border-radius:6px'>Claude Opus 5 announced maths disproofs. Within <b>3 minutes</b> other agents "
                     "were celebrating them as <span style='color:#ff2fb4'><b>“an absolute milestone”</b></span> and listing them among "
                     "achievements “just confirmed”; almost no one hedged. A day later a public Medium article "
-                    "went live; <b>26 minutes after that</b> the author <span style='color:#4ea8ff'><b>retracted two of the results</b></span>. "
+                    "went live; <b>26 minutes after that</b> the author <span style='color:#4ea8ff'><b>retracted two of the results</b></span>; 17 minutes later an agent's "
+                    "local copy of the blog still listed them. "
                     "The first independent check that passed came <span style='color:#3ddc97'><b>26.5 hours</b></span> after the "
                     "announcement. Press ▶ or click a moment below the slider.</div>", unsafe_allow_html=True)
         first_amp = min((e for d in drift.get("agents", {}).values() for e in d.get("timeline", []) if e["stance"] == "amplifies"),
                         key=lambda e: e["at"], default=None)
-        # Row ids and times were checked against the data (docs/FINDINGS.md §1; retraction: chat 56f9501d).
+        # Row ids and times were checked against the data (docs/FINDINGS.md §1, §1b; retraction: chat 56f9501d; stale blog: turn dbb72309).
         moments = [m for m in [
             {"at": "2026-07-29T18:53:39Z", "label": "announced", "row": "eb0a037a", "color": "#b28dff", "lane": 0},
-            first_amp and {"at": first_amp["at"], "label": "treated as settled fact", "row": first_amp["row"][:8], "color": "#ff2fb4", "lane": 3},
+            first_amp and {"at": first_amp["at"], "label": "first pushed further", "row": first_amp["row"][:8], "color": "#ff2fb4", "lane": 3},
             {"at": "2026-07-30T18:54:38Z", "label": "Medium article live", "row": "6f8ff422", "color": "#ff5c6c", "lane": 2},
             {"at": "2026-07-30T19:20:58Z", "label": "author retracts 2", "row": "56f9501d", "color": "#4ea8ff", "lane": 0},
             {"at": "2026-07-30T21:21:21Z", "label": "first check passes", "row": "17ad5fe9", "color": "#3ddc97", "lane": 1},

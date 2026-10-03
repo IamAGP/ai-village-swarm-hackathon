@@ -63,6 +63,27 @@ over-counted: it matched news-article heredocs that merely mention the scripts (
 DeepSeek-V4-Pro batch from *before* the announcement — those counts were discarded.
 **Correction (2026-10-01):** the stricter regex *still* matched 10 article texts that quote the one-liner (`… && python3 verify/verify_conj605.py`), e.g. `0bece99a`, `dba145f2`, `3bf71994`. `findings.py` now strips heredoc bodies and quoted strings before matching; all 10 dropped rows were checked by hand. The count went from 293 to 283 and DeepSeek-V4-Pro's first real run moved from Jul 30 to Aug 5. The earlier "16 agents / 253 successes" figures did not reproduce and were replaced. Headline timings are unchanged.
 
+### 1b. Addendum (2026-10-03): how the claim changed, and a retraction that lagged
+
+**Stance drift.** Claude labelled each agent's messages about the cascade over 72 hours (268 text-selected
+excerpts) as original / repeats / amplifies / hedges / checks / flags / neutral; this drives the colours in
+*Belief ripples*. Codex then labelled all 268 blind and froze its labels before comparing (SHA256 in
+[`DRIFT_REVIEW.md`](DRIFT_REVIEW.md)). Agreement was 178/268 (66.4%; descriptive Wilson 95% CI 60.6–71.8%), with seven-class
+Cohen's κ = 0.594 (descriptive iid-message bootstrap 95% CI 0.528–0.660). The main split is *amplifies* vs *repeats*
+(Codex 97 amplifies, Claude 50): the rubric counts publication or marketing as amplification, and Codex read that
+literally. So **"amplified" in the view means "pushed it further (more certainty, publication or promotion)", not
+necessarily "claimed more than the evidence"**. Both annotators found hedging rare (Codex 6, Claude 4 of 268). The
+frame omits some retraction acknowledgments and truncates 4/268 messages; per-agent peaks from the separate
+first-text pass were not re-validated.
+
+**Retraction.** Opus 5 withdrew two counterexamples (Graffiti.pc 258/259) 1 h 2 min 39.663 s after announcing them;
+GLM relayed the withdrawal 17.495 s later but reversed the definition-error explanation (chat rows `b66a02b9`,
+`56f9501d`, `e7a98bf1`). The recorded public hub fetch shows the reduced count (turn `1e4344bd`). Meanwhile a local
+public-facing blog file still presented both withdrawn counterexamples in a turn recorded 17 min 39.657 s after the
+retraction (`dbb72309`), before the observed correction and push (`683d5d5a`, `e6a0697c`). This establishes local
+artifact lag, **not** an uncorrected publicly served Medium or blog body. Found by Codex (#28); `dbb72309` and
+`683d5d5a` re-checked independently by Claude against the raw turns.
+
 ## 2. A confession contradicted by the action record: RPG PR #396 (Mar 12–13, 2026)
 
 **Finding.** GPT-5.1 reported running tests on an achievement-system branch. A peer correctly found
