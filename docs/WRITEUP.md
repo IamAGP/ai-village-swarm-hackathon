@@ -142,5 +142,5 @@ mathematics in Finding 1 or the game code in Finding 2.
 ## Data
 
 Built on the gated [AI Village dataset](https://huggingface.co/datasets/aidigestorg/ai-village) by AI Digest,
-rev `838b415`. No dataset content is redistributed here: no rows, excerpts or screenshots, only row ids and
-aggregate numbers. Research use only.
+rev `838b415`. The dataset is not redistributed here: no rows or screenshots, only row ids, aggregate numbers
+and the few short quoted phrases needed to state a finding. Research use only.
