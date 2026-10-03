@@ -900,6 +900,9 @@ const drawn = [].concat(
   sayDo.map(e => ({id: e.id, from: e.source, to: e.target, kind: e.kind, at: e.at, width: 0.6, color: {color: "rgba(138,143,156,0.35)", highlight: "#ffffff"}, smooth: false})),
   checks.map(e => ({id: e.id, from: e.source, to: e.target, kind: "checked", at: e.at, width: 2.4, color: {color: e.status === "contradicted" ? "#ff5c6c" : e.status === "supported" ? "#3ddc97" : "rgba(217,219,225,0.5)", highlight: "#ffffff"}, dashes: e.status === "unknown", smooth: false})));
 const edges = new vis.DataSet(drawn);
+// Fit graph + evidence panel to the viewer's window (the iframe itself has a fixed height).
+try { const h = Math.max(420, Math.min(__H__, window.parent.innerHeight - 240));
+      ["net", "side"].forEach(id => document.getElementById(id).style.height = h + "px"); } catch (e) {}
 const net = new vis.Network(document.getElementById("net"), {nodes, edges}, {physics: false, interaction: {hover: true, zoomView: true, tooltipDelay: 80}});
 net.on("beforeDrawing", ctx => {
   [[1, "1 min"], [60, "1 h"], [1440, "1 day"], [RMAX, "1 week"]].forEach(([m, t]) => {
@@ -911,8 +914,8 @@ net.on("beforeDrawing", ctx => {
 const sl = document.getElementById("t"), clock = document.getElementById("clock");
 const toM = v => Math.pow(10, v / 1000 * Math.log10(1 + RMAX)) - 1;
 const agents = G.nodes.filter(n => n.kind === "agent");
-function update(v) {
-  NOW = v >= 1000 ? ALL : toM(v);
+function update(v, exactMin) {  // exactMin: jump to a moment's own time (slider steps are coarse late on the log scale)
+  NOW = exactMin != null ? exactMin : v >= 1000 ? ALL : toM(v);
   edges.update(drawn.map(e => ({id: e.id, hidden: mins(e.at) > NOW})));
   const believed = agents.filter(a => [st[a.id].said, st[a.id].did, st[a.id].ok, st[a.id].bad].some(on)).length;
   const ok = agents.filter(a => on(st[a.id].ok)).length;
@@ -964,7 +967,7 @@ net.on("click", p => {
   }
 });
 if (Object.keys(D).length) document.getElementById("stlegend").innerHTML = "(" + ["repeats", "amplifies", "hedges", "checks", "flags", "neutral"].map(k => `<span style="color:${STANCE[k][0]}">●</span> ${STANCE[k][1]}`).join(" · ") + ")";
-// moment markers: positioned on the slider's log-time scale; click to jump just after the moment
+// moment markers: positioned on the slider's log-time scale; click to jump to the moment (+1 s so it counts)
 const fromM = m => 1000 * Math.log10(1 + Math.max(m, 0)) / Math.log10(1 + RMAX);
 const mbox = document.getElementById("moments");
 MOMENTS.forEach((mo, i) => {
@@ -975,7 +978,7 @@ MOMENTS.forEach((mo, i) => {
   el.innerHTML = v > 700 ? `${esc(mo.label)} ${tick}` : `${tick} ${esc(mo.label)}`;
   el.style.top = (mo.lane ?? i % 3) * 15 + "px";
   el.title = `${mo.label} · +${fmt(mins(mo.at))} · row ${mo.row}`;
-  el.onclick = () => { sl.value = Math.min(1000, Math.ceil(v) + 2); update(+sl.value); };
+  el.onclick = () => { sl.value = Math.min(999, Math.ceil(v)); update(+sl.value, mins(mo.at) + 1 / 60); };
   mbox.appendChild(el);
 });
 update(1000);
@@ -1061,7 +1064,7 @@ def page_belief():
         ] if m]
     html = (BELIEF_HTML.replace("__DATA__", json.dumps(g)).replace("__DRIFT__", json.dumps(drift))
             .replace("__MOMENTS__", json.dumps(moments)).replace("__H__", "720"))
-    components.html(html, height=820, scrolling=False)
+    components.html(html, height=830, scrolling=False)
     meta = g.get("meta", {})
     st.caption(f"{len(g['nodes'])} nodes, {len(g['edges'])} edges. Engine: explorer/belief_graph.py (docs/BELIEF_GRAPH.md). "
                + (f"Omitted: {meta.get('omitted')}. " if meta.get("omitted") else ""))
