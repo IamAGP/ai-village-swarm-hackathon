@@ -772,11 +772,14 @@ def _belief_graph_url(url):
 BELIEF_HTML = r"""
 <div id="wrap" style="display:flex;gap:14px;font-family:Inter,system-ui,sans-serif;color:#e8e8ea">
  <div style="flex:1;min-width:0">
-  <div id="hud" style="display:flex;align-items:center;gap:14px;margin:0 0 6px 4px;flex-wrap:wrap">
-   <button id="play" style="background:#ff5c6c;color:#fff;border:0;border-radius:6px;padding:8px 16px;font-size:15px;cursor:pointer">▶ play</button>
-   <input id="t" type="range" min="0" max="1000" value="1000" style="flex:1;min-width:160px">
-   <div id="clock" style="font-size:15px;font-weight:600"></div>
+  <div id="hud" style="display:flex;align-items:flex-start;gap:14px;margin:0 0 4px 4px">
+   <button id="play" style="background:#ff5c6c;color:#fff;border:0;border-radius:6px;padding:8px 16px;font-size:15px;cursor:pointer;flex:none">▶ play</button>
+   <div style="flex:1;min-width:160px">
+    <input id="t" type="range" min="0" max="1000" value="1000" style="width:100%;margin:8px 0 2px 0">
+    <div id="moments" style="position:relative;height:62px"></div>
+   </div>
   </div>
+  <div id="clock" style="font-size:15px;font-weight:600;margin:0 0 6px 4px"></div>
   <div id="net" style="height:__H__px;border-radius:10px;background:radial-gradient(circle at 50% 50%,#1b1d26 0%,#0e1117 70%)"></div>
   <div style="font-size:12.5px;color:#a9adb8;margin:6px 4px;line-height:1.6">
    Rings = time since the start (log): 1 min · 1 h · 1 day · 1 week. <b>Agents</b> are split circles:
@@ -795,6 +798,7 @@ BELIEF_HTML = r"""
 <script src="https://cdn.jsdelivr.net/npm/vis-network@9/standalone/umd/vis-network.min.js"></script>
 <script>
 const G = __DATA__;
+const MOMENTS = __MOMENTS__;               // verified key moments (row ids) for this seed, shown under the slider
 const D = (__DRIFT__).agents || {};      // claim drift per agent: a timeline of stances (first text + 72 h of chat)
 const PRI = {neutral: 0, hedges: 1, repeats: 2, checks: 3, flags: 4, amplifies: 5, original: 6};
 Object.values(D).forEach(d => { if (!d.timeline) d.timeline = [{at: d.at, stance: d.stance, gist: d.gist, cue: d.cue, row: d.row, src: "first text"}]; });
@@ -857,8 +861,8 @@ function agentRenderer({ctx, id, x, y, state: {selected, hover}, label}) {
     ctx.beginPath(); ctx.moveTo(x - r, y); ctx.lineTo(x + r, y); ctx.strokeStyle = "#0e1117"; ctx.lineWidth = 2; ctx.stroke();
     ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.strokeStyle = selected || big ? "#ffffff" : "rgba(255,255,255,0.55)"; ctx.lineWidth = selected || big ? 2.5 : 1; ctx.stroke();
     if (c.crack) { ctx.beginPath(); ctx.moveTo(x - r * .4, y + 3); ctx.lineTo(x - r * .05, y + r * .6); ctx.lineTo(x + r * .2, y + r * .25); ctx.lineTo(x + r * .45, y + r * .75); ctx.strokeStyle = "#0e1117"; ctx.lineWidth = 2; ctx.stroke(); }
-    ctx.fillStyle = "#e8e8ea"; ctx.font = (big ? "bold 14px" : "12px") + " Inter, sans-serif"; ctx.textAlign = "center";
-    ctx.fillText(label, x, y + r + 14); ctx.restore();
+    ctx.fillStyle = "#e8e8ea"; ctx.font = (big ? "bold 15px" : "13px") + " Inter, sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(label, x, y + r + 15); ctx.restore();
   }, nodeDimensions: {width: 2 * R, height: 2 * R}};
 }
 const R = 15;
@@ -960,8 +964,23 @@ net.on("click", p => {
   }
 });
 if (Object.keys(D).length) document.getElementById("stlegend").innerHTML = "(" + ["repeats", "amplifies", "hedges", "checks", "flags", "neutral"].map(k => `<span style="color:${STANCE[k][0]}">●</span> ${STANCE[k][1]}`).join(" · ") + ")";
+// moment markers: positioned on the slider's log-time scale; click to jump just after the moment
+const fromM = m => 1000 * Math.log10(1 + Math.max(m, 0)) / Math.log10(1 + RMAX);
+const mbox = document.getElementById("moments");
+MOMENTS.forEach((mo, i) => {
+  const v = fromM(mins(mo.at)), el = document.createElement("div");
+  el.style.cssText = `position:absolute;left:calc(${v / 10}% ${v > 700 ? '+ 1px' : '- 1px'});top:0;cursor:pointer;font-size:11.5px;white-space:nowrap;color:${mo.color};transform:translateX(${v > 700 ? "-100%" : "0"})`;
+  const tick = `<span style="display:inline-block;width:2px;height:10px;background:${mo.color};vertical-align:top"></span>`;
+  // flipped labels (right side) extend leftwards, so their tick must sit at the right end to mark the true moment
+  el.innerHTML = v > 700 ? `${esc(mo.label)} ${tick}` : `${tick} ${esc(mo.label)}`;
+  el.style.top = (mo.lane ?? i % 3) * 15 + "px";
+  el.title = `${mo.label} · +${fmt(mins(mo.at))} · row ${mo.row}`;
+  el.onclick = () => { sl.value = Math.min(1000, Math.ceil(v) + 2); update(+sl.value); };
+  mbox.appendChild(el);
+});
 update(1000);
-setTimeout(() => net.fit({animation: false}), 50);
+net.once("afterDrawing", () => net.fit({animation: false}));
+setTimeout(() => net.fit({animation: false}), 300);
 </script>
 """
 
@@ -1020,7 +1039,27 @@ def page_belief():
     if seed.get("kind") == "url" and seed.get("value") == F1_URL and os.path.exists(f"{FINDINGS}/belief_drift_graffiti.json"):
         f72 = f"{FINDINGS}/belief_drift_graffiti_72h.json"  # first text + 72 h of chat, per-agent stance timeline
         drift = json.load(open(f72 if os.path.exists(f72) else f"{FINDINGS}/belief_drift_graffiti.json"))
-    html = BELIEF_HTML.replace("__DATA__", json.dumps(g)).replace("__DRIFT__", json.dumps(drift)).replace("__H__", "720")
+    moments = []
+    if seed.get("kind") == "url" and seed.get("value") == F1_URL:
+        st.markdown("<div style='font-size:1.05rem;line-height:1.5;margin:4px 0 8px;padding:10px 14px;border-left:3px solid #ff2fb4;"
+                    "background:#161922;border-radius:6px'>Claude Opus 5 announced maths disproofs. Within <b>3 minutes</b> other agents "
+                    "were celebrating them as <span style='color:#ff2fb4'><b>“an absolute milestone”</b></span> and listing them among "
+                    "achievements “just confirmed”; almost no one hedged. A day later a public Medium article "
+                    "went live; <b>26 minutes after that</b> the author <span style='color:#4ea8ff'><b>retracted two of the results</b></span>. "
+                    "The first independent check that passed came <span style='color:#3ddc97'><b>26.5 hours</b></span> after the "
+                    "announcement. Press ▶ or click a moment below the slider.</div>", unsafe_allow_html=True)
+        first_amp = min((e for d in drift.get("agents", {}).values() for e in d.get("timeline", []) if e["stance"] == "amplifies"),
+                        key=lambda e: e["at"], default=None)
+        # Row ids and times were checked against the data (docs/FINDINGS.md §1; retraction: chat 56f9501d).
+        moments = [m for m in [
+            {"at": "2026-07-29T18:53:39Z", "label": "announced", "row": "eb0a037a", "color": "#b28dff", "lane": 0},
+            first_amp and {"at": first_amp["at"], "label": "treated as settled fact", "row": first_amp["row"][:8], "color": "#ff2fb4", "lane": 3},
+            {"at": "2026-07-30T18:54:38Z", "label": "Medium article live", "row": "6f8ff422", "color": "#ff5c6c", "lane": 2},
+            {"at": "2026-07-30T19:20:58Z", "label": "author retracts 2", "row": "56f9501d", "color": "#4ea8ff", "lane": 0},
+            {"at": "2026-07-30T21:21:21Z", "label": "first check passes", "row": "17ad5fe9", "color": "#3ddc97", "lane": 1},
+        ] if m]
+    html = (BELIEF_HTML.replace("__DATA__", json.dumps(g)).replace("__DRIFT__", json.dumps(drift))
+            .replace("__MOMENTS__", json.dumps(moments)).replace("__H__", "720"))
     components.html(html, height=820, scrolling=False)
     meta = g.get("meta", {})
     st.caption(f"{len(g['nodes'])} nodes, {len(g['edges'])} edges. Engine: explorer/belief_graph.py (docs/BELIEF_GRAPH.md). "
