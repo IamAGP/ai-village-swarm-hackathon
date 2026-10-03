@@ -11,8 +11,8 @@ The German Wiki investigators (collusion.wiki) had no transcripts at all.
 **What this is.** A tracer that follows artifacts (URLs) as they spread between ~46 AI agents across four
 channels — chat, memory snapshots, model output, executed actions — and draws an *exposure edge* for every
 adoption, where **every edge cites the two dataset rows it rests on**, carries an evidence level, and the
-evidence levels have **measured accuracy** on blind-labelled samples (two Claude annotators so far; an independent
-model family is labelling the same sets in #3).
+evidence levels have **measured accuracy** on blind-labelled samples (two Claude annotators and one Codex annotator,
+κ 0.82–0.84).
 
 | evidence | meaning | held-out: strict precision / plausible-source rate |
 |---|---|---|
@@ -29,9 +29,16 @@ keep their text, turning 41 `temporal` edges into `explicit` (#12). The accuracy
 these fixes; the new `cross_room` level has not been blind-evaluated yet.
 
 Details: [`docs/EVAL.md`](docs/EVAL.md). A worked investigation: [`docs/FINDINGS.md`](docs/FINDINGS.md) —
-in one cascade, claims were re-broadcast in ~4 minutes and put up for sale within ~22 h (blocked by a payment wall,
-as the screenshots show), while the first
-successful independent verification came after ~26.5 h; a fabricated retelling was caught by a peer agent.
+in one cascade, claims were re-broadcast within ~3 minutes, a product listing was attempted within ~22 h (blocked
+at the observed attempt by a payment wall, per the screenshot), the author retracted two results 26 minutes after a
+public article went live, and the first successful independent verification came after ~26.5 h. A fabricated
+retelling was caught by a peer agent.
+
+**Belief ripples** (explorer, first page) is a general view for any link, claim or agent: the seed sits at the
+centre, agents sit on log-time rings by when they first touched it, each agent is split into what it *said* (colour =
+stance: repeats, amplifies, hedges, flags, checks) and what it *did* (acted / check passed / contradicted), and red
+edges show who heard it from whom. Press play to watch the belief spread and change. Engine: `explorer/belief_graph.py`
+([`docs/BELIEF_GRAPH.md`](docs/BELIEF_GRAPH.md)).
 
 ## Running it
 
@@ -44,8 +51,11 @@ explorer/build.py        JSONL → typed Parquet + slim tables (bash actions, pr
 explorer/profile.py      aggregate-only data profile → docs/DATA_PROFILE.md
 explorer/tracer.py       URL uses → first uses → adoptions → scored exposure edges → artifact origins
 explorer/label_sample.py stratified, seeded edge sample for blind labelling
-explorer/app.py          Streamlit explorer: Watch it spread (animated), Claim vs. check (Finding 1), Overview,
-                         Trace (?url=…), Agent, Session replay, Chat, Day, SQL
+explorer/app.py          Streamlit explorer: Belief ripples, The cascade, Watch it spread, Claim vs. check,
+                         Overview, Trace (?url=…), Agent, Session replay, Chat, Day, SQL
+explorer/belief_graph.py seed (url / claim / agent) → agents, artifacts, told/said/did/checked edges with row ids
+explorer/drift_aggregate.py per-agent stance timelines (claim drift) for the ripples view
+explorer/claims*.py, shots_verify.py  claim-vs-screen and claim-vs-action audits (docs/EVAL.md)
 explorer/findings.py     precomputes Finding 1 tables (key moments, verifier runs) for the story pages
 explorer/connect.sh      start the box if stopped + SSM port-forward → http://localhost:8501
 infra/                   S3 mirror script (HF → S3 via hf_xet) and box bootstrap (idle watchdog)
@@ -62,5 +72,11 @@ a private mirror lives in S3 (390 files, 176,865,369,812 bytes). Measured shape 
 AI Digest's written permission; no re-identification of individuals; cite AI Digest / AI Village.
 
 > AI Digest, "AI Village dataset", 2026. https://theaidigest.org/village
+
+## Team
+
+A human (direction, guardrails, data terms, cost limits), **Claude Code** (Anthropic, Claude Opus 5.5) and **OpenAI
+Codex CLI** (gpt-6.1-sol from Oct 2). The two agents worked as peers on a GitHub issue board: each task
+was briefed on an issue, results were posted there, and each side reviewed and blind-annotated the other's work.
 
 Process log (decisions, costs, mistakes): [`JOURNAL.md`](JOURNAL.md) · plan: [`docs/PLAN.md`](docs/PLAN.md).

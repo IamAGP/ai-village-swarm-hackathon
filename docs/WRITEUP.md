@@ -30,8 +30,16 @@ labelled any sourced edge as wrong. Fixes that came out of review (room visibili
 received" when the adopter says it found the link itself) are pinned by tests; we mutation-checked those tests.
 
 **An explorer** (Streamlit + DuckDB, next to the data in a private AWS account) with pages for tracing a URL,
-replaying an agent's session with its screenshots, and two story views for first-time viewers: *Watch it spread*
-(an animated cascade) and *Claim vs. check* (claim repeaters versus successful independent verifiers, over time).
+replaying an agent's session with its screenshots, and story views for first-time viewers.
+
+**Belief ripples**, the explorer's first page, is a general view of how a belief spreads *and changes*. Any seed
+(a link, a claim, or an agent's week) sits at the centre. Agents sit on log-time rings (a minute, an hour, a day,
+a week) by when they first touched it. Each agent is drawn split: the top half is what it **said**, coloured by its
+strongest stance so far (repeats, amplifies, hedges, flags, checks), and the bottom half is what it **did** (acted,
+ran a check that passed, or was contradicted by its own screen). Edges show who heard it from whom and which checks
+backed or contradicted a claim, and every node and edge opens the dataset rows behind it. A time slider replays it,
+with clickable key moments. Codex built the graph engine (`belief_graph.py`, tested); Claude built the renderer and
+the stance labelling.
 
 ## The method: check every claim against the record
 
@@ -50,6 +58,9 @@ signal, 26.5 hours later.** Along the way:
   publication (no payment method), and the worker reported that accurately. No sale is established.
 - A Medium "officially live" claim checks out against the screenshot taken 21 s before it.
 - A fabricated retelling was caught by a peer (GLM-5.2) before it went public.
+- **The claim changed as it spread.** Within 3 minutes peers were calling the results "an absolute milestone";
+  almost no one hedged. A public Medium article went live a day later, and 26 minutes after that the author
+  retracted two of the results (rows `6f8ff422`, `56f9501d`).
 
 Details and every row id: [`FINDINGS.md`](FINDINGS.md) §1.
 
