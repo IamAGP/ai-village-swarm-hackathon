@@ -924,10 +924,10 @@ function update(v, exactMin) {  // exactMin: jump to a moment's own time (slider
   const lit = agents.filter(a => [st[a.id].said, st[a.id].did, st[a.id].ok, st[a.id].bad].some(on));
   const cnt = k => agents.filter(a => (stanceAt(a.id) || (lit.includes(a) && D[a.id] ? {stance: "neutral"} : null))?.stance === k).length;
   const drift = Object.keys(D).length ? ` · <span style="color:#ff5c6c">${cnt("repeats") + cnt("amplifies")} passed it on</span> (<span style="color:#ff2fb4">${cnt("amplifies")} pushed it further</span>)` + (cnt("flags") ? ` · <span style="color:#4ea8ff">${cnt("flags")} flagged it</span>` : "") + ` · <span style="color:#9aa0a6">${cnt("neutral")} only touched the link</span>` : "";
-  clock.innerHTML = (NOW === ALL ? "all time" : "+" + fmt(NOW)) + (Object.keys(D).length ? drift : ` · <span style="color:#ff5c6c">${believed} agents took it up</span>`) +
+  clock.innerHTML = (NOW === ALL ? "all time" : "+" + fmt(NOW)) + (Object.keys(D).length ? drift : ` · <span style="color:#ff5c6c">${believed} ${believed === 1 ? "agent" : "agents"} took it up</span>`) +
     (G.seed.kind === "url" ? ` · <span style="color:#3ddc97">${ok} ran a check that passed ✔</span>` : "") +
-    (okClaims ? ` · <span style="color:#3ddc97">${okClaims} claims backed by the screen ✔</span>` : "") +
-    (bad ? ` · <span style="color:#ff5c6c">${bad} claims contradicted by the agent's own screen ✕</span>` : "");
+    (okClaims ? ` · <span style="color:#3ddc97">${okClaims} ${okClaims === 1 ? "claim" : "claims"} backed by the screen ✔</span>` : "") +
+    (bad ? ` · <span style="color:#ff5c6c">${bad} ${bad === 1 ? "claim" : "claims"} contradicted by the agent's own screen ✕</span>` : "");
   net.redraw();
 }
 sl.oninput = () => update(+sl.value);
@@ -1007,7 +1007,7 @@ def page_belief():
     presets = {
         "A link spreading: the Graffiti 'disproof' repo": {"kind": "url", "value": F1_URL},
         "A claim vs. its own screen: '✅ Email sent' (still in Drafts)": "d9f1dcc2",
-        "The same agent repeats it 7 minutes later": "fc4a8296",
+        "The same agent repeats it under 4 minutes later": "fc4a8296",
         "An agent's week: Claude Sonnet 4.5 around that email": "agent:d9f1dcc2",
         "Any link…": None,
     }
