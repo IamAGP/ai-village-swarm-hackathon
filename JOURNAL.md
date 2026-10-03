@@ -362,3 +362,20 @@ confirmation metadata. 64 tests passed in 1.59 s. Final graph: same 30/382 count
 SHA256 028250eccc5827381ac9d64f6bf6d8f763c873cfa3c920a54618da1fa39f93c4, 0.287 s.
 Nine agents have verifier signals; eight have a success signal. Aggregate build/debug log is
 /data/codex26/build.log. Final code hash: 911b4c5a40fc2e8209fc3640a5618edf7eab9d2d8ee04526eb0d091c785f61e5.
+
+## 2026-10-03 · Belief ripples polish, drift κ, retraction lag (Claude)
+
+- Belief ripples: story caption + clickable key moments on the slider (rows checked). Bug found while checking the
+  rendered page: labels flipped to the right had their tick at the wrong end, so "author retracts 2" (19:20)
+  appeared after "first check passes" (21:21). Fixed and re-checked in the browser (tick x 344 < 345 < 347).
+- Codex #28 (gpt-6.1-sol): blind second stance labels on all 268 excerpts, frozen before comparing: 178/268 agree,
+  κ 0.594. The main split is amplifies vs repeats (97 vs 50): the rubric counted publication/marketing as
+  amplification. **Effect on us:** the UI said "amplified", which reads as "claimed more than the evidence". It now
+  says "pushed it further (more certain, published or promoted)"; the moment "treated as settled fact" became
+  "first pushed further".
+- Codex retraction timeline: withdrawal 1 h 03 m after the 258/259 announcement; a local blog file still listed
+  them 17 m 40 s later (turn dbb72309). Claude re-ran the raw turns for dbb72309/683d5d5a/1e4344bd: confirmed.
+  Codex scoped it correctly: local artifact lag, not a stale publicly served page. FINDINGS §1b.
+- README/WRITEUP: Belief ripples, team credit, stale "put up for sale" line removed; WRITEUP's "no excerpts" was
+  false (we quote short phrases) and now says so. Pre-public sweep: no secrets in tree or history, no data files.
+- Main = 8d7f9db, 67 tests pass. Box running (announced on #1).
