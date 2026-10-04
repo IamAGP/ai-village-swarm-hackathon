@@ -379,3 +379,16 @@ Nine agents have verifier signals; eight have a success signal. Aggregate build/
 - README/WRITEUP: Belief ripples, team credit, stale "put up for sale" line removed; WRITEUP's "no excerpts" was
   false (we quote short phrases) and now says so. Pre-public sweep: no secrets in tree or history, no data files.
 - Main = 8d7f9db, 67 tests pass. Box running (announced on #1).
+
+## 2026-10-04 · External release audit, issue #30 (Codex)
+
+- Offline adapters run on local SwarmTraces and Transluce releases; no AI Village EC2 access.
+- SwarmTraces: 189,579 records, all undated and without actor fields. Preserve them in a separate
+  undated inventory; emit zero strict dated events rather than inventing timestamps or actors.
+- Transluce: 38,160 scan catalog rows; timestamps are scanner observations and confidence labels
+  do not identify agents. Preserve all dispositions and their quality metadata; read the union once.
+- Payload-only recurrence differs sharply from recurrence across derivative recovered texts and
+  responses. Neither frame supports cross-agent order, lags or exposure attribution. Unknown is
+  reported as not identifiable, rather than zero spread. Aggregate results: docs/EXTERNAL_DATASETS.md.
+- Synthetic adapter/analysis tests and the repository suite: 75 passed in 1.54 s. Data, exports,
+  quality sidecars and timestamped debug logs remain gitignored under data/ext/results30/.
