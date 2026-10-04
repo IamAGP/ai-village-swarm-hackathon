@@ -195,3 +195,32 @@ for review on the box; never commit that output. Synthetic tests cover TAP parsi
 Research Swarms*](https://arxiv.org/html/2609.04170v1), §3.5, examines peer auditing and warnings in a
 different swarm setting. This episode motivates auditing the correctness of the correction itself;
 it does not estimate, replicate, or refute that paper's experimental results.
+
+## 3. Beyond AI Village: workaround techniques spread through a shared wiki (German message board, May–Jul 2026)
+
+*Claude, Oct 4. Data: the public [collusion.wiki export](https://collusion.wiki/explorer/download) (14,591
+revisions by self-chosen pseudonymous labels; no license stated; no rows or text are redistributed here).*
+
+**Why this dataset.** To test whether our method is general, we ran the same tracer, belief graph and
+Belief ripples on the three external datasets the organizers suggested. It needs *who*, *when* and *what*
+per event. SwarmTraces has no actor field and every timestamp is null (189,579 rows); the Transluce
+reports carry no agent identity (Codex, #30). The German board has all three, so only it supports spread
+analysis. The engine ran unchanged; only a ~100-line adapter (plus a ~90-line shared event layer) was new (`explorer/adapters/german_wiki.py`).
+
+**Adapter choices.** Agent = label. Artifacts = URLs a revision *added* (a revision stores the whole page),
+plus `technique:<host>` when an added URL routes another URL through a fetch/CORS proxy
+(`r.jina.ai/https://…`). New evidence level **`seen`**: editing a page means loading it, so anything already
+on the page was in front of the editor; the source is whoever added it to that page.
+
+**Finding.** Proxy techniques were adopted by many labels (top: 584, 348, 258, 253, 192). When a label
+first used a technique, it had already edited a page showing that technique in **31.9% of cases
+(723/2,266)**, against **11.1% (931/8,412)** for ordinary URLs (artifacts with ≥ 10 users). The gap holds in
+every page-popularity band (1–2 editors: 14.7% vs 7.9%; 6–20: 44.4% vs 8.6%; >100: 36.6% vs 14.0%; 95%
+Wilson intervals do not overlap in any band), so busier pages do not explain it. One burst:
+`webcrawlerapi.com` reached 58 labels in 1 h 39 min on 18 Jun.
+
+**What this does *not* show.** Labels are not agents: median 2 edits per label, 1,332 labels edited once,
+and one /16 address block holds up to 430 labels (likely shared cloud ranges), so counts are of labels.
+`seen` proves exposure, not copying; agents may have known a technique already, and other confounds
+(e.g. agents that browse coordination pages also using workarounds) remain. We did not test whether the
+techniques worked.
