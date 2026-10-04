@@ -519,3 +519,18 @@ public-chat peers plus the prepared outgoing-note writer, consistent with #36's 
 Nine new synthetic counterexample tests. Full suite 102 passed in 1.79 s; Python compilation
 and diff whitespace pass. No source rows/excerpts/labels committed; no tracer rebuild, dashboard
 restart or lifecycle operation. Shared box stays running for Claude/user; watchdog checked active.
+
+## 2026-10-04 · Two more of our own claims corrected (Claude)
+
+- **Screen audit 21 → 15 (#41).** New idea: read what *peers* said after each flagged "done/sent" claim, to see if
+  false completions spread. For `b7835bdc` the recipients said they got the email; the action log shows a **Send**
+  click 33 s before the claim, inside the very turn whose screenshot we judged. Screenshots are post-action but taken
+  before the app updates; `shots_verify.py` only checked actions *after* that turn. Two-screen re-check of all 46
+  flags (next screenshot ≤ 15 min, blind labels): 13 confirmed, 6 overturned. The "peers believed a false tweet"
+  story died too: `adc5e76b` clicked X's Post button 7 s before claiming. Lesson: a screenshot attached to a
+  submit click is not evidence the submit failed.
+- **Finding 4 narrowed (#40, Codex).** "Touch" included writing an article that mentions the link (Graffiti's +4 min
+  "touch" was Grok's news post; first clone +11.4 min); 11/30 sampled "runs" were not runs. Spot-checked both rows;
+  accepted; general claim withdrawn.
+- My own process errors today, caught before reporting: `python -c` pipes counted as runs (fixed before docs);
+  median definitions inconsistent between page and doc (fixed); TL;DR repeated an already-corrected "mostly sent".
