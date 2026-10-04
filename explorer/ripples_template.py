@@ -209,6 +209,7 @@ if (Object.keys(D).length) document.getElementById("stlegend").innerHTML = "(" +
 // moment markers: positioned on the slider's log-time scale; click to jump to the moment (+1 s so it counts)
 const fromM = m => 1000 * Math.log10(1 + Math.max(m, 0)) / Math.log10(1 + RMAX);
 const mbox = document.getElementById("moments");
+mbox.style.height = `${Math.max(62, 20 + 15 * Math.max(0, ...MOMENTS.map((m, i) => m.lane ?? i % 3)))}px`;
 MOMENTS.forEach((mo, i) => {
   const v = fromM(mins(mo.at)), el = document.createElement("div");
   el.style.cssText = `position:absolute;left:calc(${v / 10}% ${v > 700 ? '+ 1px' : '- 1px'});top:0;cursor:pointer;font-size:11.5px;white-space:nowrap;color:${mo.color};transform:translateX(${v > 700 ? "-100%" : "0"})`;

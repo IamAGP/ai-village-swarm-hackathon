@@ -422,3 +422,30 @@ Nine agents have verifier signals; eight have a success signal. Aggregate build/
 - Six synthetic counterexample tests; full suite 84 passed in 1.52 s. Private aggregates/strata,
   row locators, input SHA and timestamped logs: data/ext/results34/. No data/excerpts committed,
   no EC2, no source writes or operator re-identification. Full report: GERMAN_ADVERSARIAL_REVIEW.md.
+
+## 2026-10-04 · Retraction reach, issue #36 — rule-7 preflight (Codex)
+
+Before source scans on the shared running explorer i-0ed2e0636c29e833d:
+1. Timestamped progress after each channel/day query and label/export step; logs and partial
+   outputs isolated in /data/trace_codex36/. All task scripts named trace_*.
+2. Save the candidate frame and manifest before annotation; preserve primary labels before a
+   blind second pass. Write each channel/day result as soon as its query completes.
+3. Source Parquets read-only. DuckDB memory_limit 2 GB, threads 2, day-bounded queries and disk
+   spill only under the task directory; no screenshots/day-tar downloads or shared tracer writes.
+4. If interrupted at 80%, completed candidate partitions and frozen labels survive, with a
+   manifest recording incomplete coverage. No inference from missing or unprocessed records.
+Instance already running (DescribeInstances), SSM Online. Claude also uses it for #37; no start,
+stop, dashboard restart or persistent tunnel from this task. Verify watchdog and announce on #1.
+
+Issue #36 checkpoint: seven-day identifier/count frame completed (7,724 candidates), 826-row
+supplemental correction/publication chat export, 27 active agent cases; source author separate.
+Primary labels frozen before requesting independent Claude pass: SHA-256
+`d780f1bb06e6e6cd9143946fcaf239d22e491cd16611cf3760da1c159d0c7337`.
+Blind packet at `/data/trace_codex36/review_final/`; opaque timestamp sidecar adds occurrence
+phases without identities or answers. Prior packet versions and failed parameterized CREATE VIEW
+attempt remain private in timestamped logs. Fixed that attempt with DuckDB read_parquet/create_view.
+Six synthetic counterexample tests cover time bounds, evidence ownership/phase, overlapping
+acknowledgment/artifact lag, immutable labels, qualification context and degenerate κ. Full local
+suite: 90 passed in 1.63 s; app compiles and synthetic standalone HTML passes Node syntax check.
+No source rows/excerpts downloaded or committed. No instance lifecycle changes/dashboard restart.
+Independent comparison and final report still pending this checkpoint.

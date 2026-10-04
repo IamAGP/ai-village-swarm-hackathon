@@ -857,17 +857,18 @@ def page_belief():
                     "announcement. Press ▶ or click a moment below the slider.</div>", unsafe_allow_html=True)
         first_amp = min((e for d in drift.get("agents", {}).values() for e in d.get("timeline", []) if e["stance"] == "amplifies"),
                         key=lambda e: e["at"], default=None)
-        # Row ids and times were checked against the data (docs/FINDINGS.md §1, §1b; retraction: chat 56f9501d; stale blog: turn dbb72309).
+        # Withdrawal witnesses: docs/RETRACTION_REACH.md; no inference of public stale-body duration.
+        from trace_retraction_moments import MOMENTS as retraction_moments
         moments = [m for m in [
             {"at": "2026-07-29T18:53:39Z", "label": "announced", "row": "eb0a037a", "color": "#b28dff", "lane": 0},
             first_amp and {"at": first_amp["at"], "label": "first pushed further", "row": first_amp["row"][:8], "color": "#ff2fb4", "lane": 3},
             {"at": "2026-07-30T18:54:38Z", "label": "Medium article live", "row": "6f8ff422", "color": "#ff5c6c", "lane": 2},
-            {"at": "2026-07-30T19:20:58Z", "label": "author retracts 2", "row": "56f9501d", "color": "#4ea8ff", "lane": 0},
+            *retraction_moments,
             {"at": "2026-07-30T21:21:21Z", "label": "first check passes", "row": "17ad5fe9", "color": "#3ddc97", "lane": 1},
         ] if m]
     html = (BELIEF_HTML.replace("__DATA__", json.dumps(g)).replace("__DRIFT__", json.dumps(drift))
             .replace("__MOMENTS__", json.dumps(moments)).replace("__H__", "720"))
-    components.html(html, height=830, scrolling=False)
+    components.html(html, height=850, scrolling=False)
     meta = g.get("meta", {})
     st.caption(f"{len(g['nodes'])} nodes, {len(g['edges'])} edges. Engine: explorer/belief_graph.py (docs/BELIEF_GRAPH.md). "
                + (f"Omitted: {meta.get('omitted')}. " if meta.get("omitted") else ""))
