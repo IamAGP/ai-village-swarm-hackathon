@@ -474,3 +474,48 @@ of the unresolved editor case was available at final review. Full suite after re
 main: 93 passed in 1.73 s; Python compilation, standalone Node syntax and diff whitespace checks
 pass. Source content, label files and debug logs remain on the box. Shared explorer remains running
 for Claude/user; no lifecycle operation, tracer rebuild or dashboard restart performed by Codex.
+## 2026-10-04 · Touch vs run adversarial review, issue #40 — rule-7 preflight (Codex)
+
+Before scanning the shared running explorer: use only trace_* scripts, isolated outputs/logs in
+/data/trace_codex40/, source Parquets read-only, DuckDB memory_limit 2 GB and two threads with
+isolated spill. Persist each extraction, sample, and sensitivity result before the next step;
+timestamp progress and preserve failed attempts. If interrupted, saved candidate commands and
+row-ID samples survive, with incomplete stages explicitly marked. Reconstruct origin, stricter
+touch, execution and prior-contribution sensitivities without replacing shared tracer outputs.
+Announce on #1; watchdog remains on. No instance start/stop, Streamlit restart or tracer rebuild;
+Claude/user are using the box. No dataset rows, excerpts, labels or screenshots in Git.
+
+Issue #40 final: verdict weakened. Reproduced 383 cascades and the UI-specific 77/68,
+1.7267 h / 54 faster-than-Graffiti comparison. Saved outputs are 78/69 before the UI API
+exclusion. Removing five further non-repo pages leaves 72 root-shaped candidates, legacy
+64 detections. Eleven-minute action lag includes copied article/message content: 9/30 random
+first actions are artifact/text-only, three typed URLs unresolved, seventeen request intents
+(including metadata) and one state-changing request. Literal request sensitivity is 288/383,
+49.215 min conditional median, but misses Python/variables/browser access; not an opening estimate.
+Four earlier human seeds change all-link median 10.964→10.685 min; root repo median/Graffiti rank
+unchanged. All origins resolve to model-string roster entries, but true authorship is not known.
+
+Manual run labels frozen before flag comparison: 19 TP / 11 FP among 30 detections, precision
+63.3% (Wilson95 45.5–78.1%); 30 negative cases have no missed file/module invocation under the
+narrow rule. Separate broader source-evaluation definition finds one Node-vm miss (balanced
+sample recall 19/20, 95%; 76.4–99.1%). Repo-balanced two-stage sampling, prefix indexing and
+command-only interpretation limit extrapolation. Original labels preserved; all private hashes,
+row IDs and semantic boundaries are in TOUCH_RUN_REVIEW.md. Final context sensitivity: 54/72
+observed, median 1.955 h, 40/54 faster than Graffiti; 24/54 first actors have earlier contribution
+intents. No earlier contribution record: 39 observed, median 20.906 h, 26/39 faster. Also excluding
+same-turn writes: 38 observed, median 11.479 h, 25/38 faster. Neither is known independent checking.
+Graffiti's +4-min literal action writes an article; +11.38-min literal clone request and +26.459-h
+selected verifier invocation remain. Eight targeted pre-invocation alias/filename candidates
+contain no earlier run; the bounded search does not establish global absence or delegated coverage.
+
+Outputs and debug logs stay in /data/trace_codex40/. Preserved v1/v2/v3 and final sensitivity
+outputs and definition-separated label files; subsequent parser changes never altered frozen
+samples. Final code handles known wrappers, comment false positives, quoted paths, explicit
+external scripts and overlapping basenames; it remains a limited intent predicate, not a full
+shell/provenance parser. Narrowed FINDINGS §4, WRITEUP, DEMO_SCRIPT, legacy scan docstrings and
+app labels; chart filters root shapes, withdraws comparative-checking headline, keeps original
+legacy outputs. Also corrected WRITEUP's retraction TL;DR from five public spreaders to four
+public-chat peers plus the prepared outgoing-note writer, consistent with #36's evidence.
+Nine new synthetic counterexample tests. Full suite 102 passed in 1.79 s; Python compilation
+and diff whitespace pass. No source rows/excerpts/labels committed; no tracer rebuild, dashboard
+restart or lifecycle operation. Shared box stays running for Claude/user; watchdog checked active.

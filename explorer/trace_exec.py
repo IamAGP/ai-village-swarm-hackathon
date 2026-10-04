@@ -1,10 +1,13 @@
-"""Touch vs run: for repo cascades, when did another agent first *execute* code from the repo (not just open it)?
+"""Legacy touch/run candidate scan; not verified execution or independent checking.
 Extends Finding 4. Runs on the explorer box; aggregates only. Writes /data/findings/exec/{cascades.jsonl,summary.json}.
 
 Repo cascade: a GitHub/GitLab repo URL (owner/name) that >= MIN_AGENTS non-human agents posted or acted on.
 Execution: a bash turn by a non-origin agent whose command, after stripping heredoc bodies and quoted strings
 (articles quoting a command are not runs; FINDINGS §1 correction), mentions the repo name and runs an interpreter
-or test/build tool. A run is not a successful check: exit status is not used here.
+or test/build tool. Confirmed false positives include comments, standard-library
+utilities and unrelated programs in the same turn. URL candidates also contain
+non-repo pages. See docs/TOUCH_RUN_REVIEW.md; results are preserved for sensitivity
+comparison, not validated execution. Exit status and checkout provenance are unused.
 """
 import json
 import os

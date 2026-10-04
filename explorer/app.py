@@ -959,18 +959,21 @@ def page_sql():
 
 
 def page_touch():
-    """Finding 4: agents open links within minutes; running the code (let alone checking a claim) comes later."""
+    """Finding 4's legacy action/run proxies, with the adversarial audit limitations."""
+    from trace_touch_sensitivity import root_candidate
     st.markdown("<div style='font-size:1.9rem;font-weight:700;line-height:1.2'>Touch vs. run</div>"
-                "<div style='color:#a9adb8;margin-bottom:8px'>Every GitHub/GitLab repo that 8 or more agents posted or used. "
-                "Across: hours until another agent first <b>touched</b> it (opened, cloned, used the link). Up: hours until "
-                "another agent first <b>ran code inside it</b>. Agents look fast; running comes later; checking a claim is "
-                "later still. FINDINGS §4.</div>", unsafe_allow_html=True)
+                "<div style='color:#a9adb8;margin-bottom:8px'>Repo-shaped root links used by 8 or more agents. "
+                "Across: time to another agent's first <b>link-containing action</b>, including article writing. "
+                "Up: time to the legacy scan's first <b>run candidate</b>. These proxies do not measure opening, "
+                "successful execution or independent checking. FINDINGS §4.</div>", unsafe_allow_html=True)
+    st.info("Audit: 11 of 30 sampled run detections were false positives. The general opening/checking-time "
+            "claim is withdrawn; Graffiti's separately verified chronology remains. See docs/TOUCH_RUN_REVIEW.md.")
     path = f"{FINDINGS}/exec/cascades.jsonl"
     if not os.path.exists(path):
         st.warning("Run explorer/trace_exec.py on this box first.")
         return
     df = pd.read_json(path, lines=True)
-    df = df[~df.url.str.contains("/api/")].copy()
+    df = df[df.url.map(root_candidate)].copy()
     never = int(df.run_h.isna().sum())
     touch_med = df.touch_h.median()  # over all repos, as in FINDINGS §4
     df = df.dropna(subset=["run_h", "touch_h"])
@@ -979,27 +982,28 @@ def page_touch():
     df["run"] = df.run_h.clip(lower=0.01)
     df["which"] = df.url.eq(F1_URL).map({True: "Graffiti 'disproof' repo", False: "other repos"})
     c1, c2, c3 = st.columns(3)
-    c1.metric("median time to first touch", f"{touch_med * 60:.0f} min")
-    c2.metric("median time to first run", f"{df.run_h.median():.1f} h")
-    c3.metric("never run by another agent", f"{never} of {never + len(df)}")
+    c1.metric("median link-bearing action lag", f"{touch_med * 60:.0f} min")
+    c2.metric("median run-candidate lag", f"{df.run_h.median():.1f} h")
+    c3.metric("no run candidate detected", f"{never} of {never + len(df)}")
     ax = dict(scale=alt.Scale(type="log", domain=[0.01, 1000]))
     pts = alt.Chart(df).mark_circle(opacity=0.85).encode(
-        x=alt.X("touch:Q", title="hours to first touch by another agent (log)", **ax),
-        y=alt.Y("run:Q", title="hours to first run inside the repo (log)", **ax),
+        x=alt.X("touch:Q", title="hours to link-containing action (log)", **ax),
+        y=alt.Y("run:Q", title="hours to legacy run candidate (log)", **ax),
         size=alt.Size("n_agents:Q", title="agents", scale=alt.Scale(range=[40, 500])),
         color=alt.Color("which:N", scale=alt.Scale(domain=["Graffiti 'disproof' repo", "other repos"], range=["#ff2fb4", "#4ea8ff"]),
                         legend=alt.Legend(title=None, orient="top")),
         tooltip=["repo", "n_agents", alt.Tooltip("touch_h:Q", title="touch h"), alt.Tooltip("run_h:Q", title="run h"),
-                 alt.Tooltip("run_agents:Q", title="agents who ran it"), alt.Tooltip("first_run_row:N", title="first run row")])
+                 alt.Tooltip("run_agents:Q", title="agents with run candidates"), alt.Tooltip("first_run_row:N", title="candidate row")])
     diag = alt.Chart(pd.DataFrame({"v": [0.01, 1000]})).mark_line(strokeDash=[4, 4], color="#5b6070").encode(x="v:Q", y="v:Q")
     st.altair_chart((diag + pts).properties(height=520), use_container_width=True)
     g = df[df.url.eq(F1_URL)]
     if len(g):
         g = g.iloc[0]
-        slower = int((df.run_h < g.run_h).sum())
-        st.caption(f"Graffiti: touched after {g.touch_h * 60:.0f} min, first run after {g.run_h:.1f} h (row `{g.first_run_row}`, "
-                   f"the same first independent run found by hand in FINDINGS §1), slower than {slower} of {len(df)} repos. "
-                   "A run is not a check: contributors run their own code and exit status is not used. Dashed line: run = touch.")
+        st.caption(f"Graffiti: the {g.touch_h * 60:.0f}-minute action writes a news article, not a repo read. "
+                   f"A literal clone request appears at 11.38 min (row `0461fa91`); the selected invocation at "
+                   f"{g.run_h:.2f} h (row `{g.first_run_row}`) matches the separate §1 audit. Comparative ranks depend "
+                   "on command and contributor rules; they are not rankings of independent checks. "
+                   "Exit status is unused. Dashed line: equal proxy lags.")
 
 
 PAGES = {"Belief ripples": page_belief, "Touch vs. run": page_touch, "The cascade": page_cascade, "Watch it spread": page_spread, "Claim vs. check": page_race,

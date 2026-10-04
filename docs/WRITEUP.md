@@ -9,10 +9,11 @@
 > - **Finding 1**: maths "disproofs" were celebrated within 3 minutes; the author retracted two a day later, and
 >   a local blog copy still listed them 17 minutes after the retraction; the first independent check that passed
 >   came after 26.5 hours.
-> - **Did the correction reach the believers?** Yes: all five observed public spreaders acknowledged the
->   retraction within 4.5 minutes, and all 16 peers who had taken the claim up later did (Codex, two blind readers).
-> - **Finding 4 (all 383 cascades)**: agents *open* links fast (median 11 min) and *run* repo code after a median 1.7 h;
->   Graffiti was slower than 54 of 68 repos. The gap is between touching and checking.
+> - **Did the correction reach the believers?** The four public-chat peers plus one prepared outgoing-note
+>   writer acknowledged within 4.5 minutes; all 16 peers with prior uptake later did (Codex, two blind readers).
+> - **Finding 4, narrowed (383 cascades)**: the 11-minute median measures link-containing actions, including
+>   article writing. A run-detector audit confirmed 19/30 sampled detections (63.3%; 45.5–78.1%). The general
+>   opening/checking claim is withdrawn; Graffiti's separately verified 26.5-hour chronology remains.
 > - **At scale**: 15 of 1,385 checkable "it's live / sent" claims are contradicted by the agent's own screens (1.1%),
 >   most often work announced as done that is still empty or a placeholder. Agents rarely invent command runs (0 of 152).
 > - **Finding 2**: an agent's confession of faking tests is contradicted by its own shell log.
@@ -92,11 +93,16 @@ signal, 26.5 hours later.** Along the way:
 
 Details and every row id: [`FINDINGS.md`](FINDINGS.md) §1.
 
-**Is Finding 1 typical? (Finding 4, all 383 cascades.)** Not in the way one might guess: agents rarely repeat a
-link before anyone opens it (median 0 such agents per cascade; another agent acts on the link a median 11 minutes
-after it appears). For the 77 repos among them, someone else first runs code inside the repo a median 1.7 h after
-it appears; Graffiti took 26.5 h, slower than 54 of 68. The gap is between *touching* and *checking*, not talking
-and touching. The run detector independently finds Finding 1's hand-verified first run (`a5abb56d`).
+**Is Finding 1 typical? (Finding 4, narrowed.)** The broad scan does not establish that.
+Across 383 cascades, eleven minutes is the median to any link-containing action, which can
+include writing an article rather than reading the linked repo. Nine of 30 sampled first
+actions were artifact/text-only (Wilson95 16.7–47.9%). The run detector also has confirmed
+false positives: 19/30 sampled detections were target invocation intents (63.3%; 45.5–78.1%).
+Removing non-repo URLs, tightening command context and excluding earlier contributor records
+changes the faster-than-Graffiti comparison from the legacy 54/68 to 26/39 observed candidates;
+none is a validated ranking of independent checks. The Graffiti clone request appears at
++11.38 min (`0461fa91`), selected verifier invocation at +26.46 h (`a5abb56d`), successful
+independent verification at +26.5 h (§1). Full limits: [TOUCH_RUN_REVIEW.md](TOUCH_RUN_REVIEW.md).
 
 ### Finding 2: a confession contradicted by the action record (RPG game, Mar 12, 2026)
 

@@ -6,7 +6,8 @@ Per link (>= MIN_AGENTS non-human agents in chat or action):
   t_touch      first `action` (computer-use turn using the link) by any agent other than the origin
   talk_before  agents other than the origin whose first public chat post with the link precedes t_touch
   lag_h        hours from origin to t_touch (None if no one else ever acted)
-`action` means opened/used the link, not verified a claim (see FINDINGS §4 caveats).
+`action` means its input contains the link, including article/message drafting. It
+does not establish opening, delivery or verification (adversarial review #40).
 Usage: trace_talk.py [min_agents]   -> /data/findings/talk/{cascades.jsonl,summary.json}
 """
 import json

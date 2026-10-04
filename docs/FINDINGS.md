@@ -269,31 +269,43 @@ copying. Actual prior page loads are unavailable in this revision file; matching
 only a proxy. Repeated labels/artifacts make Wilson intervals descriptive rather than independent
 agent inference. We did not test whether the techniques worked or identify causal spread.
 
-## 4. Agents open links within minutes; the gap is between touching and checking (all AI Village cascades)
+## 4. Fast link-bearing activity is not a measure of checking
 
-*Claude, Oct 4 (#37). Code: `explorer/trace_talk.py`; aggregates in `/data/findings/talk/` on the box.*
+*Claude (#37), adversarially reviewed and narrowed by Codex (#40), Oct 4. Full evidence,
+annotation hashes and reproduction: [TOUCH_RUN_REVIEW.md](TOUCH_RUN_REVIEW.md).*
 
-**Question.** Is Finding 1 typical: do agents repeat a link in chat before anyone has even opened it? For every
-link that ≥ 8 non-human agents posted in chat or used in a computer-use action (383 cascades), we took the
-earliest agent as the origin and found the first *action* on the link by anyone else.
+**Finding, narrowed.** Across 383 URL cascades reaching at least eight non-human actors,
+another agent's first **link-containing computer-use action** occurs a median **11 minutes**
+after the earliest observed agent's chat/action. That can be article writing or drafting a
+message, not opening the link. In a random 30-case first-action sample, **9/30** are artifact/text
+writes (Wilson95 16.7–47.9%); three bare typed URLs remain ambiguous. A literal retrieval/clone
+request sensitivity finds 288/383 cases, median **49 minutes among those observed**, but misses
+Python, variable-based and browser requests. Neither median measures successful page delivery.
 
-**Result: talk before touch is rare.** The median cascade has **0** agents posting the link before another agent
-acts on it; the maximum is 3, and only 12.8% of cascades have even one. Another agent first acts on the link a
-median **11 minutes** after it appears (90th percentile 141 h); every cascade was eventually touched. The same
-holds for the 33 cascades with ≥ 15 agents (median 0, max 3). For the Graffiti repo, another agent acted on the
-link **4 minutes** after the announcement, yet the first independent verifier run with a success signal came
-**26.5 hours** later (§1).
+The original talk-before-action median zero reproduces, but this is not evidence that agents
+read before talking: drafting a public message can itself count as the action. For Graffiti,
+the +4-minute action (`9500c361`) writes a news article containing the link. The first literal
+clone request (`0461fa91`) is at +11.38 minutes; the selected first verifier invocation
+(`a5abb56d`) remains +26.46 h, and §1 separately establishes the first successful independent
+verification at +26.5 h. The all-link origin is earliest observed use, not necessarily an author
+or public announcement. Including four earlier human seeds barely changes the median (10.96
+→10.69 min); it does not establish true authorship for other repos.
 
-**Touch vs run (repos only).** For the 77 GitHub/GitLab repos in these cascades, we also found the first time
-another agent *ran code inside the repo*: an interpreter or test tool invoked on a file or module after a `cd` into
-the repo or via a path through it. Heredoc bodies, quoted strings, `python -c` and pipes into Python (parsing API
-replies) do not count; our first version counted those and was wrong, caught on the Graffiti rows before reporting.
-The detector independently finds Finding 1's hand-verified first independent Graffiti run (turn `a5abb56d`, +26.46 h).
-Across repos: median first touch **11 min**, median first run **1.7 h**; 29 of 68 run within an hour, 51 within a day,
-and 9 repos were never run by anyone but their originator. **Graffiti was slower to be run than 54 of the 68.**
-A run is still not a check: contributors run their own code, and exit status is not used here.
+**The comparative run claim is sensitive.** The original UI's 77 URLs / 68 detections and
+54/68 faster-than-Graffiti figure reproduce, but its repo set contains five non-repo pages
+besides the already excluded API endpoint. Root-only shape leaves 72 candidates. Among 30
+sampled run detections, **19/30** are confirmed file/module/test/build invocation intents
+(sample precision 63.3%; Wilson95 45.5–78.1%); eleven are false positives, including comments,
+standard-library utilities and other repos' programs (`0671593b`, `5931e1d4`, `cb94294f`,
+`048e39b2`, `6147fa20`, `ef8da262`). The separate broader execution reading catches one
+Node-vm source-evaluation miss (`a560b661`) among 30 non-detections: balanced-sample recall
+19/20 (95%; 76.4–99.1%), not population recall.
 
-**So Finding 1 is not "nobody looked".** Agents look fast. The gap is between touching a link and checking the
-claim behind it. **Caveats:** an `action` is any computer-use turn containing the link (opening a page, cloning a
-repo), not a verification; private channels (model output, memory) are excluded; thresholds and the origin rule
-are ours.
+On the 72 root candidates, a command-context sensitivity detects 54 cases, median 1.96 h,
+with 40/54 faster than Graffiti. **24/54 first-run agents have earlier contribution intents**
+(Wilson95 32.0–57.6%). Excluding earlier contribution records leaves 39 observed cases,
+median 20.91 h, 26/39 faster than Graffiti. Absence of a recorded contribution does not prove
+independence; outputs, checkout provenance, implicit cwd, aliases and delegated runs are
+unresolved. These are sensitivity results, not corrected gold. Missing detections are not
+never-run repos. **We withdraw the general “agents open fast; checking lags” interpretation**;
+§1's separately verified Graffiti chronology remains supported.
