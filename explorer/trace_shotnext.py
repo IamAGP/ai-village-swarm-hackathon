@@ -1,7 +1,8 @@
 """#41: for every flagged screen contradiction, extract the agent's NEXT screenshot after the paired turn.
 
-The paired screenshot is captured right after its own turn's action (verified: typed text appears in it), so a final
-Send/Publish click inside that turn may not have rendered yet. The next screenshot shows whether the state changed.
+The documented action loop captures screenshots after execution, but rendering and publication are asynchronous.
+The next screenshot is another observation; it may show cached output or a different copy of the claimed object.
+Action timing and target identity must be reviewed separately before judging truth at claim time.
 Writes /data/findings/claims_all/next/{next.jsonl, <claim8>.png}; one log line per flag; tars fetched per day, deleted.
 """
 import json
@@ -58,7 +59,7 @@ def main():
     with open(f'{OUT}/next.jsonl', 'w') as out:
         for f, L, act, at, nxt, claim in plan:
             hit = next(((tid, tat, a) for tid, tat, _, a in nxt if tid in found), None)
-            rec = {'claim8': f['claim_id'][:8], 'claim_id': f['claim_id'], 'claim_at': L['claim_at'], 'claim': claim[:1500],
+            rec = {'claim8': f['claim_id'][:8], 'claim_id': f['claim_id'], 'claim_at': L['claim_at'], 'claim': claim,
                    'paired_turn': L['turn_id'], 'paired_action': act, 'paired_at': str(at), 'acted_after': f['acted_after'],
                    'next_turn': hit[0] if hit else None, 'next_at': str(hit[1]) if hit else None, 'next_action': hit[2] if hit else None}
             if hit:

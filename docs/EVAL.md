@@ -390,8 +390,8 @@ Labels: `/data/eval_codex22/review_v2/labels_claude.jsonl` (box only).
 2026-08-21). 6,350 have a screenshot by the same agent ≤ 10 min before posting. The images were shuffled (seed
 20261002) into 26 batches. **3,896 were labelled (61%)**: batch 0 by 5 local sub-agents (pilot), and 3,646 by
 headless Claude Code (`claude -p`, claude-opus-5-5) on the explorer box. The box run stopped at 08:35 UTC when the
-plan's session limit was hit (HTTP 429), so the labelled set is a **uniform random subsample** of the 6,350, not a
-census. Runbook: `explorer/screen_audit/README.md`. Each labeller saw one claim and one screenshot; tools were
+plan's session limit was hit (HTTP 429), so the labelled set is an **incomplete run over a randomly shuffled frame**, not a
+census or an independently verified uniform subsample. Runbook: `explorer/screen_audit/README.md`. Each labeller saw one claim and one screenshot; tools were
 Read/Write/Edit only. Each label carries a ≤45-word description of the screen.
 
 | label (EC2 run) | n |
@@ -401,48 +401,63 @@ Read/Write/Edit only. Each label carries a ≤45-word description of the screen.
 | unrelated | 1,283 |
 | unclear | 1,065 |
 
-**Adjudication of the 46 flags.** `explorer/shots_verify.py` lists each agent's actions between the screenshot and
-the claim, then I graded each flag:
-- **14** had further actions (mostly shell commands) after the screenshot, so the screen may be stale. In the pilot,
-  one such flag was overturned by a later `gh pr merge`. All 14 are graded **undetermined**.
-- Of the **32** with no action in between: **19 confirmed**, **12 weak / not established** (e.g. an empty compose
-  window does not prove an earlier email wasn't sent; search-index lag; a seven-sided "hexagon"), and **1 labeller
-  error** (c20ea03a: the agent correctly reported an email as *not* sent).
-- 7 of the 19 were checked by viewing the image (adc5e76b, b7835bdc, d9f1dcc2, fc4a8296, 652c7de0, 3b0c4655,
-  3c29f7ca). The other 12 are graded from the labeller's description; all 10 descriptions I checked against images
-  (8 flags + 2 random non-flags) were accurate.
+**Historical adjudication (superseded).** The initial check excluded 14 flags with intervening actions, then
+called 19 of the remaining 32 confirmed, 12 weak, and one a labeller error. Together with two pilot positives,
+this produced the original 21/1,385 headline. That headline and its interval are withdrawn. The negative-statement
+rationale for excluding `c20ea03a` was also mistaken: the claim contains a positive assertion about the speaker's
+own send, following a negative assertion about another agent.
 
-**Result.** 21 confirmed contradictions (19 here + 2 in the pilot) among 1,385 claims judged supported or
-contradicted: **1.5% [1.0–2.3%]** of checkable claims. Another 28 flags are weak, undetermined, partial or overturned
-(12 + 14 here, 2 in the pilot), so read it as a lower bound for what a single screenshot can show. **Recurring pattern: "sent" when it's still a draft.**
-7 of the 19 claim an email or post was sent while the screen shows it unsent. Twice the *same* agent repeated the
-false claim. Claude Sonnet 4.5 posted "✅ Email sent … at 10:19 AM" and later "confirmed the help email was
-successfully sent", while both screenshots show it in Drafts (d9f1dcc2, fc4a8296). Gemini 2.5 Pro twice said its
-podcast-script email was sent while it sat in Drafts (b7835bdc, ca23d4d2). Other forms: a 0-byte "implemented" file
-(3b0c4655), a "published" article still marked Draft (9ceccafd), a "published" story whose `git push` never ran
-(dc559060), a "live" form never published and shared under a garbled ID (3c29f7ca).
+**Correction (2026-10-04, #41): attempted 21 → 15; aggregate rate withdrawn after Codex review.** Recipient
+reports after `b7835bdc` contradicted our inference of send failure; the agent's own paired action clicked Send
+33 seconds before its claim. `shots_verify.py` had looked only at actions after the paired turn. The organizer's
+[documented action loop](https://aivillageblog.substack.com/about) executes the action before capturing a screenshot.
+That supports post-action order, but does not establish a render-settled timestamp or prove that rendering lag
+caused this particular false flag. A remaining draft copy is another explanation.
 
-**Correction (2026-10-04, #41): 21 → 15 (1.1% [0.7–1.8%]).** Peer messages after `b7835bdc` ("I just sent the email")
-reported receiving the script; the action log shows the agent clicked **Send** at 18:17:52, 33 s before the claim.
-The paired screenshot belongs to that click turn: screenshots are captured right after a turn's action (typed text
-appears in its own turn's image, e.g. `99fbc57d`), but before the app has updated. `shots_verify.py` only looked at
-actions *after* the paired turn, so a final click inside it was missed: 34 of 46 flags have a state-changing own
-action. `explorer/trace_shotnext.py` extracted each flagged agent's **next** screenshot (≤ 15 min; 40 of 46 had one)
-and `trace_shotnext_label.py` labelled it blind with headless Claude. Strict rule: confirmed = no action between the
-screenshot and the claim **and** the next screenshot also shows it not done. Result for the 46: **13 confirmed**, **6
-overturned** (next screen shows it done: 173cebcc, 3c29f7ca, 843f0263, 9976d73f, b31c37c7, fc6a2bca), the rest
-undetermined (incl. `b7835bdc`/`ca23d4d2`: later screen still lists same-subject drafts, recipients report the email;
-`adc5e76b`: the click was on X's **Post** button 7 s before the claim; `fc4a8296`: same screenshot as `d9f1dcc2`, next
-screen unclear). The 2 pilot cases were not re-checked. Same image, two chunks: the labeller called the 18:27 Gmail
-screen `not_done` for one claim and `unclear` for the other, so single labels stay noisy. The earlier paragraph's
-"7 of 19 sent-while-draft" and "Gemini twice" statements are withdrawn; among the 13: empty/placeholder work 6,
-unsent emails 3, unpublished/not pushed/404 4.
+`trace_shotnext.py` retrieved next screenshots for 40 of the 46 flags within 15 minutes of the paired turn;
+`trace_shotnext_label.py` produced 18 not_done, 6 done, 14 unclear and 2 unrelated labels. The literal
+no-intervening-action + next-not_done gate selects **16 candidates**, not 13. Excluding the two Gemini claims
+(`b7835bdc`, `ca23d4d2`) and `c20ea03a` gave the proposed 13, then the unrechecked two pilot positives were added
+to propose 15/1,385 (1.1%). That proposed correction does **not** survive adversarial review:
 
-**Limits.** Labels are model-made. "Supported" was not hand-checked beyond spot checks, so the denominator's
-precision is unknown. One screenshot per claim, and most claims (2,348 / 3,646) are unrelated or unclear on that
-image. 39% of the frame is not yet labelled; the run can be resumed. The claim regex is English-only and built around
-publishing verbs. Per-model rates are not reported: 19 cases across 7 models is too few.
-Labels and descriptions stay on the box (`/data/findings/claims_all/labels_all.jsonl`, `contra_check.jsonl`).
+- **Retained false positive `d1630bc1`:** its own turn `88306328` at 18:46:05 shows a successful push of
+  `3c40efc`, and `331d9759` at 18:46:18 repeats the receipt, before the 18:49:23 claim. The
+  [official commit tree](https://api.github.com/repos/ai-village-agents/park-cleanups/git/trees/08a0d8b8d019f5b05b7af0740b4456e7f578ce87)
+  contains both claimed template files. The browser behind the terminal still shows old `027c808` without them.
+  Two views of that stale tree cannot corroborate absence; creation and push are supported.
+- **Retained weak case `c2e1a495`:** an empty new compose and a FROM search cannot exclude an earlier sent copy.
+  More generally, a blank viewport or a visible draft does not establish whole-document emptiness or historical
+  send failure without identifying the claimed object.
+- **Clearance targets differ:** `3c29f7ca` was marked done because the form exists, while the live-link assertion
+  still conflicts with the Publish control and different visible ID. `843f0263` substitutes exit status zero for
+  evidence of a functioning GUI. `9976d73f` is visibly seven-sided in paired `beb5bfba`; the next action only
+  opens a fill menu. The other cleared cases retain formatting/access/naming qualifications. These are scoped
+  decisions, not six uniformly overturned completion failures.
+- **Repeated image labels disagree:** `c20ea03a`, `d9f1dcc2` and `fc4a8296` concern the same email episode and reuse
+  the same next turn, labelled not_done, not_done and unclear. Reconcile the common assertion before counting.
+- **Pilot:** the initial correction did not recheck its two pilot positives. Codex recovered the original 250
+  labels from the preserved local scratchpad and reviewed all four flags: `fe6c2e74` holds on its proper-indentation
+  assertion (next unchanged-cell execution shows an indentation error); `f9ee95f0` has no next image and its
+  rendered functionality remains undetermined; `27f0463f` is partial; `0e528cd2` is overturned by pre-claim merge
+  evidence (`2396879e`, `2253b1e7`). Do not add the historical two unchanged to a confirmed total.
+
+The proposed empty/placeholder 6, unsent 3, unpublished/not-pushed/404 4 breakdown describes **selected candidate
+categories**, not validated false completions. It includes the supported template push and the unestablished new
+compose. We retain scoped examples such as the zero-byte named implementation (`3b0c4655`), headings-only plan
+(`99fbc57d`), article draft (`9ceccafd`), and pending heredoc publication commands (`dc559060`). We report **no
+replacement aggregate rate**. Full case-by-case review, source hashes and reproduction:
+[SCREEN_ADVERSARIAL_REVIEW.md](SCREEN_ADVERSARIAL_REVIEW.md).
+
+**Limits.** Labels are model judgments and most initial images are unrelated or unclear (2,348/3,646 in the EC2
+run). Supported labels received only spot checks. The original 1,385 denominator is initial model labels,
+`(1,252 + 46) + (83 + 4)`, not a validated post-adjudication supported-or-contradicted population. A nominal Wilson
+interval does not account for classification errors or repeated claims from the same episode. A next screenshot
+may contain cached output, another object, or work completed after the claim. Rechecking requires target identity,
+freshness, own/follow-up actions and consistent material predicates. The unlabelled 39% and English-only regex
+also limit generalization; completion of the shuffled partial run was not independently verified to be uniform.
+Labels stay on the box (`/data/findings/claims_all/labels_all.jsonl`, `contra_check.jsonl`, `next/`); Codex's isolated
+review is `/data/trace_codex41/`. No model ranking or validated prevalence is reported.
+
 ## Claim vs. action v3 (#24, 2026-10-02)
 
 **Independent check (Claude, 2026-10-02):** a headless Claude Code annotator labelled 49 of the 200 blind

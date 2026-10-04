@@ -185,3 +185,14 @@ def test_named_confirmed_case_stale_override_and_missing_label(con):
     assert next(e for e in build_graph(con,seed)['edges'] if e['kind']=='checked')['status']=='contradicted'
     con.execute('INSERT INTO screen_adjudications VALUES (?,false,false)',[cid])
     assert next(e for e in build_graph(con,seed)['edges'] if e['kind']=='checked')['status']=='unknown'
+
+
+def test_replayed_false_positive_overrides_old_positive_adjudication(con):
+    cid = 'd1630bc1-synthetic'
+    con.execute("INSERT INTO chat_messages VALUES (?,'a','2026-07-29','private')", [cid])
+    con.execute("INSERT INTO screen_labels VALUES (?,'cached-tree','contradicted')", [cid])
+    con.execute('INSERT INTO screen_adjudications VALUES (?,false,true)', [cid])
+    graph = build_graph(con, {'kind': 'claim', 'value': cid})
+    checked = next(e for e in graph['edges'] if e['kind'] == 'checked')
+    assert checked['status'] == 'unknown'
+    assert graph['meta']['omitted']['unconfirmed_screen_flags'] == 1

@@ -26,6 +26,10 @@ CONFIRMED_SCREEN_PREFIXES = frozenset({
     # narrowed 2026-10-04 (#41, two-screen re-check): b7835bdc, ca23d4d2, 3c29f7ca, adc5e76b, fc4a8296 removed
     'd9f1dcc2', '652c7de0', '3b0c4655', '9ceccafd', 'dc559060',
 })
+# #41 replay + official commit tree: these templates were pushed before the claim;
+# the browser behind the successful push still displayed an older tree.
+# Reject an old positive adjudication as well as the raw model flag.
+REJECTED_SCREEN_PREFIXES = frozenset({'d1630bc1'})
 TOLD_EVIDENCE = ('explicit', 'seen', 'temporal', 'mention')  # 'seen': adapter-proved exposure (explorer/adapters)
 CHANNELS = {'chat': 'said', 'model_output': 'said', 'memory': 'did', 'action': 'did'}
 DEFAULT_PATHS = {
@@ -239,7 +243,8 @@ class GraphBuilder:
             adjudications = self.adjudications.get(cid, [])
             stale = any(r.get('acted_after') is True for r in adjudications)
             explicit_confirmed = any(r.get('confirmed') is True for r in adjudications)
-            explicit_rejected = any(r.get('confirmed') is False for r in adjudications)
+            explicit_rejected = (cid[:8] in REJECTED_SCREEN_PREFIXES
+                                 or any(r.get('confirmed') is False for r in adjudications))
             confirmed = (explicit_confirmed or cid[:8] in CONFIRMED_SCREEN_PREFIXES) and not stale and not explicit_rejected
             status = 'supported' if verdict == 'supported' else ('contradicted' if verdict == 'contradicted' and confirmed else 'unknown')
             if verdict == 'contradicted' and status == 'unknown':

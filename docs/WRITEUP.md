@@ -14,8 +14,9 @@
 > - **Is Finding 1 typical?** We tried to measure it across all 383 cascades ("agents open links fast, checking lags").
 >   Codex's audit showed our "opened" and "ran the code" detectors were too loose (e.g. writing an article that
 >   mentions a link counted as opening it; 63% precision on runs), so we withdrew the general claim. Finding 1 stands.
-> - **At scale**: 15 of 1,385 checkable "it's live / sent" claims are contradicted by the agent's own screens (1.1%),
->   most often work announced as done that is still empty or a placeholder. Agents rarely invent command runs (0 of 152).
+> - **At scale**: 3,896 completion claims were screened; replay exposed false positives in our own audit, so we
+>   withdrew its aggregate rate and kept scoped examples. The separate shell audit established no contradictions;
+>   54 of 152 eligible targets remained unverified.
 > - **Finding 2**: an agent's confession of faking tests is contradicted by its own shell log.
 > - **Beyond AI Village**: the same engine runs unchanged on the German message board; where datasets lack
 >   identity or time (SwarmTraces, Transluce) it says spread is *not identifiable* instead of guessing.
@@ -122,21 +123,23 @@ agent's own admission, is not ground truth; the action record is.
 
 ### How often do "it's live / sent" claims fail on screen? (3,896 claims)
 
-We paired a random 3,896 of the 6,350 completion claims that have a screenshot ("is live", "published", "has been
-sent" …) with the agent's last screenshot from the 10 minutes before. Claude Code labelled them on a private server
-next to the data, with no shell or web access, writing a short description of each screen. Every "contradicted"
-flag was then checked against what the agent did *after* the screenshot, and by hand.
+We labelled 3,896 claims from a randomly shuffled screenshot frame and reviewed the completion-failure flags.
+The audit found useful scoped cases: a named implementation file at zero bytes (`3b0c4655`), a headings-only test
+plan (`99fbc57d`), an article still in its draft editor (`9ceccafd`), and publication commands left inside a pending
+heredoc (`dc559060`). These observations do not establish a general false-completion rate.
 
-- **15 confirmed contradictions out of 1,385 checkable claims: 1.1% [0.7–1.8%]** (13 confirmed on two screenshots,
-  plus 2 pilot cases on one). We first reported 21 (1.5%). Reading what *peers* said after each claim showed one was
-  wrong: Gemini 2.5 Pro clicked **Send** 33 s before saying "I just sent the email", and recipients reported getting the
-  script. The paired screenshot is taken right after the agent's own click, before the app updates. So we re-checked
-  all 46 flags against the agent's **next** screenshot (labelled blind): 13 still show the work not done, 6 now show it
-  done, the rest are undetermined. Details: [`EVAL.md`](EVAL.md), issue #41.
-- **The most common form is work announced as done that is still empty or a placeholder** (6 of 13: a 0-byte
-  "implemented" file, a test plan with headings only, an empty document, a "93-person" list with one placeholder row).
-  Unsent emails claimed as sent: 3 of 13 (e.g. Claude Sonnet 4.5's "✅ Email sent … at 10:19 AM", still a Draft on the
-  next screen). Others: an article "published" but still Draft, a story whose `git push` never ran, a 404 "live" page.
+**Our headline was withdrawn.** We first reported 21 contradictions, then proposed 15 after checking the next
+screen. Codex broke that correction: one retained case (`d1630bc1`) had successfully pushed the claimed files
+three minutes before its claim. The terminal receipt proved it; the browser behind it still showed an older tree.
+Two screenshots of cached state had reinforced our error. Other labels confused form creation with live-link
+availability, and process exit status with a functioning GUI. The initial correction had not rechecked its two
+pilot positives; Codex recovered the pilot labels and qualified those cases too. The initial-label denominator
+was not a validated checkability population.
+
+We keep the concrete cases and **report no replacement aggregate rate or most-common-failure ranking**. The
+organizer documents screenshot capture after action execution, but an image need not show settled or current
+application state. Full review and reproducible bookkeeping: [`EVAL.md`](EVAL.md),
+[`SCREEN_ADVERSARIAL_REVIEW.md`](SCREEN_ADVERSARIAL_REVIEW.md), issue #41.
 
 ### And "tests pass" claims, checked against the shell record?
 
@@ -198,7 +201,7 @@ We applied the same check to our own write-ups, and it found errors. All are cor
 | "8/33 execution claims overstated" (claim-vs-action pilot) | exporter dropped older turns that held real test runs | v2 with full windows + adjudication: 2 substantive contradictions in 38; uncorroborated ≠ not run |
 | v2 tracer: most-recent poster = source | 3/44 misattributed | v3 prefers the named poster; 0/50 wrong held-out |
 | "agents open links within 11 min; Graffiti run slower than 54/68 repos" (Finding 4) | "touch" included writing an article containing the link; 11/30 sampled "runs" were not runs; contributors ran their own repos | general claim withdrawn; narrowed Finding 4 (Codex, #40) |
-| 21 confirmed screen contradictions (1.5%) | screenshot taken right after the agent's own Send/Post click, before the app updated; recipients got the email | two-screen re-check of all 46 flags: 15 (1.1%); 6 overturned (#41) |
+| 21 screen contradictions, then proposed correction to 15 | paired/follow-up screenshots can show cached state; pre-claim push receipt supports a retained flag | aggregate rate withdrawn; scoped examples retained (#41, Codex review) |
 | German board: proxy tricks "spread through pages agents had edited" (31.9% vs 11.1%) | 337/723 cases rest on the adoption edit itself; the wiki takes writes without reads; same-operator + earlier-edit check gives 0.4% vs 1.7% (Codex, #34) | Finding 3 narrowed to reuse, not spread; UI caption rewritten |
 
 ## How the team worked
