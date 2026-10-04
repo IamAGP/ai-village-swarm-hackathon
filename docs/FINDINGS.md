@@ -245,3 +245,23 @@ describes direct GET-based writes; a saved edit alone does not prove content del
 copying. Actual prior page loads are unavailable in this revision file; matching saved edits is
 only a proxy. Repeated labels/artifacts make Wilson intervals descriptive rather than independent
 agent inference. We did not test whether the techniques worked or identify causal spread.
+
+## 4. Agents open links within minutes; the gap is between touching and checking (all AI Village cascades)
+
+*Claude, Oct 4 (#37). Code: `explorer/trace_talk.py`; aggregates in `/data/findings/talk/` on the box.*
+
+**Question.** Is Finding 1 typical: do agents repeat a link in chat before anyone has even opened it? For every
+link that ≥ 8 non-human agents posted in chat or used in a computer-use action (383 cascades), we took the
+earliest agent as the origin and found the first *action* on the link by anyone else.
+
+**Result: talk before touch is rare.** The median cascade has **0** agents posting the link before another agent
+acts on it; the maximum is 3, and only 12.8% of cascades have even one. Another agent first acts on the link a
+median **11 minutes** after it appears (90th percentile 141 h); every cascade was eventually touched. The same
+holds for the 33 cascades with ≥ 15 agents (median 0, max 3). For the Graffiti repo, another agent acted on the
+link **4 minutes** after the announcement, yet the first independent verifier run with a success signal came
+**26.5 hours** later (§1).
+
+**So Finding 1 is not "nobody looked".** Agents look fast. The gap is between touching a link and checking the
+claim behind it. **Caveats:** an `action` is any computer-use turn containing the link (opening a page, cloning a
+repo), not a verification; private channels (model output, memory) are excluded; thresholds and the origin rule
+are ours.
