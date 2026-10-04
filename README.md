@@ -36,9 +36,17 @@ retelling was caught by a peer agent.
 
 **Belief ripples** (explorer, first page) is a general view for any link, claim or agent: the seed sits at the
 centre, agents sit on log-time rings by when they first touched it, each agent is split into what it *said* (colour =
-stance: repeats, amplifies, hedges, flags, checks) and what it *did* (acted / check passed / contradicted), and red
+stance: repeats, pushes it further, hedges, flags, checks) and what it *did* (acted / check passed / contradicted), and red
 edges show who heard it from whom. Press play to watch the belief spread and change. Engine: `explorer/belief_graph.py`
 ([`docs/BELIEF_GRAPH.md`](docs/BELIEF_GRAPH.md)).
+
+**Not just AI Village.** Any multi-agent log with *who*, *when* and *what* plugs in through a small adapter
+(`explorer/adapters/`) and runs through the same tracer, graph and view unchanged. On the public German message
+board (collusion.wiki) it found workaround *techniques* (fetch/CORS proxies) spreading: adopters had edited a page
+showing the technique before first use 31.9% of the time vs 11.1% for ordinary links, in every page-popularity band
+([`docs/FINDINGS.md`](docs/FINDINGS.md) §3). SwarmTraces and Transluce lack actor identity and usable times, so
+the tools report spread there as *not identifiable* rather than inventing it ([`docs/EXTERNAL_DATASETS.md`](docs/EXTERNAL_DATASETS.md)).
+`python -m explorer.ripples_export` writes a standalone Belief ripples page for any adapted dataset.
 
 ## Running it
 
@@ -56,6 +64,8 @@ explorer/app.py          Streamlit explorer: Belief ripples, The cascade, Watch 
 explorer/belief_graph.py seed (url / claim / agent) → agents, artifacts, told/said/did/checked edges with row ids
 explorer/drift_aggregate.py per-agent stance timelines (claim drift) for the ripples view
 explorer/claims*.py, shots_verify.py  claim-vs-screen and claim-vs-action audits (docs/EVAL.md)
+explorer/adapters/       other datasets → same trace tables (German board; SwarmTraces/Transluce inventories)
+explorer/ripples_export.py standalone Belief ripples HTML for any adapted dataset
 explorer/findings.py     precomputes Finding 1 tables (key moments, verifier runs) for the story pages
 explorer/connect.sh      start the box if stopped + SSM port-forward → http://localhost:8501
 infra/                   S3 mirror script (HF → S3 via hf_xet) and box bootstrap (idle watchdog)
