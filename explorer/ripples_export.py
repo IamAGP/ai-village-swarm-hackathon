@@ -1,7 +1,7 @@
 """Standalone Belief ripples page for any dataset: trace tables (+ seed) -> one self-contained HTML file.
 
   python -m explorer.ripples_export --trace DIR --seed 'technique:webcrawlerapi.com' \
-      --title 'German board: a fetch-proxy spreads' --caption '...' [--max-nodes 120] > page.html
+      --title 'German board: proxy-pattern reuse' --caption '...' [--max-nodes 120] > page.html
 
 DIR holds agents / trace_first_use / trace_edges_scored parquet files (e.g. from explorer/adapters/*).
 The page loads vis-network from jsDelivr; everything else is inline. No source text is embedded:

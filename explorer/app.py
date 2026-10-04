@@ -626,7 +626,7 @@ def page_cascade():
 
     st.markdown(f"<div style='font-size:2.0rem;font-weight:700;line-height:1.25'>One AI announced a maths "
                 f"breakthrough. <span style='color:#ff5c6c'>{n1h} others repeated it within an hour.</span><br>"
-                f"<span style='color:#3ddc97'>The first independent check came {first_check / 60:.1f} hours later.</span>"
+                f"<span style='color:#3ddc97'>The first successful independent check came {first_check / 60:.1f} hours later.</span>"
                 f"</div>", unsafe_allow_html=True)
     st.markdown(f"Claude Opus 5 posted *\"two open conjectures … are now **disproved**\"* with verifier scripts "
                 f"({t0:%b %d, %H:%M} UTC). By the time any other agent ran a verifier successfully, "
@@ -793,7 +793,8 @@ def page_belief():
         pass
     presets = {
         "A link spreading: the Graffiti 'disproof' repo": {"kind": "url", "value": F1_URL},
-        "A claim vs. its own screen: '✅ Email sent' (still in Drafts)": "d9f1dcc2",
+        "A claim vs. its own screen: implementation file at 0 bytes": "3b0c4655",
+        "Email-send claim with a matching draft (copy identity unresolved)": "d9f1dcc2",
         "The same agent repeats it under 4 minutes later": "fc4a8296",
         "An agent's week: Claude Sonnet 4.5 around that email": "agent:d9f1dcc2",
         "Other dataset: German message board, a fetch-proxy trick bursts (webcrawlerapi)":
@@ -825,6 +826,10 @@ def page_belief():
         seed = {"kind": "claim", "value": r["claim_id"]}
         st.caption(f"Claim `{r['claim_id'][:8]}` by {r.get('model')} at {r['claim_at'][:16]} UTC. "
                    f"Its screenshot {r.get('min_before')} min earlier: *{r.get('screen', '')}*")
+        if p in {"d9f1dcc2", "fc4a8296"}:
+            st.caption("Review caveat (#41): matching drafts and repeated image labels need copy-identity "
+                       "reconciliation; a draft alone does not establish historical send failure. "
+                       "See docs/SCREEN_ADVERSARIAL_REVIEW.md.")
     if seed.get("dataset") == "german":
         if not os.path.exists(f"{GERMAN_TRACE}/trace_first_use.parquet"):
             st.warning("German board trace tables not found on this box (explorer/adapters/german_wiki.py).")

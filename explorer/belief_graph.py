@@ -30,7 +30,7 @@ CONFIRMED_SCREEN_PREFIXES = frozenset({
 # the browser behind the successful push still displayed an older tree.
 # Reject an old positive adjudication as well as the raw model flag.
 REJECTED_SCREEN_PREFIXES = frozenset({'d1630bc1'})
-TOLD_EVIDENCE = ('explicit', 'seen', 'temporal', 'mention')  # 'seen': adapter-proved exposure (explorer/adapters)
+TOLD_EVIDENCE = ('explicit', 'seen', 'temporal', 'mention')  # 'seen': adapter page-edit exposure proxy
 CHANNELS = {'chat': 'said', 'model_output': 'said', 'memory': 'did', 'action': 'did'}
 DEFAULT_PATHS = {
     'agents': '/data/parquet/agents.parquet',

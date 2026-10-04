@@ -102,7 +102,7 @@ Fresh sample (0 overlap with seed 3), labelled blind by **two** annotators (A = 
   (v2: 3/44). Sourced edges were never judged wrong (plausible-source rate lower CI bound ≥ 87%) — consistent-with, not proof of, exposure.
 - **Strict** precision — the edge text *shows* the exposure — is ~56–60% for `explicit` and ~32–40% for
   `temporal` on held-out data. v2's 78% came from a friendlier sample (same annotator A: 78% → 60%).
-- `none` edges: no confirmed missed exposure in 22 decided held-out items (upper CI ≈ 24–28%).
+- `none` edges: no confirmed missed exposure in 10 and 12 decided held-out judgments by two readers (upper CI ≈ 24–28%); these are overlapping items, not 22 distinct draws.
 - Treat `temporal` as "consistent with exposure", not proof; `explicit` as the adopter naming the source.
 
 ### `mention` evidence (v4, 72 h window) — sample seed 4242, annotator A
@@ -367,7 +367,7 @@ masking, not guaranteed anonymity. Do not give the independent annotator `key.js
 `primary_labels.json`, `metadata.json`, the case plan, or this results section. Candidate evidence is
 untruncated; markers and numeric results remain available after identity masking. The export checks
 for residual known names and model-family tokens before writing. Independent labels and agreement
-must be added later; no agreement claim is made now.
+are reported in the added annotation section below.
 
 Reproduce on the authorized box with code and case plan together:
 
@@ -455,7 +455,8 @@ interval does not account for classification errors or repeated claims from the 
 may contain cached output, another object, or work completed after the claim. Rechecking requires target identity,
 freshness, own/follow-up actions and consistent material predicates. The unlabelled 39% and English-only regex
 also limit generalization; completion of the shuffled partial run was not independently verified to be uniform.
-Labels stay on the box (`/data/findings/claims_all/labels_all.jsonl`, `contra_check.jsonl`, `next/`); Codex's isolated
+EC2 labels stay on the box (`/data/findings/claims_all/labels_all.jsonl`, `contra_check.jsonl`, `next/`); the original
+pilot labels were recovered from a private local scratchpad. Codex's isolated
 review is `/data/trace_codex41/`. No model ranking or validated prevalence is reported.
 
 ## Claim vs. action v3 (#24, 2026-10-02)
@@ -561,8 +562,8 @@ Give Claude's independent annotator **only** `/data/eval_codex24/review/blind.js
 key, manifest, result summaries or this results section before their labels are locked. Model names,
 handles and row IDs are masked; dates, prose, URLs and distinctive events can still reveal identity.
 This is masking, not guaranteed blindness. The second annotation independently interprets the same
-investigator-exported evidence, not an independently retrieved dataset. No agreement or adjudicated
-final rate is claimed yet.
+investigator-exported evidence, not an independently retrieved dataset. The 49-packet independent annotation
+and agreement are reported above; no adjudicated final rate is claimed.
 
 - Blind file: **53,488,295 bytes**, SHA-256 `24e4d831366eacf31774360922e442699910f1bdad34786b8c0cf92e619931af`.
 - Primary labels: `/data/eval_codex24/review/primary_labels.jsonl`, SHA-256 `63ff35ccb8c97ead7135dd955e2736e598141b667f9390441c6d5764b3015c7b`; frozen before opening identity/row mappings.

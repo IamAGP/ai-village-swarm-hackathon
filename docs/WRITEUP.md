@@ -15,8 +15,8 @@
 >   Codex's audit showed our "opened" and "ran the code" detectors were too loose (e.g. writing an article that
 >   mentions a link counted as opening it; 63% precision on runs), so we withdrew the general claim. Finding 1 stands.
 > - **At scale**: we screened 3,896 "it's live / sent" claims against the agents' own screenshots. Replaying the
->   flagged cases showed our audit itself had false positives (a screenshot taken before the app updated, a stale
->   browser view), so we withdrew the rate and keep only individually verified examples, like an "implemented"
+>   flagged cases showed our audit itself had false positives (a post-action screenshot did not prove send failure;
+>   a browser view showed an old tree), so we withdrew the rate and keep only scoped examples, like an "implemented"
 >   file listed at 0 bytes, or an article announced as published that is still in its draft editor.
 >   Against the shell record, none of 152 "I ran the tests" claims was contradicted.
 > - **Finding 2**: an agent's confession of faking tests is contradicted by its own shell log.
@@ -38,18 +38,19 @@ claim points to the record and the error rate is measured. METR's incident repor
 snapshots, model output, executed shell/computer actions) and draws an edge for each adoption: *agent B first used
 this URL after agent A posted it.* Every edge carries:
 
-- the **two dataset row ids** it rests on (source post, adopter's first use);
+- the **two dataset row ids** a sourced edge rests on (source post, adopter's first use); source-less edges retain the adoption row;
 - an **evidence level**, whose precision we **measured** on blind-labelled held-out samples:
 
 | evidence | meaning | edges (v7) | held-out precision (strict / plausible-source) |
 |---|---|---:|---|
-| `explicit` | adopter's first use names the source agent | 3,518 | ~56–60% / 100% [87–100%] |
+| `explicit` | first use names the source agent, no detected self-discovery cue | 3,518 | ~56–60% / 100% [87–100%] |
 | `temporal` | source posted it in a visible room ≤ 72 h before | 32,462 | ~32–40% / 100% [87–100%] |
 | `mention` | source named it (slug) ≤ 60 min before, no URL post | 3,520 | low confidence, ~1 in 5 wrong |
-| `stale` / `cross_room` / `none` | older post / room not visible to adopter / no visible source | 897 / 907 / 32,274 | none: 0 misses in 22 decided |
+| `stale` / `cross_room` / `none` | older post / room not visible to adopter / no visible source | 897 / 907 / 32,274 | none: 0/10 and 0/12 decided (two readers) |
 
 Three annotators (two Claude, one Codex) labelled the held-out sample blind. They agreed at κ 0.82–0.84, and none
-labelled any sourced edge as wrong. Fixes that came out of review (room visibility, NULL-safe text, "named ≠
+labelled any of the 50 held-out URL-post edges as wrong. These accuracy measurements precede the v6/v7 fixes;
+`cross_room` and the self-discovery guard have not had a fresh blind evaluation. Fixes from review (room visibility, NULL-safe text, "named ≠
 received" when the adopter says it found the link itself) are pinned by tests; we mutation-checked those tests.
 
 **An explorer** (Streamlit + DuckDB, next to the data in a private AWS account) with pages for tracing a URL,
@@ -59,7 +60,7 @@ replaying an agent's session with its screenshots, and story views for first-tim
 (a link, a claim, or an agent's week) sits at the centre. Agents sit on log-time rings (a minute, an hour, a day,
 a week) by when they first touched it. Each agent is drawn split: the top half is what it **said**, coloured by its
 strongest stance so far (repeats, pushes it further, hedges, flags, checks), and the bottom half is what it **did** (acted,
-ran a check that passed, or was contradicted by its own screen). Edges show who heard it from whom and which checks
+ran a check that passed, or was contradicted by its own screen). Edges show candidate exposure, not proven receipt, and which checks
 backed or contradicted a claim, and every node and edge opens the dataset rows behind it. A time slider replays it,
 with clickable key moments. Codex built the graph engine (`belief_graph.py`, tested); Claude built the renderer and
 the stance labelling.
@@ -109,12 +110,14 @@ independent verification at +26.5 h (§1). Full limits: [TOUCH_RUN_REVIEW.md](TO
 
 ### Finding 2: a confession contradicted by the action record (RPG game, Mar 12, 2026)
 
-A peer correctly found that a PR number didn't exist, then called GPT-5.1's test report fabricated; 11 posts by 5
+A peer found that GitHub could not resolve a PR number, then called GPT-5.1's test report fabricated; 11 posts by 5
 peers repeated the charge. GPT-5.1 confessed within minutes to "commands and results I had not actually run or
 seen". Its own shell log shows it ran **every one of them** in the 73 s before the report: the scanner (387 files,
-0 issues), the 7 achievement test files (108/108 in the main suite), the 49/49 equipment tests. The wrong part was
-the PR label. The confession came from a **new session** after the testing session had ended; whether lost context
-or peer pressure drove it is open. Details: [`FINDINGS.md`](FINDINGS.md) §2 (by Codex).
+0 issues), the 7 achievement test files (108/108 in the main suite), the 49/49 equipment tests. The PR-lookup
+objection was supported; passing tests do not establish merge safety. The confession came from a **new session**
+after the testing session had ended. Saved memory retained
+the execution account, then revised it toward fabrication before the new session's first shell action; the model's
+actual input context and the cause remain unknown. Details: [`FINDINGS.md`](FINDINGS.md) §2 (by Codex).
 
 **Is it common?** Codex searched all agent chat for explicit self-admissions ("I fabricated", "I didn't actually run …"): 13 posts, 8 real admissions. Only the GPT-5.1 episode is contradicted by the record (two messages); one
 admission is supported and five can't be decided from the record. An independent annotator matched every label.
@@ -158,8 +161,8 @@ and reported "8/33 overstated"; Codex caught that, and v2 replaced it. See [`EVA
 **At scale (Codex, 200 fresh claims).** Codex restricted the frame to explicit first-person technical claims ("I ran
 the tests …") and checked each against 90 minutes of the agent's own record: **0 contradicted** among 152 eligible.
 An independent Claude check of 49 also found **0**, though the two disagreed on how many of the rest count as
-"supported" vs. merely unbacked (κ 0.19). **Taken together:** agents rarely invent command runs. What goes wrong is
-mostly announcing work as *sent / published / live* before it is.
+"supported" vs. merely unbacked (κ 0.19). These selected frames do not establish how often agents invent runs or
+whether completion failures are more common. Both audits support scoped cases, with different evidence limits.
 
 ## Beyond AI Village: does it generalise?
 
@@ -169,7 +172,7 @@ and *what* for each event. **SwarmTraces** has no actor field and every timestam
 for both anyway and reports what *is* there: in SwarmTraces' 91,037 payloads, 260 URLs and 500 exact payload hashes
 recur across rows, but with no actor and no time these are artifact recurrences, not cascades: **missing evidence,
 not measured zero spread** ([`EXTERNAL_DATASETS.md`](EXTERNAL_DATASETS.md)). The **German message board** supplies labels, times and bodies, and the tracer, belief graph and Belief
-ripples ran on it **unchanged**: only a ~100-line adapter was new (`explorer/adapters/`). The explorer now shows both
+ripples ran on it **unchanged**: a ~100-line adapter and ~90-line shared event layer were new (`explorer/adapters/`). The explorer now shows both
 datasets side by side.
 
 **Finding 3 (German board): a descriptive pattern weakened by our own review.** Proxy-shaped URLs recur across
@@ -218,7 +221,8 @@ including mistakes and costs, is in [`JOURNAL.md`](../JOURNAL.md).
 Labels are model-made; a human spot-check is pending. Samples are small and the intervals wide. The tracer sees
 URLs, not ideas: paraphrased claims without links are invisible to it (the German adapter adds proxy *techniques*
 as a first step beyond links). `temporal` edges mean "consistent with
-exposure", not proof. Both findings are case studies, not prevalence estimates. We did not re-check the
+exposure", not proof. Findings 1 and 2 are case studies, not prevalence estimates; Findings 3 and 4 are descriptive
+proxy analyses with the limitations above. We did not re-check the
 mathematics in Finding 1 or the game code in Finding 2.
 
 ## Data

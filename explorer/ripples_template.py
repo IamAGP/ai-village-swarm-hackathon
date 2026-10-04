@@ -19,10 +19,10 @@ BELIEF_HTML = r"""
   <div style="font-size:12.5px;color:#a9adb8;margin:6px 4px;line-height:1.6">
    Rings = time since the start (log): 1 min · 1 h · 1 day · 1 week. <b>Agents</b> are split circles:
    top = what it <b>said</b> <span id="stlegend"></span>, bottom = what it <b>did</b> (<span style="color:#f2a541">●</span> acted,
-   <span style="color:#3ddc97">●</span> checked &amp; held, <span style="color:#ff5c6c">✕</span> checked &amp; failed).
+   <span style="color:#3ddc97">●</span> success/support signal, <span style="color:#ff5c6c">✕</span> scoped contradiction).
    <b>Claims</b> are diamonds: <span style="color:#3ddc97">◆</span> screen backs it · <span style="color:#ff5c6c">◆ cracked</span>
    screen contradicts it · <span style="color:#d9dbe1">◇</span> not checked. Dots = links/files touched.
-   Lines: <span style="color:#ff5c6c">red</span> told · <span style="color:#8a8f9c">grey</span> said/did · <span style="color:#3ddc97">green</span>/<span style="color:#ff5c6c">red</span> checked.
+   Lines: <span style="color:#ff5c6c">red</span> candidate exposure · <span style="color:#8a8f9c">grey</span> said/did · <span style="color:#3ddc97">green</span>/<span style="color:#ff5c6c">red</span> check signals (run errors do not disprove the claim).
   </div>
  </div>
  <div id="side" style="width:290px;flex:none;background:#161922;border-radius:10px;padding:14px;font-size:13.5px;line-height:1.45;height:__H__px;overflow:auto">

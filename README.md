@@ -10,23 +10,23 @@ The German Wiki investigators (collusion.wiki) had no transcripts at all.
 
 **What this is.** A tracer that follows artifacts (URLs) as they spread between ~46 AI agents across four
 channels — chat, memory snapshots, model output, executed actions — and draws an *exposure edge* for every
-adoption, where **every edge cites the two dataset rows it rests on**, carries an evidence level, and the
+adoption, where **every sourced edge cites the two dataset rows it rests on**, carries an evidence level, and the
 evidence levels have **measured accuracy** on blind-labelled samples (two Claude annotators and one Codex annotator,
 κ 0.82–0.84).
 
 | evidence | meaning | held-out: strict precision / plausible-source rate |
 |---|---|---|
-| `explicit` | the adopter's first use names the source agent | ~56–60% / 100% [87–100%] |
+| `explicit` | the adopter's first use names the source agent, with no detected self-discovery cue | ~56–60% / 100% [87–100%] |
 | `temporal` | the source posted the URL in chat ≤ 72 h before | ~32–40% / 100% [87–100%] |
 | `mention` | no URL post, but the source named it (URL slug) in chat ≤ 60 min before | low confidence: ~21–26% wrong |
-| `stale` / `none` | older post / no visible source | misses among `none`: 0/22 decided |
+| `stale` / `none` | older post / no visible source | misses among `none`: 0/10 and 0/12 decided (two readers) |
 
 *Strict precision* = the excerpts show the exposure; *plausible-source rate* = the excerpts are consistent with it
 and do not rule it out — not proof that the post caused the adoption (see [`docs/TRACER_REVIEW.md`](docs/TRACER_REVIEW.md) #6).
 **Fixed after review (v6):** edges now respect chat-room visibility since rooms v1 (2026-02-25) — 907 adoptions (1.2%)
 whose only candidate posts were in rooms the adopter wasn't in are labelled `cross_room` (#11); talk-only first uses
-keep their text, turning 41 `temporal` edges into `explicit` (#12). The accuracy numbers below were measured before
-these fixes; the new `cross_room` level has not been blind-evaluated yet.
+keep their text, turning 41 `temporal` edges into `explicit` (#12). The accuracy numbers above were measured before
+these fixes and v7's self-discovery guard; the new `cross_room` level and that guard have not had a fresh blind evaluation.
 
 Details: [`docs/EVAL.md`](docs/EVAL.md). A worked investigation: [`docs/FINDINGS.md`](docs/FINDINGS.md) —
 in one cascade, claims were re-broadcast within ~3 minutes, a product listing was attempted within ~22 h (blocked
@@ -37,7 +37,7 @@ retelling was caught by a peer agent.
 **Belief ripples** (explorer, first page) is a general view for any link, claim or agent: the seed sits at the
 centre, agents sit on log-time rings by when they first touched it, each agent is split into what it *said* (colour =
 stance: repeats, pushes it further, hedges, flags, checks) and what it *did* (acted / check passed / contradicted), and red
-edges show who heard it from whom. Press play to watch the belief spread and change. Engine: `explorer/belief_graph.py`
+edges show candidate exposure, not proven receipt. Press play to watch recorded uptake and change. Engine: `explorer/belief_graph.py`
 ([`docs/BELIEF_GRAPH.md`](docs/BELIEF_GRAPH.md)).
 
 **Not just AI Village.** Any multi-agent log with *who*, *when* and *what* plugs in through a small adapter
@@ -57,7 +57,7 @@ They contain agent names, times, statuses and row ids only, no message text.
 
 Run the local regression tests with `.venv/bin/python -m pytest tests/`.
 
-Everything runs on a private EC2 box next to the data (the gated data never leaves AWS):
+The explorer runs on a private EC2 box next to the data; private review files stay out of git:
 
 ```
 explorer/build.py        JSONL → typed Parquet + slim tables (bash actions, provider shape, PT day)
