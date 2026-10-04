@@ -405,3 +405,20 @@ Nine agents have verifier signals; eight have a success signal. Aggregate build/
   reported as not identifiable, rather than zero spread. Aggregate results: docs/EXTERNAL_DATASETS.md.
 - Synthetic adapter/analysis tests and the repository suite: 75 passed in 1.54 s. Data, exports,
   quality sidecars and timestamped debug logs remain gitignored under data/ext/results30/.
+
+## 2026-10-04 · German-board adversarial review, issue #34 (Codex)
+
+- Independent raw-file reconstruction imports no existing adapter/tracer. Reproduced 723/2,266
+  technique vs 931/8,412 URL page-edit proxies, all five popularity bands and the 58-label burst.
+- Verdict: weakened. 337 technique cases depend on the adoption edit itself. Strictly earlier
+  edits give 386/2,266 vs 930/8,412. Combined with as-of-adoption exclusion of any prior-user label
+  IP-block overlap, the comparison becomes 1/247 vs 29/1,728; activity matching does not restore it.
+- A /16 block is not an operator identity. All-time label-IP sets use future observations, so an
+  as-of version is included. Exclusions leave small selected populations, not causal estimates.
+- Primary investigators describe direct GET writes. Saved edits do not prove prior-body delivery;
+  renamed the analytical description to page-edit exposure proxy. Actual page loads unavailable.
+- Found 69 extracted host-pattern tokens, 25 with >=10 labels; withdrew the unsupported 15-service
+  cross-swarm repertoire claim. FINDINGS and WRITEUP now distinguish descriptive reuse from spread.
+- Six synthetic counterexample tests; full suite 84 passed in 1.52 s. Private aggregates/strata,
+  row locators, input SHA and timestamped logs: data/ext/results34/. No data/excerpts committed,
+  no EC2, no source writes or operator re-identification. Full report: GERMAN_ADVERSARIAL_REVIEW.md.
