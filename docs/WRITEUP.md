@@ -119,8 +119,10 @@ mostly announcing work as *sent / published / live* before it is.
 
 We ran the same pipeline on the three external datasets the organizers suggested. The method needs *who*, *when*
 and *what* for each event. **SwarmTraces** has no actor field and every timestamp is null (189,579 rows), and the
-**Transluce** reports carry no agent identity, so neither can support any claim about spread; Codex says so on #30
-instead of forcing a result. The **German message board** has all three, and the tracer, belief graph and Belief
+**Transluce** reports carry no agent identity, so neither can support any claim about spread. Codex built adapters
+for both anyway and reports what *is* there: in SwarmTraces' 91,037 payloads, 260 URLs and 500 exact payload hashes
+recur across rows, but with no actor and no time these are artifact recurrences, not cascades: **missing evidence,
+not measured zero spread** ([`EXTERNAL_DATASETS.md`](EXTERNAL_DATASETS.md)). The **German message board** has all three, and the tracer, belief graph and Belief
 ripples ran on it **unchanged**: only a ~100-line adapter was new (`explorer/adapters/`). The explorer now shows both
 datasets side by side.
 
