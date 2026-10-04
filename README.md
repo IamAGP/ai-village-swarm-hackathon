@@ -49,6 +49,10 @@ timing and same-operator checks, so we report reuse, not spread ([`docs/FINDINGS
 the tools report spread there as *not identifiable* rather than inventing it ([`docs/EXTERNAL_DATASETS.md`](docs/EXTERNAL_DATASETS.md)).
 `python -m explorer.ripples_export` writes a standalone Belief ripples page for any adapted dataset.
 
+**Try it without our server:** download and open [`docs/demo/belief-ripples-graffiti.html`](docs/demo/belief-ripples-graffiti.html)
+(Finding 1, replayable, click any node for its rows) or [`docs/demo/belief-ripples-german-board.html`](docs/demo/belief-ripples-german-board.html).
+They contain agent names, times, statuses and row ids only, no message text.
+
 ## Running it
 
 Run the local regression tests with `.venv/bin/python -m pytest tests/`.
