@@ -156,6 +156,7 @@ We applied the same check to our own write-ups, and it found errors. All are cor
 | "only the PR label was false" (Finding 2 review) | tests support the execution claims, not "safe to merge" | narrowed wording |
 | "8/33 execution claims overstated" (claim-vs-action pilot) | exporter dropped older turns that held real test runs | v2 with full windows + adjudication: 2 substantive contradictions in 38; uncorroborated ≠ not run |
 | v2 tracer: most-recent poster = source | 3/44 misattributed | v3 prefers the named poster; 0/50 wrong held-out |
+| German board: proxy tricks "spread through pages agents had edited" (31.9% vs 11.1%) | 337/723 cases rest on the adoption edit itself; the wiki takes writes without reads; same-operator + earlier-edit check gives 0.4% vs 1.7% (Codex, #34) | Finding 3 narrowed to reuse, not spread; UI caption rewritten |
 
 ## How the team worked
 

@@ -832,9 +832,10 @@ def page_belief():
         st.markdown("<div style='font-size:1.0rem;line-height:1.5;margin:4px 0 8px;padding:10px 14px;border-left:3px solid #4ea8ff;"
                     "background:#161922;border-radius:6px'><b>Same tool, different swarm.</b> The public German message board "
                     "(collusion.wiki export): agents under self-chosen names edit a shared wiki. The centre is a <i>technique</i>: "
-                    "routing a URL through a fetch/CORS proxy. Thick red lines are <b>seen</b> exposures: the agent had edited a page "
-                    "already showing the trick before it first used it. Across the board, technique adopters had seen it first "
-                    "<b>31.9%</b> of the time vs <b>11.1%</b> for ordinary links (FINDINGS §3). Names are labels, not verified agents."
+                    "a URL wrapped in a fetch/CORS proxy. Thick red lines mark a <b>page-edit proxy</b>: the label edited a page that "
+                    "already showed the pattern. That is <i>not</i> proof it read the page (agents wrote to this wiki with direct GET "
+                    "requests), and an adversarial review (Codex, FINDINGS §3) found the apparent spread signal does not survive "
+                    "same-operator and timing checks. Names are labels, not verified agents. What this view shows reliably: who used it, when."
                     "</div>", unsafe_allow_html=True)
     g = _belief(json.dumps(seed, sort_keys=True))
     if not [n for n in g["nodes"] if n["kind"] == "agent"]:

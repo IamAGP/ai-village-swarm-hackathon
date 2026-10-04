@@ -8,8 +8,9 @@ it can *prove*). `trace_tables` turns them into the three relations the belief-g
   trace_edges_scored(url, source, target, s_at, t_at, source_row, target_row, evidence)
 
 Evidence levels for an adopter's first use of an artifact (earliest applicable wins):
-  seen      the adapter recorded that the adopter had the artifact in front of it before first use
-            (e.g. it edited a wiki page that already contained it); source = whoever put it there.
+  seen      an adapter-specific exposure signal before (or at) first use, e.g. a wiki edit to a page that already
+            contained it; source = whoever put it there. Its strength depends on the dataset: for the German board
+            it is only a proxy (edits need not read the page; docs/GERMAN_ADVERSARIAL_REVIEW.md).
   temporal  another agent used it in the window before (default 72 h); source = most recent such use.
             Consistent with exposure, not proof (same meaning as the AI Village tracer).
   stale     earlier uses exist, all older than the window.

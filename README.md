@@ -42,9 +42,10 @@ edges show who heard it from whom. Press play to watch the belief spread and cha
 
 **Not just AI Village.** Any multi-agent log with *who*, *when* and *what* plugs in through a small adapter
 (`explorer/adapters/`) and runs through the same tracer, graph and view unchanged. On the public German message
-board (collusion.wiki) it found workaround *techniques* (fetch/CORS proxies) spreading: adopters had edited a page
-showing the technique before first use 31.9% of the time vs 11.1% for ordinary links, in every page-popularity band
-([`docs/FINDINGS.md`](docs/FINDINGS.md) §3). SwarmTraces and Transluce lack actor identity and usable times, so
+board (collusion.wiki) it traces proxy-wrapped URLs reused by hundreds of labels. A first reading suggested the
+tricks spread through pages agents had edited; Codex's adversarial review showed that signal does not survive
+timing and same-operator checks, so we report reuse, not spread ([`docs/FINDINGS.md`](docs/FINDINGS.md) §3,
+[`docs/GERMAN_ADVERSARIAL_REVIEW.md`](docs/GERMAN_ADVERSARIAL_REVIEW.md)). SwarmTraces and Transluce lack actor identity and usable times, so
 the tools report spread there as *not identifiable* rather than inventing it ([`docs/EXTERNAL_DATASETS.md`](docs/EXTERNAL_DATASETS.md)).
 `python -m explorer.ripples_export` writes a standalone Belief ripples page for any adapted dataset.
 

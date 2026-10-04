@@ -11,8 +11,10 @@ logs. Modelling choices (stated so they can be challenged):
                plus `technique:<host>` for each added URL that routes another URL through a fetch/CORS
                proxy (host path embeds http(s):// or www.); writing a new proxied URL counts as using the
                technique even when the page already showed it.
-  seen       = editing a page requires loading it, so every artifact on the page *before* the edit was
-               in front of the editor; source = the label that first added it to that page.
+  seen       = page-edit exposure PROXY: the label edited a page whose preceding revision contained the
+               artifact; source = the label that first added it there. Not proof of reading: the investigators
+               report agents wrote to this wiki with direct GET requests, without loading the page
+               (collusion.wiki). Includes the adoption edit itself; see docs/GERMAN_ADVERSARIAL_REVIEW.md.
   channel    = 'chat': a wiki edit is a public statement.
 
 Usage: python -m explorer.adapters.german_wiki <revisions.jsonl.gz> [--out DIR]
