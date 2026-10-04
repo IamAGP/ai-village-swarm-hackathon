@@ -122,17 +122,21 @@ and *what* for each event. **SwarmTraces** has no actor field and every timestam
 **Transluce** reports carry no agent identity, so neither can support any claim about spread. Codex built adapters
 for both anyway and reports what *is* there: in SwarmTraces' 91,037 payloads, 260 URLs and 500 exact payload hashes
 recur across rows, but with no actor and no time these are artifact recurrences, not cascades: **missing evidence,
-not measured zero spread** ([`EXTERNAL_DATASETS.md`](EXTERNAL_DATASETS.md)). The **German message board** has all three, and the tracer, belief graph and Belief
+not measured zero spread** ([`EXTERNAL_DATASETS.md`](EXTERNAL_DATASETS.md)). The **German message board** supplies labels, times and bodies, and the tracer, belief graph and Belief
 ripples ran on it **unchanged**: only a ~100-line adapter was new (`explorer/adapters/`). The explorer now shows both
 datasets side by side.
 
-**Finding 3 (German board).** Agents passed around *workaround techniques*: routing a URL through a fetch/CORS proxy.
-The top technique was used by 584 pseudonymous labels. A wiki adds an exposure signal AI Village chat lacks:
-editing a page means loading it. When a label first used a technique, it had already edited a page showing that
-technique **31.9% of the time (723/2,266), against 11.1% (931/8,412) for ordinary links**, and the gap holds in every
-page-popularity band (95% intervals never overlap). So techniques spread through what agents had in front of them
-roughly three times as often as links did. Labels are cheap pseudonyms, not verified agents, and exposure is not
-proof of copying ([`FINDINGS.md`](FINDINGS.md) §3).
+**Finding 3 (German board): a descriptive pattern weakened by our own review.** Proxy-shaped URLs recur across
+pseudonymous labels (top host-pattern token: 584 labels). At first technique use, an edit at or before adoption
+has a preceding page revision containing that token in **31.9% of cases (723/2,266; descriptive Wilson 95% CI
+30.0–33.9%)**, versus **11.1% for full URLs (931/8,412; 10.4–11.8%)**. Codex independently reproduced this
+association and every popularity band, then found that 337/723 technique cases rely on the adoption edit itself.
+Requiring an earlier edit and excluding labels sharing any observed /16 block with prior artifact-user labels
+(using only IP observations available by adoption) gives **1/247 (0.4%; 0.1–2.3%) vs 29/1,728 (1.7%; 1.2–2.4%)**.
+Saved edits are exposure proxies, not proven reads: the wiki accepts direct GET-based writes. Coarse network
+blocks cannot identify operators, and these exclusions select a small residual population. We therefore report
+label/token reuse and candidate exposure, **not established independent-agent diffusion**
+([`FINDINGS.md`](FINDINGS.md) §3; [`GERMAN_ADVERSARIAL_REVIEW.md`](GERMAN_ADVERSARIAL_REVIEW.md)).
 
 **Checked against what the Village team published.** None of the Village's Substack posts mention the Graffiti
 cascade, its retraction, or "sent" claims still in Drafts (keyword scan of every post in the archive; the July
