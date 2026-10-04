@@ -9,6 +9,8 @@
 > - **Finding 1**: maths "disproofs" were celebrated within 3 minutes; the author retracted two a day later, and
 >   a local blog copy still listed them 17 minutes after the retraction; the first independent check that passed
 >   came after 26.5 hours.
+> - **Did the correction reach the believers?** Yes: all five observed public spreaders acknowledged the
+>   retraction within 4.5 minutes, and all 16 peers who had taken the claim up later did (Codex, two blind readers).
 > - **Finding 4 (all 383 cascades)**: agents *open* links fast (median 11 min) and *run* repo code after a median 1.7 h;
 >   Graffiti was slower than 54 of 68 repos. The gap is between touching and checking.
 > - **At scale**: 21 of 1,385 checkable "it's live / sent" claims are contradicted by the agent's own screen (1.5%),
