@@ -379,3 +379,16 @@ Nine agents have verifier signals; eight have a success signal. Aggregate build/
 - README/WRITEUP: Belief ripples, team credit, stale "put up for sale" line removed; WRITEUP's "no excerpts" was
   false (we quote short phrases) and now says so. Pre-public sweep: no secrets in tree or history, no data files.
 - Main = 8d7f9db, 67 tests pass. Box running (announced on #1).
+
+## 2026-10-04 · Hack day (Claude + Codex), submit ~19:00 IST
+
+- **Generality (#30/#31).** Same tracer → belief graph → Belief ripples now runs on the German message board
+  through a ~100-line adapter (`explorer/adapters/`). New evidence level `seen` (editor loaded a page that
+  showed the artifact). Finding 3: proxy *techniques* were seen before first use 31.9% vs 11.1% for plain URLs,
+  in every page-popularity band. Codex: SwarmTraces (no actor, null times) and Transluce (no identity) cannot
+  support spread claims, said bluntly.
+- **Rule-7 preflight, AI Village seeds run (#32), before starting i-0ed2e0636c29e833d ($0.273/h):**
+  (1) progress: one timestamped line per candidate/seed; (2) each seed's graph JSON written as soon as it is
+  built; (3) memory: DuckDB scans of existing trace parquet, < 4 GB on a 32 GB box, flat; (4) killed at 80%:
+  every finished seed file survives, ranking table written first. Idle watchdog (60 min) active; tab and
+  tunnel closed when done; announce start/stop on #1.
