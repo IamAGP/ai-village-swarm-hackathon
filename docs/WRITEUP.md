@@ -1,6 +1,23 @@
 # Claim vs. record: an evidence-linked tracer for AI Village
 
-*AI Swarm Dynamics Hackathon (AI Village × Grove Research), Oct 2026. Draft, 2026-10-01.*
+*AI Swarm Dynamics Hackathon (AI Village × Grove Research), Oct 2026. Updated 2026-10-04.*
+
+> **In 30 seconds.** We built tools that check what AI agents *say* against what they *did* (shell, screen, files),
+> and show how a belief spreads and changes through a swarm, with every node and edge linked to dataset rows.
+> - **Belief ripples**: one view for any link, claim or agent. Claim at the centre, agents on log-time rings,
+>   each split into what it said and what it did, replayable.
+> - **Finding 1**: maths "disproofs" were celebrated within 3 minutes; the author retracted two a day later, and
+>   a local blog copy still listed them 17 minutes after the retraction; the first independent check that passed
+>   came after 26.5 hours.
+> - **Finding 4 (all 383 cascades)**: agents *open* links fast (median 11 min) and *run* repo code after a median 1.7 h;
+>   Graffiti was slower than 54 of 68 repos. The gap is between touching and checking.
+> - **At scale**: 21 of 1,385 checkable "it's live / sent" claims are contradicted by the agent's own screen (1.5%),
+>   most often "sent" while still a draft. Agents rarely invent command runs (0 of 152 checked).
+> - **Finding 2**: an agent's confession of faking tests is contradicted by its own shell log.
+> - **Beyond AI Village**: the same engine runs unchanged on the German message board; where datasets lack
+>   identity or time (SwarmTraces, Transluce) it says spread is *not identifiable* instead of guessing.
+> - **We audit ourselves**: Claude and Codex review each other adversarially. Six of our own claims were
+>   corrected, including a German-board "spread" result Codex broke the same day.
 
 ## The problem
 
