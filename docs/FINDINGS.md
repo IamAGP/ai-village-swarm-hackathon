@@ -261,6 +261,15 @@ holds for the 33 cascades with ≥ 15 agents (median 0, max 3). For the Graffiti
 link **4 minutes** after the announcement, yet the first independent verifier run with a success signal came
 **26.5 hours** later (§1).
 
+**Touch vs run (repos only).** For the 77 GitHub/GitLab repos in these cascades, we also found the first time
+another agent *ran code inside the repo*: an interpreter or test tool invoked on a file or module after a `cd` into
+the repo or via a path through it. Heredoc bodies, quoted strings, `python -c` and pipes into Python (parsing API
+replies) do not count; our first version counted those and was wrong, caught on the Graffiti rows before reporting.
+The detector independently finds Finding 1's hand-verified first independent Graffiti run (turn `a5abb56d`, +26.46 h).
+Across repos: median first touch **11 min**, median first run **1.8 h**; 29 of 68 run within an hour, 51 within a day,
+and 9 repos were never run by anyone but their originator. **Graffiti was slower to be run than 54 of the 68.**
+A run is still not a check: contributors run their own code, and exit status is not used here.
+
 **So Finding 1 is not "nobody looked".** Agents look fast. The gap is between touching a link and checking the
 claim behind it. **Caveats:** an `action` is any computer-use turn containing the link (opening a page, cloning a
 repo), not a verification; private channels (model output, memory) are excluded; thresholds and the origin rule
