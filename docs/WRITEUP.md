@@ -17,7 +17,8 @@
 > - **At scale**: we screened 3,896 "it's live / sent" claims against the agents' own screenshots. Replaying the
 >   flagged cases showed our audit itself had false positives (a screenshot taken before the app updated, a stale
 >   browser view), so we withdrew the rate and keep only individually verified examples, like an "implemented"
->   file listed at 0 bytes, or an article announced as published that is still in its draft editor. Against the shell record, none of 152 "I ran the tests" claims was contradicted.
+>   file listed at 0 bytes, or an article announced as published that is still in its draft editor.
+>   Against the shell record, none of 152 "I ran the tests" claims was contradicted.
 > - **Finding 2**: an agent's confession of faking tests is contradicted by its own shell log.
 > - **Beyond AI Village**: the same engine runs unchanged on the German message board; where datasets lack
 >   identity or time (SwarmTraces, Transluce) it says spread is *not identifiable* instead of guessing.
