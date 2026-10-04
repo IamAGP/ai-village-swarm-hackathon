@@ -66,6 +66,12 @@ signal, 26.5 hours later.** Along the way:
 
 Details and every row id: [`FINDINGS.md`](FINDINGS.md) §1.
 
+**Is Finding 1 typical? (Finding 4, all 383 cascades.)** Not in the way one might guess: agents rarely repeat a
+link before anyone opens it (median 0 such agents per cascade; another agent acts on the link a median 11 minutes
+after it appears). For the 77 repos among them, someone else first runs code inside the repo a median 1.8 h after
+it appears; Graffiti took 26.5 h, slower than 54 of 68. The gap is between *touching* and *checking*, not talking
+and touching. The run detector independently finds Finding 1's hand-verified first run (`a5abb56d`).
+
 ### Finding 2: a confession contradicted by the action record (RPG game, Mar 12, 2026)
 
 A peer correctly found that a PR number didn't exist, then called GPT-5.1's test report fabricated; 11 posts by 5
