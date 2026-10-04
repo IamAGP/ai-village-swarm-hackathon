@@ -957,7 +957,51 @@ def page_sql():
             st.error(str(e))
 
 
-PAGES = {"Belief ripples": page_belief, "The cascade": page_cascade, "Watch it spread": page_spread, "Claim vs. check": page_race,
+def page_touch():
+    """Finding 4: agents open links within minutes; running the code (let alone checking a claim) comes later."""
+    st.markdown("<div style='font-size:1.9rem;font-weight:700;line-height:1.2'>Touch vs. run</div>"
+                "<div style='color:#a9adb8;margin-bottom:8px'>Every GitHub/GitLab repo that 8 or more agents posted or used. "
+                "Across: hours until another agent first <b>touched</b> it (opened, cloned, used the link). Up: hours until "
+                "another agent first <b>ran code inside it</b>. Agents look fast; running comes later; checking a claim is "
+                "later still. FINDINGS §4.</div>", unsafe_allow_html=True)
+    path = f"{FINDINGS}/exec/cascades.jsonl"
+    if not os.path.exists(path):
+        st.warning("Run explorer/trace_exec.py on this box first.")
+        return
+    df = pd.read_json(path, lines=True)
+    df = df[~df.url.str.contains("/api/")].copy()
+    never = int(df.run_h.isna().sum())
+    touch_med = df.touch_h.median()  # over all repos, as in FINDINGS §4
+    df = df.dropna(subset=["run_h", "touch_h"])
+    df["repo"] = df.url.str.replace(r"^https?://(www\.)?", "", regex=True)
+    df["touch"] = df.touch_h.clip(lower=0.01)
+    df["run"] = df.run_h.clip(lower=0.01)
+    df["which"] = df.url.eq(F1_URL).map({True: "Graffiti 'disproof' repo", False: "other repos"})
+    c1, c2, c3 = st.columns(3)
+    c1.metric("median time to first touch", f"{touch_med * 60:.0f} min")
+    c2.metric("median time to first run", f"{df.run_h.median():.1f} h")
+    c3.metric("never run by another agent", f"{never} of {never + len(df)}")
+    ax = dict(scale=alt.Scale(type="log", domain=[0.01, 1000]))
+    pts = alt.Chart(df).mark_circle(opacity=0.85).encode(
+        x=alt.X("touch:Q", title="hours to first touch by another agent (log)", **ax),
+        y=alt.Y("run:Q", title="hours to first run inside the repo (log)", **ax),
+        size=alt.Size("n_agents:Q", title="agents", scale=alt.Scale(range=[40, 500])),
+        color=alt.Color("which:N", scale=alt.Scale(domain=["Graffiti 'disproof' repo", "other repos"], range=["#ff2fb4", "#4ea8ff"]),
+                        legend=alt.Legend(title=None, orient="top")),
+        tooltip=["repo", "n_agents", alt.Tooltip("touch_h:Q", title="touch h"), alt.Tooltip("run_h:Q", title="run h"),
+                 alt.Tooltip("run_agents:Q", title="agents who ran it"), alt.Tooltip("first_run_row:N", title="first run row")])
+    diag = alt.Chart(pd.DataFrame({"v": [0.01, 1000]})).mark_line(strokeDash=[4, 4], color="#5b6070").encode(x="v:Q", y="v:Q")
+    st.altair_chart((diag + pts).properties(height=520), use_container_width=True)
+    g = df[df.url.eq(F1_URL)]
+    if len(g):
+        g = g.iloc[0]
+        slower = int((df.run_h < g.run_h).sum())
+        st.caption(f"Graffiti: touched after {g.touch_h * 60:.0f} min, first run after {g.run_h:.1f} h (row `{g.first_run_row}`, "
+                   f"the same first independent run found by hand in FINDINGS §1), slower than {slower} of {len(df)} repos. "
+                   "A run is not a check: contributors run their own code and exit status is not used. Dashed line: run = touch.")
+
+
+PAGES = {"Belief ripples": page_belief, "Touch vs. run": page_touch, "The cascade": page_cascade, "Watch it spread": page_spread, "Claim vs. check": page_race,
          "Overview": page_overview, "Trace": page_trace, "Agent": page_agent, "Session replay": page_session,
          "Chat": page_chat, "Day timeline": page_day, "SQL": page_sql}
 st.sidebar.title("AI Village explorer")

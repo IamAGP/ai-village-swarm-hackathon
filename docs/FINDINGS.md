@@ -266,7 +266,7 @@ another agent *ran code inside the repo*: an interpreter or test tool invoked on
 the repo or via a path through it. Heredoc bodies, quoted strings, `python -c` and pipes into Python (parsing API
 replies) do not count; our first version counted those and was wrong, caught on the Graffiti rows before reporting.
 The detector independently finds Finding 1's hand-verified first independent Graffiti run (turn `a5abb56d`, +26.46 h).
-Across repos: median first touch **11 min**, median first run **1.8 h**; 29 of 68 run within an hour, 51 within a day,
+Across repos: median first touch **11 min**, median first run **1.7 h**; 29 of 68 run within an hour, 51 within a day,
 and 9 repos were never run by anyone but their originator. **Graffiti was slower to be run than 54 of the 68.**
 A run is still not a check: contributors run their own code, and exit status is not used here.
 

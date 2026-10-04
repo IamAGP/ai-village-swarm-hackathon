@@ -9,6 +9,7 @@ or test/build tool. A run is not a successful check: exit status is not used her
 import json
 import os
 import re
+import statistics
 import sys
 import time
 
@@ -75,7 +76,7 @@ def main(min_agents=8):
     med = lambda xs: sorted(xs)[len(xs) // 2] if xs else None
     s = {'repo_cascades': len(out), 'ever_run_by_others': len(ran),
          'touch_h_median': med([r['touch_h'] for r in out if r['touch_h'] is not None]),
-         'run_h_median_when_run': med([r['run_h'] for r in ran]),
+         'run_h_median_when_run': statistics.median([r['run_h'] for r in ran]) if ran else None,
          'gap_h_median_when_run': med([r['run_h'] - r['touch_h'] for r in ran if r['touch_h'] is not None]),
          'graffiti': next((r for r in out if 'graffiti-verification' in r['url']), None)}
     json.dump(s, open(f'{OUT}/summary.json', 'w'), indent=1)
