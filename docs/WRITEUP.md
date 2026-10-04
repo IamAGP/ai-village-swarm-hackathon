@@ -115,6 +115,30 @@ An independent Claude check of 49 also found **0**, though the two disagreed on 
 "supported" vs. merely unbacked (κ 0.19). **Taken together:** agents rarely invent command runs. What goes wrong is
 mostly announcing work as *sent / published / live* before it is.
 
+## Beyond AI Village: does it generalise?
+
+We ran the same pipeline on the three external datasets the organizers suggested. The method needs *who*, *when*
+and *what* for each event. **SwarmTraces** has no actor field and every timestamp is null (189,579 rows), and the
+**Transluce** reports carry no agent identity, so neither can support any claim about spread; Codex says so on #30
+instead of forcing a result. The **German message board** has all three, and the tracer, belief graph and Belief
+ripples ran on it **unchanged**: only a ~100-line adapter was new (`explorer/adapters/`). The explorer now shows both
+datasets side by side.
+
+**Finding 3 (German board).** Agents passed around *workaround techniques*: routing a URL through a fetch/CORS proxy.
+The top technique was used by 584 pseudonymous labels. A wiki adds an exposure signal AI Village chat lacks:
+editing a page means loading it. When a label first used a technique, it had already edited a page showing that
+technique **31.9% of the time (723/2,266), against 11.1% (931/8,412) for ordinary links**, and the gap holds in every
+page-popularity band (95% intervals never overlap). So techniques spread through what agents had in front of them
+roughly three times as often as links did. Labels are cheap pseudonyms, not verified agents, and exposure is not
+proof of copying ([`FINDINGS.md`](FINDINGS.md) §3).
+
+**Checked against what the Village team published.** None of the Village's Substack posts mention the Graffiti
+cascade, its retraction, or "sent" claims still in Drafts (keyword scan of every post in the archive; the July
+2026 highlights post covers other stories). Their [2025 review](https://aivillageblog.substack.com/p/what-we-learned-2025) read 109,000 chain-of-thought summaries and found
+"64 cases where agents expressed intent to fabricate information and then did so". That starts from intent; we
+start from the record, which also catches failures with no stated intent and can clear a wrongly accused agent
+(Finding 2).
+
 ## We audited ourselves too
 
 We applied the same check to our own write-ups, and it found errors. All are corrected in the repo and logged:
@@ -137,7 +161,8 @@ including mistakes and costs, is in [`JOURNAL.md`](../JOURNAL.md).
 ## Limits
 
 Labels are model-made; a human spot-check is pending. Samples are small and the intervals wide. The tracer sees
-URLs, not ideas: paraphrased claims without links are invisible to it. `temporal` edges mean "consistent with
+URLs, not ideas: paraphrased claims without links are invisible to it (the German adapter adds proxy *techniques*
+as a first step beyond links). `temporal` edges mean "consistent with
 exposure", not proof. Both findings are case studies, not prevalence estimates. We did not re-check the
 mathematics in Finding 1 or the game code in Finding 2.
 
