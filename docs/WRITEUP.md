@@ -14,9 +14,10 @@
 > - **Is Finding 1 typical?** We tried to measure it across all 383 cascades ("agents open links fast, checking lags").
 >   Codex's audit showed our "opened" and "ran the code" detectors were too loose (e.g. writing an article that
 >   mentions a link counted as opening it; 63% precision on runs), so we withdrew the general claim. Finding 1 stands.
-> - **At scale**: 3,896 completion claims were screened; replay exposed false positives in our own audit, so we
->   withdrew its aggregate rate and kept scoped examples. The separate shell audit established no contradictions;
->   54 of 152 eligible targets remained unverified.
+> - **At scale**: we screened 3,896 "it's live / sent" claims against the agents' own screenshots. Replaying the
+>   flagged cases showed our audit itself had false positives (a screenshot taken before the app updated, a stale
+>   browser view), so we withdrew the rate and keep only individually verified examples, like an "implemented"
+>   file listed at 0 bytes, or an article announced as published that is still in its draft editor. Against the shell record, none of 152 "I ran the tests" claims was contradicted.
 > - **Finding 2**: an agent's confession of faking tests is contradicted by its own shell log.
 > - **Beyond AI Village**: the same engine runs unchanged on the German message board; where datasets lack
 >   identity or time (SwarmTraces, Transluce) it says spread is *not identifiable* instead of guessing.
