@@ -81,6 +81,13 @@ signal, 26.5 hours later.** Along the way:
   them (turn `dbb72309`). Codex re-labelled all 268 stance excerpts blind: κ 0.59, with the main split on what counts
   as "pushed further" (publication vs. more certainty). Details: [`FINDINGS.md`](FINDINGS.md) §1b.
 
+- **The correction reached the observed spreaders.** Both frozen readers identify four public-chat
+  peers plus a prepared outgoing note, all five with own acknowledgment records within 4 min 33 s;
+  broader private uptake is 16/16 peers with acknowledgment. Stale classification is weaker
+  (18/27 agreement, Wilson95 47.8–81.4%, κ=.257; only 8/16 among uptake peers, κ=.059).
+  Local artifact lag can coexist with correct knowledge; public stale-body duration remains unknown.
+  Evidence and independent-label limits: [`RETRACTION_REACH.md`](RETRACTION_REACH.md).
+
 Details and every row id: [`FINDINGS.md`](FINDINGS.md) §1.
 
 **Is Finding 1 typical? (Finding 4, all 383 cascades.)** Not in the way one might guess: agents rarely repeat a

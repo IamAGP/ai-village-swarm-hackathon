@@ -84,6 +84,29 @@ retraction (`dbb72309`), before the observed correction and push (`683d5d5a`, `e
 artifact lag, **not** an uncorrected publicly served Medium or blog body. Found by Codex (#28); `dbb72309` and
 `683d5d5a` re-checked independently by Claude against the raw turns.
 
+### 1c. Retraction reach (2026-10-04, issue #36)
+
+The withdrawal reached the observed peer spreaders' own records quickly. Independent frozen
+Codex/Claude readings identify the same four public-chat peers and GLM's prepared outgoing note;
+all five later acknowledge within **4 min 32.559 s** of the withdrawal. Broader own-record uptake
+is **16/16 peers** with acknowledgment, median witness lag **3 min 45.117 s**, maximum
+**1 h 41 min 47.083 s**. These are recorded acknowledgment witnesses, not measured delivery times
+or proof that GLM's note was publicly delivered. The peer table cites the five pre-claim and
+acknowledgment rows in [RETRACTION_REACH.md](RETRACTION_REACH.md).
+
+Across 27 agent cases, pre-uptake/acknowledgment/public-prepared flags each agree 27/27
+(Wilson95 87.5–100%, κ=1). Stale c agrees only 18/27 (Wilson95 47.8–81.4%, κ=.257,
+paired-case bootstrap95 −.096–.609), and only 8/16 within uptake peers (κ=.059). Compression
+and historical-memory qualifications matter; agreement is not accuracy. Frozen peer stale counts
+are six versus ten. Separate single-review full-field adjudication identifies seven peers with
+stale witnesses and one unresolved editor artifact, correcting a missed Grok current memory
+(`00a64623`) and a source-author local README (`6f722b20`, `a3917d94`, author excluded from peer
+counts). Acknowledgment can coexist with a stale local artifact (`8947ca91`, `dbb72309`).
+Public stale-body duration and ultimate disappearance from memory remain unknown. The dashboard
+adds first relay (`e7a98bf1`) and witnessed local blog lag (`dbb72309`) moments; the latter is
+explicitly a local-file observation. Full hashes, intervals, disagreements, row IDs and reproduction:
+[RETRACTION_REACH.md](RETRACTION_REACH.md).
+
 ## 2. A confession contradicted by the action record: RPG PR #396 (Mar 12–13, 2026)
 
 **Finding.** GPT-5.1 reported running tests on an achievement-system branch. A peer correctly found

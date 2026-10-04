@@ -70,10 +70,21 @@ class LabelAudit:
         self.packet_hash = hashlib.sha256((self.packet/'blind.jsonl').read_bytes()).hexdigest()
         self.cut = datetime.fromisoformat(RETRACTED_AT)
 
-    def load_frozen(self, folder):
+    def load_frozen(self, folder, expected_sha256=None):
         folder = Path(folder)
         path = folder/'labels.jsonl'
-        freeze = json.loads((folder/'freeze.json').read_text())
+        if (folder/'freeze.json').exists():
+            freeze = json.loads((folder/'freeze.json').read_text())
+            if expected_sha256 and freeze['sha256'] != expected_sha256:
+                raise ValueError('Declared freeze hash differs from requested hash')
+        elif expected_sha256:
+            # External annotators can freeze with sha256sum rather than our JSON format.
+            # The explicit hash must come from their freeze announcement, never an auto-read.
+            freeze = dict(sha256=expected_sha256, packet_sha256=self.packet_hash,
+                          external_manifest=str(folder/'MANIFEST.sha256'),
+                          packet_binding='Shared review packet by investigator protocol; external manifest hashes labels only')
+        else:
+            raise ValueError('Need freeze.json or the externally announced frozen SHA-256')
         if hashlib.sha256(path.read_bytes()).hexdigest() != freeze['sha256']:
             raise ValueError('Frozen labels hash mismatch')
         if freeze['packet_sha256'] != self.packet_hash:
@@ -123,6 +134,12 @@ class LabelAudit:
         return result
 
     def summary(self, labels):
+        displayed = {case:{r for c in value['contexts'] for r in c['row_ids']}
+                     for case,value in self.cases.items()}
+        gaps = {case:{phase:[r for r in x[phase+'_evidence'] if r not in displayed[case]]
+                      for phase in ('a','b','c')}
+                for case,x in labels.items()
+                if any(r not in displayed[case] for phase in ('a','b','c') for r in x[phase+'_evidence'])}
         peers = [x for k,x in labels.items() if not self.cases[k]['source_author']]
         uptake = [x for x in peers if x['a'] is True]
         public = [x for x in peers if x['a_public'] is True]
@@ -134,7 +151,7 @@ class LabelAudit:
                         observed_ack_seconds=sorted(lags), median_seconds=median(lags) if lags else None,
                         max_seconds=max(lags) if lags else None,
                         cases=[x['case_id'] for x in group])
-        return dict(active_cases=len(labels), peer_cases=len(peers), source_author_excluded=True,
+        return dict(active_cases=len(labels), peer_cases=len(peers), source_author_excluded=True,witnesses_not_in_display=gaps,
                     mentioned_peers=sum(x['mentioned'] is True for x in peers),
                     never_mentioned_in_selected_frame=sum(x['mentioned'] is False for x in peers),
                     pre_uptake=reach(uptake), pre_public_or_prepared_outgoing=reach(public),
@@ -143,11 +160,11 @@ class LabelAudit:
                     stale_after_public=sum(x['c'] is True for x in public),
                     unresolved={f:sum(x[f] is None for x in peers) for f in BINARY_FLAGS})
 
-    def compare(self, primary, secondary, draws=10000):
+    def compare(self, primary, secondary, draws=10000, cases=None):
         comparisons = {}
         for flag in (*BINARY_FLAGS, 'joint_abc'):
             a,b,disagreements = [],[],[]
-            for case in sorted(self.cases):
+            for case in sorted(self.cases if cases is None else cases):
                 left = tuple(primary[case][f] for f in ('a','b','c')) if flag == 'joint_abc' else primary[case][flag]
                 right = tuple(secondary[case][f] for f in ('a','b','c')) if flag == 'joint_abc' else secondary[case][flag]
                 if left is None or right is None or (flag == 'joint_abc' and (None in left or None in right)):
@@ -164,6 +181,7 @@ def main():
     p.add_argument('--packet',required=True,type=Path)
     p.add_argument('--primary',required=True,type=Path)
     p.add_argument('--secondary',type=Path)
+    p.add_argument('--secondary-sha256',help='Explicit hash from external reviewer freeze announcement')
     p.add_argument('--out',required=True,type=Path)
     args = p.parse_args()
     if args.out.exists():
@@ -173,8 +191,11 @@ def main():
     result = dict(packet_sha256=audit.packet_hash,primary_freeze=freeze,primary=audit.summary(primary),
                   limits='Selected keyword frame; imperfect masking; own-record timestamps, not receipt times; private uptake and artifact lag are distinct from public spread and mental belief.')
     if args.secondary:
-        secondary,freeze2 = audit.load_frozen(args.secondary)
-        result.update(secondary_freeze=freeze2,secondary=audit.summary(secondary),agreement=audit.compare(primary,secondary))
+        secondary,freeze2 = audit.load_frozen(args.secondary,args.secondary_sha256)
+        cohort = [k for k,x in primary.items() if not audit.cases[k]['source_author'] and x['a'] is True]
+        result.update(secondary_freeze=freeze2,secondary=audit.summary(secondary),
+                      agreement=audit.compare(primary,secondary),
+                      agreement_pre_uptake_peers=audit.compare(primary,secondary,cases=cohort))
     args.out.mkdir()
     write_json(args.out/'summary.json',result)
     log('label_audit_complete',paired=bool(args.secondary),cases=len(primary))

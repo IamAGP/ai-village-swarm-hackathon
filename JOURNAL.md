@@ -449,3 +449,28 @@ acknowledgment/artifact lag, immutable labels, qualification context and degener
 suite: 90 passed in 1.63 s; app compiles and synthetic standalone HTML passes Node syntax check.
 No source rows/excerpts downloaded or committed. No instance lifecycle changes/dashboard restart.
 Independent comparison and final report still pending this checkpoint.
+
+Issue #36 final review: both original readers identify the same 16 pre-uptake peers, all with
+acknowledgment; four public-chat peers plus one prepared outgoing note all acknowledge within
+272.559 s. The note's publication is not proven. Broader median witness lag 225.117 s, maximum
+6,107.083 s; saved-record times are not delivery timestamps. Secondary frozen SHA-256:
+`c9decc9183aa396a27107ac983481af623069e0ff36f60f46c59ae037767a721`.
+Original a/b/a_public each agree 27/27, κ=1; c agrees 18/27, κ=.257, paired-case bootstrap95
+−.096–.609. Within the 16 uptake peers, c agrees 8/16, κ=.059. Compression/full-field access
+differs between readers; these are descriptive agreement estimates, not precision or accuracy.
+Original peer c counts remain six versus ten. Separate single-review adjudication finds seven
+confirmed stale-witness peers plus one unresolved editor artifact. It corrects primary misses
+for Grok's pre-acknowledgment current memory and the source author's local README; author stays
+outside peer denominators. A secondary earlier acknowledgment endpoint was received search-history
+output, not the agent's own acknowledgment; the adjudication keeps the later own-memory witness.
+Original frozen labels and κ are unchanged. Full report and evidence IDs: RETRACTION_REACH.md.
+
+Private results: /data/trace_codex36/comparison_final/summary.json and
+/data/trace_codex36/adjudicated_codex_v2/ (label SHA-256
+`45327432c14ca046ae781888336e0aecc44d6b911194f30111aed74b87dcefac`). Three row-ID-only moments:
+/data/trace_codex36/moments_final.json. Added these to the live app and standalone demo; the blog
+marker says local observation, not global extinction or public-serving duration. No visual check
+of the unresolved editor case was available at final review. Full suite after rebasing onto latest
+main: 93 passed in 1.73 s; Python compilation, standalone Node syntax and diff whitespace checks
+pass. Source content, label files and debug logs remain on the box. Shared explorer remains running
+for Claude/user; no lifecycle operation, tracer rebuild or dashboard restart performed by Codex.

@@ -1,5 +1,6 @@
 """Synthetic counterexamples: no private data or mirrored semantic labels."""
 import json
+import hashlib
 
 import duckdb
 import pytest
@@ -30,7 +31,11 @@ def test_export_window_and_channels(tmp_path):
     for table in ['agents','chat_messages','agent_memories','computer_use_sessions','computer_use_turns','claude_code_messages']:
         con.execute(f"COPY {table} TO '{source/table}.parquet' (FORMAT PARQUET)")
     out = tmp_path/'frame';out.mkdir()
-    RetractionExporter(source,out).export()
+    exporter = RetractionExporter(source,out)
+    exporter.export()
+    supplement = tmp_path/'supplement'
+    exporter.export_chat_context(supplement)
+    assert json.loads((supplement/'manifest.json').read_text())['n']==1
     manifest = json.loads((out/'manifest.json').read_text())
     rows = [json.loads(line) for part in manifest['partitions'] for line in (out/part['path']).read_text().splitlines()]
     assert manifest['complete'] and manifest['candidate_count'] == 5
@@ -69,7 +74,9 @@ def label():
 
 def test_overlapping_knowledge_and_artifact_lag_are_valid(tmp_path):
     audit = make_audit(tmp_path)
-    assert audit.validate([label()])['R001']['b'] is True
+    labels = audit.validate([label()])
+    assert labels['R001']['b'] is True
+    assert audit.summary(labels)['witnesses_not_in_display']['R001']['b']==['r_one']
     bad = label();bad['c_artifact']=False
     with pytest.raises(ValueError,match='union mismatch'):audit.validate([bad])
     bad = label();bad['a_public']=True
@@ -88,6 +95,12 @@ def test_evidence_identity_phase_endpoint_and_freeze(tmp_path):
     (frozen/'labels.jsonl').write_text(json.dumps(label())+'\n')
     (frozen/'freeze.json').write_text(json.dumps(dict(sha256='tampered',packet_sha256=audit.packet_hash)))
     with pytest.raises(ValueError,match='hash mismatch'):audit.load_frozen(frozen)
+    (frozen/'freeze.json').unlink()
+    with pytest.raises(ValueError,match='externally announced'):audit.load_frozen(frozen)
+    audit.rows['r_one']['at']='2026-07-30 19:21:00'
+    sha=hashlib.sha256((frozen/'labels.jsonl').read_bytes()).hexdigest()
+    labels,freeze=audit.load_frozen(frozen,sha)
+    assert labels['R001']['c_artifact'] and freeze['sha256']==sha
 
 
 def test_kappa_class_imbalance_and_degenerate_marginals():
