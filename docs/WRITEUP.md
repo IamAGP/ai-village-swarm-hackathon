@@ -11,15 +11,15 @@
 >   came after 26.5 hours.
 > - **Did the correction reach the believers?** The four public-chat peers plus one prepared outgoing-note
 >   writer acknowledged within 4.5 minutes; all 16 peers with prior uptake later did (Codex, two blind readers).
-> - **Finding 4, narrowed (383 cascades)**: the 11-minute median measures link-containing actions, including
->   article writing. A run-detector audit confirmed 19/30 sampled detections (63.3%; 45.5–78.1%). The general
->   opening/checking claim is withdrawn; Graffiti's separately verified 26.5-hour chronology remains.
+> - **Is Finding 1 typical?** We tried to measure it across all 383 cascades ("agents open links fast, checking lags").
+>   Codex's audit showed our "opened" and "ran the code" detectors were too loose (e.g. writing an article that
+>   mentions a link counted as opening it; 63% precision on runs), so we withdrew the general claim. Finding 1 stands.
 > - **At scale**: 15 of 1,385 checkable "it's live / sent" claims are contradicted by the agent's own screens (1.1%),
 >   most often work announced as done that is still empty or a placeholder. Agents rarely invent command runs (0 of 152).
 > - **Finding 2**: an agent's confession of faking tests is contradicted by its own shell log.
 > - **Beyond AI Village**: the same engine runs unchanged on the German message board; where datasets lack
 >   identity or time (SwarmTraces, Transluce) it says spread is *not identifiable* instead of guessing.
-> - **We audit ourselves**: Claude and Codex review each other adversarially. Seven of our own claims were
+> - **We audit ourselves**: Claude and Codex review each other adversarially. Eight of our own claims were
 >   corrected, including a German-board "spread" result Codex broke the same day.
 
 ## The problem
@@ -197,6 +197,7 @@ We applied the same check to our own write-ups, and it found errors. All are cor
 | "only the PR label was false" (Finding 2 review) | tests support the execution claims, not "safe to merge" | narrowed wording |
 | "8/33 execution claims overstated" (claim-vs-action pilot) | exporter dropped older turns that held real test runs | v2 with full windows + adjudication: 2 substantive contradictions in 38; uncorroborated ≠ not run |
 | v2 tracer: most-recent poster = source | 3/44 misattributed | v3 prefers the named poster; 0/50 wrong held-out |
+| "agents open links within 11 min; Graffiti run slower than 54/68 repos" (Finding 4) | "touch" included writing an article containing the link; 11/30 sampled "runs" were not runs; contributors ran their own repos | general claim withdrawn; narrowed Finding 4 (Codex, #40) |
 | 21 confirmed screen contradictions (1.5%) | screenshot taken right after the agent's own Send/Post click, before the app updated; recipients got the email | two-screen re-check of all 46 flags: 15 (1.1%); 6 overturned (#41) |
 | German board: proxy tricks "spread through pages agents had edited" (31.9% vs 11.1%) | 337/723 cases rest on the adoption edit itself; the wiki takes writes without reads; same-operator + earlier-edit check gives 0.4% vs 1.7% (Codex, #34) | Finding 3 narrowed to reuse, not spread; UI caption rewritten |
 
