@@ -20,11 +20,11 @@ except ImportError:
     from tracer import canonical
 
 GRAFFITI_URL = 'https://gitlab.com/ai-village-agents/village/graffiti-verification'
-# Explicitly confirmed case prefixes in docs/EVAL.md (Oct 2 screen audit).
+# Confirmed screen contradictions (docs/EVAL.md; two-screen re-check, #41).
 # No-action-between is necessary, not sufficient; never infer confirmation from it.
 CONFIRMED_SCREEN_PREFIXES = frozenset({
-    'adc5e76b', 'b7835bdc', 'd9f1dcc2', 'fc4a8296', '652c7de0',
-    '3b0c4655', '3c29f7ca', 'ca23d4d2', '9ceccafd', 'dc559060',
+    # narrowed 2026-10-04 (#41, two-screen re-check): b7835bdc, ca23d4d2, 3c29f7ca, adc5e76b, fc4a8296 removed
+    'd9f1dcc2', '652c7de0', '3b0c4655', '9ceccafd', 'dc559060',
 })
 TOLD_EVIDENCE = ('explicit', 'seen', 'temporal', 'mention')  # 'seen': adapter-proved exposure (explorer/adapters)
 CHANNELS = {'chat': 'said', 'model_output': 'said', 'memory': 'did', 'action': 'did'}

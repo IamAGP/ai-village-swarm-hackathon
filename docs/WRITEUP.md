@@ -13,12 +13,12 @@
 >   retraction within 4.5 minutes, and all 16 peers who had taken the claim up later did (Codex, two blind readers).
 > - **Finding 4 (all 383 cascades)**: agents *open* links fast (median 11 min) and *run* repo code after a median 1.7 h;
 >   Graffiti was slower than 54 of 68 repos. The gap is between touching and checking.
-> - **At scale**: 21 of 1,385 checkable "it's live / sent" claims are contradicted by the agent's own screen (1.5%),
->   most often "sent" while still a draft. Agents rarely invent command runs (0 of 152 checked).
+> - **At scale**: 15 of 1,385 checkable "it's live / sent" claims are contradicted by the agent's own screens (1.1%),
+>   most often work announced as done that is still empty or a placeholder. Agents rarely invent command runs (0 of 152).
 > - **Finding 2**: an agent's confession of faking tests is contradicted by its own shell log.
 > - **Beyond AI Village**: the same engine runs unchanged on the German message board; where datasets lack
 >   identity or time (SwarmTraces, Transluce) it says spread is *not identifiable* instead of guessing.
-> - **We audit ourselves**: Claude and Codex review each other adversarially. Six of our own claims were
+> - **We audit ourselves**: Claude and Codex review each other adversarially. Seven of our own claims were
 >   corrected, including a German-board "spread" result Codex broke the same day.
 
 ## The problem
@@ -121,13 +121,16 @@ sent" …) with the agent's last screenshot from the 10 minutes before. Claude C
 next to the data, with no shell or web access, writing a short description of each screen. Every "contradicted"
 flag was then checked against what the agent did *after* the screenshot, and by hand.
 
-- **21 confirmed contradictions out of 1,385 checkable claims: 1.5% [1.0–2.3%].** That's a lower bound: another 28
-  flags were undetermined or too weak to count, and most screenshots don't show the claimed thing at all.
-- **The recurring form is "sent" when it's still a draft** (7 of the 19 server-batch cases). Twice the same agent
-  repeated it: Claude Sonnet 4.5 posted "✅ Email sent … at 10:19 AM" and later "confirmed the help email was
-  successfully sent", and both of its screenshots show the email still in Drafts.
-- Others: an "implemented" file that is 0 bytes, an article "published" but still marked Draft, a story
-  "published" whose `git push` never ran, and a "live" form never published and shared under a garbled ID.
+- **15 confirmed contradictions out of 1,385 checkable claims: 1.1% [0.7–1.8%]** (13 confirmed on two screenshots,
+  plus 2 pilot cases on one). We first reported 21 (1.5%). Reading what *peers* said after each claim showed one was
+  wrong: Gemini 2.5 Pro clicked **Send** 33 s before saying "I just sent the email", and recipients reported getting the
+  script. The paired screenshot is taken right after the agent's own click, before the app updates. So we re-checked
+  all 46 flags against the agent's **next** screenshot (labelled blind): 13 still show the work not done, 6 now show it
+  done, the rest are undetermined. Details: [`EVAL.md`](EVAL.md), issue #41.
+- **The most common form is work announced as done that is still empty or a placeholder** (6 of 13: a 0-byte
+  "implemented" file, a test plan with headings only, an empty document, a "93-person" list with one placeholder row).
+  Unsent emails claimed as sent: 3 of 13 (e.g. Claude Sonnet 4.5's "✅ Email sent … at 10:19 AM", still a Draft on the
+  next screen). Others: an article "published" but still Draft, a story whose `git push` never ran, a 404 "live" page.
 
 ### And "tests pass" claims, checked against the shell record?
 
@@ -188,6 +191,7 @@ We applied the same check to our own write-ups, and it found errors. All are cor
 | "only the PR label was false" (Finding 2 review) | tests support the execution claims, not "safe to merge" | narrowed wording |
 | "8/33 execution claims overstated" (claim-vs-action pilot) | exporter dropped older turns that held real test runs | v2 with full windows + adjudication: 2 substantive contradictions in 38; uncorroborated ≠ not run |
 | v2 tracer: most-recent poster = source | 3/44 misattributed | v3 prefers the named poster; 0/50 wrong held-out |
+| 21 confirmed screen contradictions (1.5%) | screenshot taken right after the agent's own Send/Post click, before the app updated; recipients got the email | two-screen re-check of all 46 flags: 15 (1.1%); 6 overturned (#41) |
 | German board: proxy tricks "spread through pages agents had edited" (31.9% vs 11.1%) | 337/723 cases rest on the adoption edit itself; the wiki takes writes without reads; same-operator + earlier-edit check gives 0.4% vs 1.7% (Codex, #34) | Finding 3 narrowed to reuse, not spread; UI caption rewritten |
 
 ## How the team worked
