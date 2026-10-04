@@ -26,7 +26,7 @@ CONFIRMED_SCREEN_PREFIXES = frozenset({
     'adc5e76b', 'b7835bdc', 'd9f1dcc2', 'fc4a8296', '652c7de0',
     '3b0c4655', '3c29f7ca', 'ca23d4d2', '9ceccafd', 'dc559060',
 })
-TOLD_EVIDENCE = ('explicit', 'temporal', 'mention')
+TOLD_EVIDENCE = ('explicit', 'seen', 'temporal', 'mention')  # 'seen': adapter-proved exposure (explorer/adapters)
 CHANNELS = {'chat': 'said', 'model_output': 'said', 'memory': 'did', 'action': 'did'}
 DEFAULT_PATHS = {
     'agents': '/data/parquet/agents.parquet',
