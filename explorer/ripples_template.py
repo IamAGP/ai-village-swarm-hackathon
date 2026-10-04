@@ -96,8 +96,12 @@ function agentRenderer({ctx, id, x, y, state: {selected, hover}, label}) {
     ctx.beginPath(); ctx.moveTo(x - r, y); ctx.lineTo(x + r, y); ctx.strokeStyle = "#0e1117"; ctx.lineWidth = 2; ctx.stroke();
     ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.strokeStyle = selected || big ? "#ffffff" : "rgba(255,255,255,0.55)"; ctx.lineWidth = selected || big ? 2.5 : 1; ctx.stroke();
     if (c.crack) { ctx.beginPath(); ctx.moveTo(x - r * .4, y + 3); ctx.lineTo(x - r * .05, y + r * .6); ctx.lineTo(x + r * .2, y + r * .25); ctx.lineTo(x + r * .45, y + r * .75); ctx.strokeStyle = "#0e1117"; ctx.lineWidth = 2; ctx.stroke(); }
-    ctx.fillStyle = "#e8e8ea"; ctx.font = (big ? "bold 15px" : "13px") + " Inter, sans-serif"; ctx.textAlign = "center";
-    ctx.fillText(label, x, y + r + 15); ctx.restore();
+    // crowded graphs (> 40 agents): names only for the centre, hovered and selected nodes
+    if (big || selected || hover || G.nodes.filter(n => n.kind === "agent").length <= 40) {
+      ctx.fillStyle = "#e8e8ea"; ctx.font = (big ? "bold 15px" : "13px") + " Inter, sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(label, x, y + r + 15);
+    }
+    ctx.restore();
   }, nodeDimensions: {width: 2 * R, height: 2 * R}};
 }
 const R = 15;

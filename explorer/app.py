@@ -19,6 +19,7 @@ import streamlit as st
 DB = "/data/explorer.duckdb"
 BUCKET_TARS = "s3://ai-village-459653581741/hf/ai-village/images/computer-use-turns"
 TAR_CACHE = "/data/tarcache"
+GERMAN_TRACE = "/data/ext/german_trace"  # explorer/adapters/german_wiki.py output (public collusion.wiki export)
 TAR_CACHE_MAX_BYTES = 40 * 1024**3
 _tar_lock = threading.Lock()
 
@@ -795,6 +796,10 @@ def page_belief():
         "A claim vs. its own screen: '✅ Email sent' (still in Drafts)": "d9f1dcc2",
         "The same agent repeats it under 4 minutes later": "fc4a8296",
         "An agent's week: Claude Sonnet 4.5 around that email": "agent:d9f1dcc2",
+        "Other dataset: German message board, a fetch-proxy trick bursts (webcrawlerapi)":
+            {"kind": "url", "value": "technique:webcrawlerapi.com", "dataset": "german"},
+        "Other dataset: German message board, the most-copied proxy (jqp.vercel.app)":
+            {"kind": "url", "value": "technique:jqp.vercel.app", "dataset": "german", "max_nodes": 90},
         "Any link…": None,
     }
     choice = st.radio("What sits at the centre?", list(presets), horizontal=False)
@@ -820,6 +825,17 @@ def page_belief():
         seed = {"kind": "claim", "value": r["claim_id"]}
         st.caption(f"Claim `{r['claim_id'][:8]}` by {r.get('model')} at {r['claim_at'][:16]} UTC. "
                    f"Its screenshot {r.get('min_before')} min earlier: *{r.get('screen', '')}*")
+    if seed.get("dataset") == "german":
+        if not os.path.exists(f"{GERMAN_TRACE}/trace_first_use.parquet"):
+            st.warning("German board trace tables not found on this box (explorer/adapters/german_wiki.py).")
+            return
+        st.markdown("<div style='font-size:1.0rem;line-height:1.5;margin:4px 0 8px;padding:10px 14px;border-left:3px solid #4ea8ff;"
+                    "background:#161922;border-radius:6px'><b>Same tool, different swarm.</b> The public German message board "
+                    "(collusion.wiki export): agents under self-chosen names edit a shared wiki. The centre is a <i>technique</i>: "
+                    "routing a URL through a fetch/CORS proxy. Thick red lines are <b>seen</b> exposures: the agent had edited a page "
+                    "already showing the trick before it first used it. Across the board, technique adopters had seen it first "
+                    "<b>31.9%</b> of the time vs <b>11.1%</b> for ordinary links (FINDINGS §3). Names are labels, not verified agents."
+                    "</div>", unsafe_allow_html=True)
     g = _belief(json.dumps(seed, sort_keys=True))
     if not [n for n in g["nodes"] if n["kind"] == "agent"]:
         st.warning("Nothing to draw for this seed.")
@@ -860,8 +876,13 @@ def page_belief():
 def _belief(seed_json):
     import sys
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from belief_graph import build_graph
-    return build_graph(connection().cursor(), json.loads(seed_json))
+    from belief_graph import GraphBuilder, build_graph
+    seed = json.loads(seed_json)
+    if seed.pop("dataset", None) == "german":  # same engine, the adapter's trace tables; no AI Village sources
+        paths = {k: None for k in ("f1_verify", "screen_labels", "screen_adjudications", "chat_messages")}
+        paths.update({t: f"{GERMAN_TRACE}/{t}.parquet" for t in ("agents", "trace_first_use", "trace_edges_scored")})
+        return GraphBuilder(duckdb.connect(), seed, paths).build()
+    return build_graph(connection().cursor(), seed)
 
 
 def page_race():
