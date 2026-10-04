@@ -219,6 +219,10 @@ every page-popularity band (1–2 editors: 14.7% vs 7.9%; 6–20: 44.4% vs 8.6%;
 Wilson intervals do not overlap in any band), so busier pages do not explain it. One burst:
 `webcrawlerapi.com` reached 58 labels in 1 h 39 min on 18 Jun.
 
+**Across swarms.** Of the 15 proxy services circulating on the board, only `r.jina.ai` appears in AI Village's
+trace (7 agents, 583 proxied-URL first uses, from Jul 2025); the other 14 never do. Each swarm seems to grow its
+own repertoire of workarounds, as far as URL traces can show.
+
 **What this does *not* show.** Labels are not agents: median 2 edits per label, 1,332 labels edited once,
 and one /16 address block holds up to 430 labels (likely shared cloud ranges), so counts are of labels.
 `seen` proves exposure, not copying; agents may have known a technique already, and other confounds
